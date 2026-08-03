@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Rumah 'Aisyiyah — Karena Setiap Remaja Berharga</title>
+<style>
+  /* ===================== DESIGN TOKENS ===================== */
+  :root{
+    --cream:#F4EEDD;
+    --card:#FBF8EF;
+    --green-deep:#1F5E4A;
+    --green-mid:#3E8E6E;
+    --green-soft:#E7F2EA;
+    --gold:#C08A2E;
+    --ink:#2B2B28;
+    --grey:#7A756A;
+    --danger:#B5482F;
+    --radius:18px;
+    --shadow:0 10px 30px rgba(31,94,74,.18);
+    font-family:'Segoe UI', 'Nunito', system-ui, -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--cream);height:100%;overflow:hidden;}
+  body{
+    background:var(--cream);
+  }
+  #game{
+    position:fixed;inset:0;width:100%;height:100%;
+    background:var(--cream);
+    overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  /* roof motif — signature element referencing joglo roofline (decorative strip, sits above content, never overlaps topbar) */
+  .roofline{
+    position:relative;flex:none;height:22px;width:100%;
+    background:
+      linear-gradient(135deg, transparent 49%, var(--green-deep) 50%) 0 0/22px 22px repeat-x,
+      var(--green-deep);
+    z-index:5;
+  }
+  /* full-bleed screens (title/splash/loading) have their own artwork edge-to-edge, so hide the decorative roofline strip */
+  #game.fullbleed .roofline{display:none;}
+  .ctrl-btn{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--green-soft);color:var(--green-deep);border:none;border-radius:12px;
+    padding:13px 16px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;
+  }
+  .ctrl-btn:active{transform:scale(.97);}
+
+  .screen{
+    position:absolute;inset:0;display:none;flex-direction:column;
+    padding:34px 22px 22px;overflow-y:auto;
+    animation:fadein .35s ease;
+  }
+  .screen.active{display:flex;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  h1,h2,h3{font-family:'Georgia','Iowan Old Style',serif;color:var(--green-deep);margin:0 0 6px;}
+  p{color:var(--ink);line-height:1.5;margin:0 0 12px;}
+  .tagline{color:var(--gold);font-style:italic;font-size:14px;margin-bottom:18px;}
+  .center{text-align:center;}
+  .grow{flex:1;}
+  .row{display:flex;gap:10px;}
+  .col{display:flex;flex-direction:column;gap:10px;}
+
+  button{
+    font-family:inherit;cursor:pointer;border:none;border-radius:12px;
+    padding:13px 16px;font-size:15px;font-weight:700;letter-spacing:.2px;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  button:active{transform:scale(.97);}
+  .btn-primary{background:var(--green-deep);color:#fff;box-shadow:0 6px 14px rgba(31,94,74,.35);}
+  .btn-gold{background:var(--gold);color:#fff;box-shadow:0 6px 14px rgba(192,138,46,.35);}
+  .btn-outline{background:var(--card);color:var(--green-deep);border:2px solid var(--green-mid);}
+  .btn-ghost{background:transparent;color:var(--green-deep);text-decoration:underline;font-weight:600;padding:8px;}
+  .btn-block{width:100%;}
+  .btn-sm{padding:9px 12px;font-size:13px;border-radius:10px;}
+
+  .card{
+    background:var(--card);border-radius:var(--radius);padding:18px;
+    box-shadow:var(--shadow);margin-bottom:14px;
+  }
+  .badge-pill{
+    display:inline-block;background:var(--green-soft);color:var(--green-deep);
+    border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;margin-bottom:10px;
+  }
+
+  /* topbar for lobby/room screens */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    background:var(--green-deep);color:#fff;padding:10px 16px;
+    border-radius:0 0 16px 16px;margin:0 -22px 16px;
+  }
+  .topbar .coin{background:rgba(255,255,255,.15);border-radius:999px;padding:5px 12px;font-weight:700;font-size:13px;}
+  .topbar .who{font-size:13px;font-weight:700;}
+  .topbar .who small{display:block;font-weight:400;opacity:.85;font-size:11px;}
+  .icon-btn{background:rgba(255,255,255,.15);color:#fff;border-radius:10px;padding:8px 10px;font-size:14px;}
+
+  /* splash / title */
+  .logo-leaf{font-size:52px;}
+  #screen-splash{align-items:center;justify-content:center;text-align:center;background:
+      radial-gradient(circle at 50% 20%, #fbf3df 0%, var(--cream) 65%);}
+  .brand-title{font-size:30px;letter-spacing:.5px;}
+
+  /* ===================== TITLE SCREEN ===================== */
+  #screen-title{
+    padding:0;overflow:hidden;
+    align-items:center;text-align:center;
+    background-image:url('images/bg_titlescreen.png');
+    background-size:cover;background-position:center;background-repeat:no-repeat;
+  }
+  .title-leaves{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2;}
+  .leaf{position:absolute;top:-12%;will-change:transform;animation:leafFall linear 1;animation-fill-mode:forwards;}
+  @keyframes leafFall{
+    0%{transform:translate(0,-12vh) rotate(0deg);}
+    25%{transform:translate(var(--sway1,24px),22vh) rotate(80deg);}
+    50%{transform:translate(var(--sway2,-24px),52vh) rotate(170deg);}
+    75%{transform:translate(var(--sway1,24px),82vh) rotate(260deg);}
+    100%{transform:translate(0,115vh) rotate(360deg);}
+  }
+  .title-topbtns{position:absolute;top:14px;right:14px;z-index:4;display:flex;gap:8px;}
+  .title-iconbtn{
+    width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;
+    background:rgba(20,20,15,.35);color:#fff;font-size:15px;
+    display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);
+  }
+  .title-content{
+    position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;
+    flex:1 1 auto;min-height:0;width:100%;padding:0 18px;
+  }
+  .title-logo{
+    width:90%;max-width:560px;margin-top:7vh;flex:none;
+    filter:drop-shadow(0 8px 18px rgba(0,0,0,.28));
+    animation:titleBreathe 3.2s ease-in-out infinite;
+  }
+  @keyframes titleBreathe{
+    0%,100%{transform:scale(1) translateY(0);}
+    50%{transform:scale(1.035) translateY(-4px);}
+  }
+  .title-char{
+    position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+    width:50%;max-width:360px;z-index:2;transform-origin:bottom center;
+    animation:charBreathe 2.6s ease-in-out infinite;
+    filter:drop-shadow(0 6px 12px rgba(0,0,0,.2));
+  }
+  @keyframes charBreathe{
+    0%,100%{transform:translateX(-50%) translateY(0) scale(1);}
+    50%{transform:translateX(-50%) translateY(-1px) scale(1.006);}
+  }
+  .btn-masuk{
+    position:relative;z-index:3;background:none;border:none;padding:0;cursor:pointer;
+    width:30%;max-width:210px;margin:8px 0 6px;
+    animation:btnPulse 2.4s ease-in-out infinite;
+  }
+  .btn-masuk img{width:100%;display:block;}
+  .btn-masuk:active{transform:scale(.96);}
+  @keyframes btnPulse{
+    0%,100%{filter:drop-shadow(0 6px 14px rgba(0,0,0,.3));}
+    50%{filter:drop-shadow(0 8px 20px rgba(192,138,46,.55));}
+  }
+  #screen-title .footer-note{color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.55);margin-top:0;margin-bottom:4px;position:relative;z-index:3;}
+
+  #screen-loading{
+    background-image:linear-gradient(180deg, rgba(20,12,6,.15), rgba(20,12,6,.6)), url('images/bg_loadingscreen.png');
+    background-size:cover;background-position:center;background-repeat:no-repeat;
+    align-items:center;justify-content:center;text-align:center;
+  }
+  .loading-char{
+    width:260px;max-width:58%;margin-bottom:10px;
+    filter:drop-shadow(0 6px 14px rgba(0,0,0,.35));
+  }
+  .loadbar-wrap{width:100%;max-width:340px;margin:18px auto 6px;position:relative;z-index:2;}
+  .loadbar-track{
+    position:relative;height:34px;border-radius:20px;
+    background:rgba(255,255,255,.18);
+    border:3px solid rgba(255,244,224,.9);
+    overflow:hidden;display:flex;align-items:center;
+  }
+  .loadbar-leaf{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:16px;z-index:2;}
+  .loadbar-fill{
+    height:100%;width:0%;border-radius:18px;
+    background:linear-gradient(90deg,#D64E7A,#E97F4E,#F2B84A);
+    transition:width .2s linear;
+    display:flex;align-items:center;justify-content:flex-end;padding-right:8px;
+  }
+  .loadbar-sparkle{font-size:16px;filter:drop-shadow(0 0 4px rgba(255,255,255,.9));}
+  .loading-tip{font-size:13px;color:#ffd9e4;text-shadow:0 1px 4px rgba(0,0,0,.5);position:relative;z-index:2;}
+  .loading-tip .heart{margin-right:4px;}
+  .modal-audio{
+    background-image:linear-gradient(180deg, rgba(31,94,74,.55), rgba(20,20,15,.75)), url('images/bg_loadingscreen.png');
+    background-size:cover;background-position:center;
+  }
+  .modal-card.modal-audio-card{
+    background:var(--card);border:1px solid rgba(31,94,74,.15);
+    max-width:300px;
+  }
+  .modal-audio-card h3{color:var(--green-deep);}
+  .modal-audio-card p{color:var(--ink);}
+  .audio-icon-circle{
+    width:78px;height:78px;border-radius:50%;margin:0 auto 14px;
+    display:flex;align-items:center;justify-content:center;font-size:34px;
+    background:var(--green-soft);border:2px solid var(--gold);
+    box-shadow:0 0 20px rgba(192,138,46,.35);
+  }
+  .audio-btn-outline{background:var(--card);color:var(--green-deep);border:2px solid var(--green-mid);}
+
+  /* character select */
+  .avatar-choice{
+    flex:1;background:var(--card);border-radius:16px;padding:16px;text-align:center;
+    border:3px solid transparent;cursor:pointer;
+  }
+  .avatar-choice.selected{border-color:var(--gold);box-shadow:0 0 0 4px rgba(192,138,46,.15);}
+  .avatar-emoji{font-size:44px;}
+  input[type=text]{
+    width:100%;padding:12px 14px;border-radius:10px;border:2px solid #ddd0ac;
+    font-size:15px;background:#fff;margin:10px 0 16px;
+  }
+
+  /* story / dialog */
+  .dialog-box{
+    background:var(--card);border-left:5px solid var(--gold);border-radius:0 14px 14px 14px;
+    padding:16px;box-shadow:var(--shadow);
+  }
+  .speaker{font-weight:800;color:var(--green-deep);font-size:13px;margin-bottom:4px;}
+  .choice-btn{
+    background:var(--green-soft);color:var(--green-deep);border-radius:12px;
+    padding:12px 14px;text-align:left;font-weight:600;border:2px solid transparent;
+  }
+  .choice-btn:hover{border-color:var(--green-mid);}
+
+  /* lobby doors */
+  .doors-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .door{
+    background:var(--card);border-radius:16px;padding:14px 10px;text-align:center;
+    box-shadow:var(--shadow);position:relative;
+  }
+  .door.locked{opacity:.55;}
+  .door .door-icon{font-size:30px;display:block;margin-bottom:6px;}
+  .door .door-name{font-weight:800;font-size:13px;color:var(--green-deep);}
+  .door .check{position:absolute;top:6px;right:8px;font-size:14px;}
+  .lobby-actions{display:flex;justify-content:space-around;margin-top:16px;}
+  .lobby-actions .a{background:none;border:none;color:var(--green-deep);font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .lobby-actions .a span.emoji{font-size:20px;}
+
+  /* room */
+  .room-tabs{display:flex;gap:8px;margin-bottom:14px;}
+  .room-tabs button{flex:1;}
+  .quiz-q{font-weight:700;margin-bottom:10px;}
+  .quiz-opt{background:var(--card);border:2px solid #e2d9bd;border-radius:12px;padding:11px 14px;margin-bottom:8px;text-align:left;font-weight:600;color:var(--ink);}
+  .quiz-opt.correct{border-color:var(--green-mid);background:var(--green-soft);}
+  .quiz-opt.wrong{border-color:var(--danger);background:#fbeae5;}
+  .feedback{font-size:13px;padding:10px 12px;border-radius:10px;background:var(--green-soft);color:var(--green-deep);margin-top:8px;}
+
+  .modal-backdrop{position:absolute;inset:0;background:rgba(20,20,15,.55);z-index:20;display:none;align-items:center;justify-content:center;padding:24px;}
+  .modal-backdrop.active{display:flex;}
+  .modal-card{background:var(--card);border-radius:18px;padding:22px;max-width:340px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.4);}
+  .hikmah-quote{font-style:italic;color:var(--green-deep);font-size:15px;margin:10px 0;}
+  .hikmah-source{font-size:12px;color:var(--grey);margin-bottom:14px;}
+
+  .badge-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+  .badge-cell{background:var(--card);border-radius:14px;padding:12px 6px;text-align:center;box-shadow:var(--shadow);}
+  .badge-cell.locked{opacity:.35;}
+  .badge-cell .emoji{font-size:26px;display:block;}
+  .badge-cell .label{font-size:10px;font-weight:700;color:var(--green-deep);margin-top:4px;}
+
+  textarea{
+    width:100%;min-height:90px;border-radius:10px;border:2px solid #ddd0ac;
+    padding:12px;font-family:inherit;font-size:14px;resize:vertical;
+  }
+  .compare-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px dashed #e2d9bd;}
+  .footer-note{font-size:11px;color:var(--grey);text-align:center;margin-top:auto;padding-top:10px;}
+  .contact-card{background:var(--green-soft);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:13px;}
+  .contact-card b{color:var(--green-deep);}
+  .settings-toggle{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+  .switch{width:42px;height:24px;border-radius:20px;background:#ddd0ac;position:relative;cursor:pointer;flex:none;}
+  .switch.on{background:var(--green-mid);}
+  .switch .knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;}
+  .switch.on .knob{left:20px;}
+
+  /* accessibility modes */
+  body.mode-contrast #game{--cream:#0f0f0f;--card:#1c1c1c;--ink:#f5f5f5;--green-soft:#123324;background:#000;}
+  body.mode-contrast .tip,body.mode-contrast .footer-note,body.mode-contrast .grey-text{color:#cfcfcf;}
+  body.mode-bigfont #game{font-size:19px;}
+  body.mode-bigfont h1{font-size:36px;}
+  body.mode-dyslexia #game{font-family:'Comic Sans MS','Comic Sans', 'Verdana', sans-serif;letter-spacing:.3px;}
+</style>
+</head>
+<body>
+<div id="game" class="fullbleed">
+  <audio id="bgmAudio" src="audio/ost.mp3" loop preload="auto"></audio>
+  <div class="roofline"></div>
+
+  <!-- 1. SPLASH -->
+  <section class="screen active" id="screen-splash">
+    <div class="grow"></div>
+    <div class="logo-leaf">🌱</div>
+    <h1 class="brand-title">RUMAH 'AISYIYAH</h1>
+    <p class="tagline">Karena Setiap Remaja Berharga</p>
+    <div class="grow"></div>
+  </section>
+
+  <!-- 2. LOADING -->
+  <section class="screen" id="screen-loading">
+    <div class="grow"></div>
+    <img class="loading-char" id="loadingChar" src="images/char_loadingscreen1.png" alt="">
+    <div class="loadbar-wrap">
+      <div class="loadbar-track">
+        <span class="loadbar-leaf">🌿</span>
+        <div class="loadbar-fill" id="loadingFill"><span class="loadbar-sparkle">✨</span></div>
+      </div>
+    </div>
+    <p class="loading-tip center" id="loadingTip"><span class="heart">🩷</span>Tips: Tubuhmu berharga, rawatlah dengan pengetahuan yang benar.</p>
+    <div class="grow"></div>
+  </section>
+
+  <!-- 3. TITLE -->
+  <section class="screen" id="screen-title">
+    <div class="title-leaves" id="titleLeaves"></div>
+    <div class="title-topbtns">
+      <button class="title-iconbtn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+      <button class="title-iconbtn" onclick="openModal('modalTentang')" aria-label="Tentang">ℹ</button>
+      <button class="title-iconbtn" onclick="openModal('modalKeluar')" aria-label="Keluar">✕</button>
+    </div>
+    <div class="title-content">
+      <img class="title-logo" src="images/title_game.png" alt="KenaliKu — Game Edukasi Kesehatan Reproduksi Remaja">
+    </div>
+    <img class="title-char" src="images/title_char.png" alt="Karakter Rumah 'Aisyiyah">
+    <button class="btn-masuk" onclick="startNewOrContinue()">
+      <img src="images/btn_masuk.png" alt="MASUK">
+    </button>
+    <p class="footer-note">Media edukasi untuk REACH 2026 — Reaching Teens, Inspiring Inclusive Healthy Futures</p>
+  </section>
+
+  <!-- 4. CHARACTER SELECT -->
+  <section class="screen" id="screen-charselect">
+    <h2>Pilih Karaktermu</h2>
+    <p style="font-size:13px;color:var(--grey)">Kamu bisa menggantinya nanti di pengaturan.</p>
+    <div class="row" style="margin:14px 0;">
+      <div class="avatar-choice" id="pickLaki" onclick="pickGender('laki')">
+        <div class="avatar-emoji">👦</div>
+        <div style="font-weight:700;margin-top:6px;">Laki-laki</div>
+      </div>
+      <div class="avatar-choice" id="pickPerempuan" onclick="pickGender('perempuan')">
+        <div class="avatar-emoji">👧</div>
+        <div style="font-weight:700;margin-top:6px;">Perempuan</div>
+      </div>
+    </div>
+    <label style="font-size:13px;font-weight:700;color:var(--green-deep);">Masukkan Nama Karaktermu</label>
+    <input type="text" id="nameInput" placeholder="Nama panggilan..." maxlength="20">
+    <button class="btn-primary btn-block" id="btnLanjutChar" disabled onclick="confirmCharacter()">LANJUT</button>
+  </section>
+
+  <!-- 5. STORY (dynamic content injected) -->
+  <section class="screen" id="screen-story">
+    <div id="storyContent"></div>
+  </section>
+
+  <!-- 6. LOBBY -->
+  <section class="screen" id="screen-lobby">
+    <div class="topbar">
+      <div class="who"><span id="lobbyName">Aisyah</span><small>Level <span id="lobbyLevel">1</span></small></div>
+      <div class="coin">🪙 <span id="lobbyPoints">0</span></div>
+    </div>
+    <p class="center" style="margin-bottom:10px;color:var(--grey);font-size:13px;">Rumah ini akan selalu terbuka untukmu. Pilih ruangan untuk mulai belajar.</p>
+    <div class="doors-grid" id="doorsGrid"></div>
+    <div class="lobby-actions">
+      <button class="a" onclick="renderProgress();goTo('screen-progress')"><span class="emoji">📊</span>Progress</button>
+      <button class="a" onclick="renderTrophy();goTo('screen-trophy')"><span class="emoji">🏆</span>Trophy</button>
+      <button class="a" onclick="renderHikmah();goTo('screen-hikmah')"><span class="emoji">📖</span>Hikmah</button>
+      <button class="a" onclick="openModal('modalSettings')"><span class="emoji">⚙️</span>Atur</button>
+    </div>
+  </section>
+
+  <!-- 7. ROOM (dynamic) -->
+  <section class="screen" id="screen-room">
+    <div class="topbar">
+      <button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button>
+      <div class="who" id="roomTitleTop">Ruangan</div>
+    </div>
+    <div id="roomContent"></div>
+  </section>
+
+  <!-- PROGRESS -->
+  <section class="screen" id="screen-progress">
+    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button><div class="who">Progress</div></div>
+    <div id="progressContent"></div>
+  </section>
+
+  <!-- TROPHY -->
+  <section class="screen" id="screen-trophy">
+    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button><div class="who">Trophy</div></div>
+    <div class="badge-grid" id="trophyGrid"></div>
+  </section>
+
+  <!-- HIKMAH -->
+  <section class="screen" id="screen-hikmah">
+    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button><div class="who">Koleksi Hikmah</div></div>
+    <div id="hikmahContent"></div>
+  </section>
+
+  <!-- ENDING -->
+  <section class="screen" id="screen-ending">
+    <div class="grow"></div>
+    <div class="logo-leaf center">🌅</div>
+    <h2 class="center">Rumah ini akan selalu terbuka.</h2>
+    <p class="center" style="font-style:italic;">— Kak Hana</p>
+    <p class="center" style="margin-top:16px;">Di depan gerbang, kamu bertemu remaja lain yang sedang kebingungan.</p>
+    <button class="btn-gold btn-block" onclick="showEndingCredit()">❤️ Ajak ke Rumah 'Aisyiyah</button>
+    <div id="endingCredit" style="display:none;margin-top:20px;">
+      <p class="center" style="font-weight:700;color:var(--green-deep);">"Setiap remaja memiliki cerita. Setiap cerita layak didengar.<br>Karena setiap remaja berharga."</p>
+      <p class="center tagline">RUMAH 'AISYIYAH</p>
+      <button class="btn-outline btn-block" onclick="resetGame()">Mulai Ulang</button>
+    </div>
+    <div class="grow"></div>
+  </section>
+
+  <!-- ===== MODALS ===== -->
+  <div class="modal-backdrop" id="modalHikmah">
+    <div class="modal-card">
+      <div style="font-size:34px;">📖</div>
+      <p class="hikmah-quote" id="hikmahModalText">"..."</p>
+      <p class="hikmah-source" id="hikmahModalSource">—</p>
+      <button class="btn-primary btn-block" onclick="closeModal('modalHikmah')">Simpan ke Koleksi</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalSettings">
+    <div class="modal-card" style="text-align:left;">
+      <h3 class="center">Pengaturan</h3>
+      <div class="settings-toggle">🔊 Musik Latar <div class="switch" id="swMusic" onclick="toggleMusic()"><div class="knob"></div></div></div>
+      <button class="ctrl-btn" style="margin-bottom:10px;" onclick="toggleFullscreen()">⛶ <span id="fsLabel">Layar Penuh</span></button>
+      <h3 class="center" style="margin-top:16px;">Aksesibilitas</h3>
+      <div class="settings-toggle">🔍 Font Besar <div class="switch" id="swBigfont" onclick="toggleMode('bigfont',this)"><div class="knob"></div></div></div>
+      <div class="settings-toggle">🎨 Kontras Tinggi <div class="switch" id="swContrast" onclick="toggleMode('contrast',this)"><div class="knob"></div></div></div>
+      <div class="settings-toggle">🔤 Font Ramah Disleksia <div class="switch" id="swDyslexia" onclick="toggleMode('dyslexia',this)"><div class="knob"></div></div></div>
+      <p style="font-size:12px;color:var(--grey);">🔊 Voice over, 📝 subtitle, ⌨ navigasi keyboard, dan 🤟 video bahasa isyarat tersedia sesuai kebutuhan (lihat blueprint Bab 12).</p>
+      <button class="btn-outline btn-block" style="margin-top:6px;" onclick="exitGame()">🚪 Keluar dari Permainan</button>
+      <button class="btn-primary btn-block" style="margin-top:8px;" onclick="closeModal('modalSettings')">Tutup</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalTentang">
+    <div class="modal-card">
+      <h3>Tentang</h3>
+      <p style="font-size:13px;">Rumah 'Aisyiyah adalah game edukasi kesehatan seksual & reproduksi remaja, dikembangkan untuk REACH 2026 — "Reaching Teens. Inspiring Inclusive Healthy Futures".</p>
+      <button class="btn-primary btn-block" onclick="closeModal('modalTentang')">Tutup</button>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalKeluar">
+    <div class="modal-card">
+      <h3>Keluar?</h3>
+      <p style="font-size:13px;">Progresmu sudah tersimpan otomatis di perangkat ini. Kamu akan kembali ke menu utama.</p>
+      <button class="btn-outline btn-block" onclick="closeModal('modalKeluar')">Batal</button>
+      <button class="btn-primary btn-block" style="margin-top:8px;" onclick="confirmExit()">Ya, Keluar</button>
+    </div>
+  </div>
+
+  <!-- Modal pilihan audio saat pertama main — bergaya full modal (referensi: Toya Guardians) -->
+  <div class="modal-backdrop modal-audio" id="modalAudioChoice">
+    <div class="modal-card modal-audio-card">
+      <div class="audio-icon-circle">🎧</div>
+      <h3 class="center">PENGATURAN AUDIO</h3>
+      <p class="center" style="font-size:13px;">Game ini memiliki musik latar. Gunakan headset untuk pengalaman terbaik.</p>
+      <button class="btn-gold btn-block" onclick="chooseMusic(true)">🔊 NYALAKAN MUSIK</button>
+      <button class="btn-outline btn-block audio-btn-outline" style="margin-top:10px;" onclick="chooseMusic(false)">🔇 MAIN TANPA SUARA</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================================
+   RUMAH 'AISYIYAH — single-file HTML game
+   Backend: Google Sheets via Google Apps Script (lihat Code.gs terlampir)
+   Ganti GAME_API_URL di bawah dengan URL Web App Apps Script kamu.
+   ========================================================================= */
+const GAME_API_URL = ""; // <-- tempel URL Web App Google Apps Script di sini
+
+/* ---------- STATE ---------- */
+let STATE = loadState() || {
+  name: "", gender: "perempuan", points: 0, level: 1,
+  badges: {}, kunciNilai: {}, hikmah: {}, roomsDone: {},
+  before: {}, after: {}, journal: "",
+};
+
+function saveState(){ localStorage.setItem("rumah_aisyiyah_state", JSON.stringify(STATE)); }
+function loadState(){ try{ return JSON.parse(localStorage.getItem("rumah_aisyiyah_state")); }catch(e){ return null; } }
+function resetGame(){ localStorage.removeItem("rumah_aisyiyah_state"); location.reload(); }
+
+function logToSheet(action, data){
+  if(!GAME_API_URL) return;
+  try{
+    fetch(GAME_API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify(Object.assign({action, nama: STATE.name, waktu: new Date().toISOString()}, data)),
+    }).catch(()=>{});
+  }catch(e){ /* silent fail: localStorage tetap jadi sumber utama progres */ }
+}
+
+/* ---------- GLOBAL CONTROLS: MUSIK / LAYAR PENUH / KELUAR ---------- */
+let musicOn = false;
+function startMusic(){
+  const audio = document.getElementById("bgmAudio");
+  audio.volume = 0.5;
+  audio.play().catch(()=>{ /* browser mungkin memblokir autoplay tanpa gestur; ini selalu dipicu dari klik pengguna */ });
+}
+function stopMusic(){
+  const audio = document.getElementById("bgmAudio");
+  audio.pause();
+}
+function syncMusicSwitch(){
+  const sw = document.getElementById("swMusic");
+  if(sw) sw.classList.toggle("on", musicOn);
+}
+function toggleMusic(){
+  musicOn = !musicOn;
+  syncMusicSwitch();
+  musicOn ? startMusic() : stopMusic();
+}
+
+/* Dipanggil dari modal Pengaturan Audio saat pertama main — pilihan musik.
+   Langsung memicu fullscreen juga (baik pilih musik maupun tidak),
+   karena aksi ini terjadi tepat di dalam klik pengguna (gesture). */
+function chooseMusic(withMusic){
+  musicOn = withMusic;
+  syncMusicSwitch();
+  if(musicOn) startMusic();
+  if(document.documentElement.requestFullscreen){
+    document.documentElement.requestFullscreen().catch(()=>{});
+  }
+  closeModal("modalAudioChoice");
+  goTo("screen-loading");
+  startLoading();
+}
+
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    (document.documentElement.requestFullscreen && document.documentElement.requestFullscreen())?.catch?.(()=>{});
+  } else {
+    document.exitFullscreen && document.exitFullscreen();
+  }
+}
+document.addEventListener("fullscreenchange", ()=>{
+  const isFull = !!document.fullscreenElement;
+  const label = document.getElementById("fsLabel");
+  if(label) label.textContent = isFull ? "Keluar Layar Penuh" : "Layar Penuh";
+});
+
+function exitGame(){ closeModal("modalSettings"); openModal("modalKeluar"); }
+function confirmExit(){
+  stopMusic(); musicOn = false;
+  syncMusicSwitch();
+  if(document.fullscreenElement) document.exitFullscreen && document.exitFullscreen();
+  closeModal("modalKeluar");
+  goTo("screen-title");
+}
+
+/* ---------- NAVIGATION ---------- */
+const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading"];
+function goTo(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  window.scrollTo(0,0);
+  document.getElementById("game").classList.toggle("fullbleed", FULLBLEED_SCREENS.includes(id));
+  if(id === "screen-title") startLeafRain(); else stopLeafRain();
+  if(id !== "screen-loading") stopLoadingCharAnim();
+}
+
+/* ---------- TITLE SCREEN LEAF RAIN ---------- */
+const LEAF_IMAGES = ["images/daun_jatuh_besar.png","images/daun_jatuh_sedang.png","images/daun_jatuh_kecil.png"];
+let leafSpawnTimer = null;
+function spawnLeaf(){
+  const layer = document.getElementById("titleLeaves");
+  if(!layer) return;
+  const img = document.createElement("img");
+  img.src = LEAF_IMAGES[Math.floor(Math.random()*LEAF_IMAGES.length)];
+  img.className = "leaf";
+  const size = 16 + Math.random()*26;
+  const duration = 7 + Math.random()*7;
+  const sway1 = (20 + Math.random()*50) * (Math.random()<0.5 ? -1 : 1);
+  const sway2 = (20 + Math.random()*50) * (Math.random()<0.5 ? -1 : 1);
+  img.style.left = (Math.random()*94) + "%";
+  img.style.width = size + "px";
+  img.style.opacity = (0.55 + Math.random()*0.4).toFixed(2);
+  img.style.animationDuration = duration + "s";
+  img.style.setProperty("--sway1", sway1 + "px");
+  img.style.setProperty("--sway2", sway2 + "px");
+  img.addEventListener("animationend", ()=> img.remove());
+  layer.appendChild(img);
+}
+function startLeafRain(){
+  if(leafSpawnTimer) return;
+  spawnLeaf(); spawnLeaf();
+  leafSpawnTimer = setInterval(spawnLeaf, 850);
+}
+function stopLeafRain(){
+  clearInterval(leafSpawnTimer);
+  leafSpawnTimer = null;
+  const layer = document.getElementById("titleLeaves");
+  if(layer) layer.innerHTML = "";
+}
+function openModal(id){ document.getElementById(id).classList.add("active"); if(id==="modalSettings") syncMusicSwitch(); }
+function closeModal(id){ document.getElementById(id).classList.remove("active"); }
+
+/* ---------- ACCESSIBILITY ---------- */
+function toggleMode(mode, el){
+  const cls = "mode-"+mode;
+  document.body.classList.toggle(cls);
+  el.classList.toggle("on");
+}
+
+/* ---------- LOADING ---------- */
+const tips = [
+  "Tubuhmu berharga, rawatlah dengan pengetahuan yang benar.",
+  "Bertanya bukan tanda lemah — itu tanda kamu ingin bertumbuh.",
+  "Batasan dirimu berhak dihormati, dan kamu berhak berkata tidak.",
+  "Setiap remaja berharga, termasuk kamu.",
+];
+const LOADING_CHAR_FRAMES = [
+  "images/char_loadingscreen1.png",
+  "images/char_loadingscreen2.png",
+  "images/char_loadingscreen3.png",
+  "images/char_loadingscreen4.png",
+  "images/char_loadingscreen5.png",
+];
+let loadingCharTimer = null;
+function startLoadingCharAnim(){
+  const img = document.getElementById("loadingChar");
+  if(!img) return;
+  let i = 0;
+  img.src = LOADING_CHAR_FRAMES[0];
+  loadingCharTimer = setInterval(()=>{
+    i = (i + 1) % LOADING_CHAR_FRAMES.length;
+    img.src = LOADING_CHAR_FRAMES[i];
+  }, 400);
+}
+function stopLoadingCharAnim(){
+  clearInterval(loadingCharTimer);
+  loadingCharTimer = null;
+}
+function startLoading(){
+  document.getElementById("loadingTip").textContent = tips[Math.floor(Math.random()*tips.length)];
+  startLoadingCharAnim();
+  let p = 0;
+  const fill = document.getElementById("loadingFill");
+  const iv = setInterval(()=>{
+    p += 1.3 + Math.random()*2;
+    if(p >= 100){ p = 100; clearInterval(iv); stopLoadingCharAnim(); setTimeout(()=>goTo("screen-title"), 300); }
+    fill.style.width = p+"%";
+  }, 140);
+}
+
+/* ---------- TITLE / CONTINUE ---------- */
+function startNewOrContinue(){
+  if(STATE.name){ goTo("screen-lobby"); renderLobby(); }
+  else { goTo("screen-charselect"); }
+}
+
+/* ---------- CHARACTER SELECT ---------- */
+function pickGender(g){
+  STATE.gender = g;
+  document.getElementById("pickLaki").classList.toggle("selected", g==="laki");
+  document.getElementById("pickPerempuan").classList.toggle("selected", g==="perempuan");
+  checkCharForm();
+}
+document.addEventListener("DOMContentLoaded", ()=>{
+  document.getElementById("nameInput").addEventListener("input", checkCharForm);
+  pickGender(STATE.gender);
+  openModal("modalAudioChoice");
+});
+function checkCharForm(){
+  const name = document.getElementById("nameInput").value.trim();
+  document.getElementById("btnLanjutChar").disabled = name.length === 0;
+}
+function confirmCharacter(){
+  STATE.name = document.getElementById("nameInput").value.trim();
+  saveState();
+  logToSheet("mulai_karakter", {gender: STATE.gender});
+  goTo("screen-story");
+  renderStory();
+}
+
+/* ---------- STORY (before-after: pemahaman awal + narasi pembuka) ---------- */
+const beforeQuestions = [
+  {q:"Menurutmu, siapa yang berhak menentukan apakah tubuhmu boleh disentuh orang lain?", opts:["Orang lain, kalau mereka lebih tua","Aku sendiri","Tidak ada yang berhak menolak"], correct:1},
+  {q:"Kalau ada teman yang memaksa hal yang tidak nyaman buatmu, sebaiknya kamu...", opts:["Menurut saja biar tidak dimusuhi","Boleh menolak dan bicara ke orang dewasa terpercaya","Diam dan menjauh selamanya"], correct:1},
+  {q:"Perubahan tubuh saat pubertas itu...", opts:["Hal yang wajar dan berbeda tiap orang","Tanda ada yang salah dengan tubuhku","Harus dirahasiakan dari semua orang"], correct:0},
+];
+let storyStep = 0;
+let beforeIdx = 0;
+const storyBeats = [
+  {speaker:"Narator", text:"Akhir-akhir ini kamu merasa banyak yang berubah — pada tubuhmu, perasaanmu, dan caramu memandang teman-teman di sekitar. Rasanya membingungkan."},
+  {speaker:"", text:"__BEFORE_QUIZ__"},
+  {speaker:"Narator", text:"Suatu sore, kamu menemukan selebaran kecil terselip di antara buku-bukumu: \"RUMAH 'AISYIYAH — Ruang Aman untuk Remaja: Belajar, Bertanya, Bertumbuh.\""},
+  {speaker:"Teman", text:"Aku jadi lebih percaya diri sejak sering ke sana. Kak Hana baik banget, selalu bantu dengerin cerita kita."},
+  {speaker:"Narator", text:"Kamu memutuskan untuk mencoba datang. Rumahnya terlihat hangat — bukan seperti sekolah, bukan seperti rumah sakit."},
+  {speaker:"Kak Hana", text:"Selamat datang. Rumah ini akan selalu terbuka untukmu — kamu tidak sendiri."},
+];
+function renderStory(){
+  const c = document.getElementById("storyContent");
+  if(storyStep >= storyBeats.length){ finishStoryIntro(); return; }
+  const beat = storyBeats[storyStep];
+  if(beat.text === "__BEFORE_QUIZ__"){ renderBeforeQuiz(); return; }
+  c.innerHTML = `
+    <div class="grow"></div>
+    <div class="dialog-box">
+      <div class="speaker">${beat.speaker}</div>
+      <p>${beat.text}</p>
+    </div>
+    <button class="btn-primary btn-block" style="margin-top:16px;" onclick="nextStoryBeat()">Lanjut →</button>
+  `;
+}
+function nextStoryBeat(){ storyStep++; renderStory(); }
+
+function renderBeforeQuiz(){
+  const c = document.getElementById("storyContent");
+  if(beforeIdx >= beforeQuestions.length){ storyStep++; renderStory(); return; }
+  const item = beforeQuestions[beforeIdx];
+  c.innerHTML = `
+    <span class="badge-pill">Pemahaman Awal ${beforeIdx+1}/${beforeQuestions.length}</span>
+    <div class="card">
+      <div class="quiz-q">${item.q}</div>
+      ${item.opts.map((o,i)=>`<button class="quiz-opt btn-block" onclick="answerBefore(${i})">${o}</button>`).join("")}
+    </div>
+  `;
+}
+function answerBefore(i){
+  STATE.before["q"+beforeIdx] = i;
+  beforeIdx++;
+  saveState();
+  renderBeforeQuiz();
+}
+function finishStoryIntro(){
+  logToSheet("pemahaman_awal", {jawaban: STATE.before});
+  goTo("screen-lobby");
+  renderLobby();
+}
+
+/* ---------- ROOM DEFINITIONS ---------- */
+function menstruasiRoom(){
+  return STATE.gender === "laki"
+    ? {id:"menstruasi", name:"Mimpi Basah", icon:"🌙", tema:"Siap Bertumbuh", badge:"🌙", badgeLabel:"Siap Bertumbuh", kunci:"Merawat Diri"}
+    : {id:"menstruasi", name:"Menstruasi", icon:"🌸", tema:"Aku Siap", badge:"🌸", badgeLabel:"Peduli Diri", kunci:"Merawat Diri"};
+}
+const ROOMS = [
+  {id:"pubertas", name:"Pubertas", icon:"🧑", tema:"Mengenal Tubuhku", badge:"⭐", badgeLabel:"Percaya Diri", kunci:"Mengenal Diri"},
+  null, // placeholder untuk menstruasi/mimpi basah (gender-based, diisi runtime)
+  {id:"consent", name:"Consent", icon:"🛡️", tema:"Menghargai Batasan", badge:"🛡️", badgeLabel:"Respect", kunci:"Menghargai Batasan"},
+  {id:"relasi", name:"Relasi Sehat", icon:"🤝", tema:"Healthy Relationship", badge:"🤝", badgeLabel:"Relasi Sehat", kunci:"Menghargai Orang Lain"},
+  {id:"medsos", name:"Media Sosial", icon:"📱", tema:"KBGO", badge:"📱", badgeLabel:"Digital Hero", kunci:"Bijak Bermedia"},
+  {id:"gizi", name:"Gizi", icon:"🍎", tema:"Tubuh Sehat", badge:"🍎", badgeLabel:"Healthy Badge", kunci:"Menjaga Kesehatan"},
+  {id:"konseling", name:"Konseling", icon:"💬", tema:"Ruang Tenang", badge:null, kunci:"Berani Meminta Bantuan"},
+  {id:"perpustakaan", name:"Perpustakaan", icon:"📚", tema:"Koleksi Terbuka", badge:null, kunci:null},
+  {id:"refleksi", name:"Refleksi", icon:"🪞", tema:"Ruang Terakhir", badge:null, kunci:null},
+];
+function getRooms(){ const r = ROOMS.slice(); r[1] = menstruasiRoom(); return r; }
+
+const HIKMAH = {
+  menstruasi: {text:"Wanita jangan berjiwa kerdil, tetapi berjiwa srikandi.", source:"Nyai Ahmad Dahlan (Siti Walidah), pendiri 'Aisyiyah"},
+  consent: {text:"Wanita jangan berjiwa kerdil, tetapi berjiwa srikandi.", source:"Nyai Ahmad Dahlan (Siti Walidah), pendiri 'Aisyiyah"},
+  konseling: {text:"Hadapi masalah tanpa wajah berkerut, agar hati tetap tenang.", source:"Buya Hamka"},
+  refleksi: {text:"Memaafkan diri sendiri menumbuhkan kedamaian dan kesehatan jiwa.", source:"Buya Hamka"},
+  pubertas: {text:"Pendidikan sejati membentuk generasi yang cerdas sekaligus berakhlak.", source:"K.H. Ahmad Dahlan"},
+  gizi: {text:"Pendidikan sejati membentuk generasi yang cerdas sekaligus berakhlak.", source:"K.H. Ahmad Dahlan"},
+  relasi: {text:"Jangan takut salah — dari kesalahan pertama kita belajar melangkah lebih baik.", source:"Buya Hamka"},
+};
+
+/* ---------- LOBBY ---------- */
+function renderLobby(){
+  document.getElementById("lobbyName").textContent = STATE.name || "Aisyah";
+  document.getElementById("lobbyLevel").textContent = STATE.level;
+  document.getElementById("lobbyPoints").textContent = STATE.points;
+  const grid = document.getElementById("doorsGrid");
+  grid.innerHTML = getRooms().map(r=>{
+    const done = STATE.roomsDone[r.id];
+    return `<div class="door" onclick="openRoom('${r.id}')">
+      ${done ? '<span class="check">✅</span>' : ''}
+      <span class="door-icon">${r.icon}</span>
+      <div class="door-name">${r.name}</div>
+    </div>`;
+  }).join("");
+}
+
+/* ---------- ROOM RENDERING ---------- */
+let currentRoom = null;
+function openRoom(id){
+  currentRoom = getRooms().find(r=>r.id===id);
+  document.getElementById("roomTitleTop").textContent = currentRoom.name;
+  goTo("screen-room");
+  renderRoomHome();
+}
+function renderRoomHome(){
+  const c = document.getElementById("roomContent");
+  c.innerHTML = `
+    <div class="card center">
+      <h2>${currentRoom.icon} ${currentRoom.name}</h2>
+      <p class="tagline">${currentRoom.tema}</p>
+    </div>
+    <div class="room-tabs">
+      <button class="btn-outline" onclick="showMateri()">MATERI</button>
+      <button class="btn-primary" onclick="startMechanic('${currentRoom.id}')">MULAI GAME</button>
+      <button class="btn-outline" onclick="showTarget()">TARGET</button>
+    </div>
+    <div id="roomBody"></div>
+  `;
+}
+const MATERI_TEXT = {
+  pubertas:"Pubertas adalah masa perubahan fisik & emosi yang wajar dialami setiap remaja, waktunya berbeda-beda pada tiap orang.",
+  menstruasi:"Menstruasi/mimpi basah adalah proses biologis normal tanda tubuh mulai matang — bukan sesuatu yang perlu ditakuti atau disembunyikan.",
+  consent:"Consent berarti persetujuan yang diberikan dengan sadar, tanpa paksaan. Kamu berhak menolak hal yang membuatmu tidak nyaman.",
+  relasi:"Relasi yang sehat dibangun atas rasa saling menghargai, tanpa paksaan maupun kontrol berlebihan dari salah satu pihak.",
+  medsos:"KBGO (Kekerasan Berbasis Gender Online) bisa berupa penyebaran foto tanpa izin, ancaman, atau akun palsu. Kenali dan laporkan.",
+  gizi:"Remaja butuh gizi seimbang untuk mendukung pertumbuhan fisik dan konsentrasi belajar sehari-hari.",
+  konseling:"Ruang ini tanpa skor — tempat kamu boleh bercerita apa pun yang kamu rasakan, tanpa dihakimi.",
+  perpustakaan:"Kumpulan bacaan & tontonan ringan seputar kesehatan reproduksi remaja.",
+  refleksi:"Saatnya melihat kembali apa yang sudah kamu pelajari selama menjelajah Rumah 'Aisyiyah.",
+};
+const TARGET_TEXT = {
+  pubertas:"Memahami perubahan fisik & emosi pubertas secara akurat dan tidak menghakimi diri sendiri.",
+  menstruasi:"Mampu mengelola perubahan tubuh (menstruasi/mimpi basah) dengan tenang dan penuh perawatan diri.",
+  consent:"Mampu mengenali dan menghormati batasan diri sendiri maupun orang lain.",
+  relasi:"Mampu mengenali ciri relasi sehat vs relasi yang mengontrol/memaksa.",
+  medsos:"Mampu mengenali dan melaporkan potensi KBGO di ruang digital.",
+  gizi:"Mampu menyusun pola makan seimbang untuk kebutuhan tumbuh kembang remaja.",
+  konseling:"Merasa aman untuk mengungkapkan perasaan dan mencari bantuan bila dibutuhkan.",
+  perpustakaan:"Memperluas wawasan lewat bacaan tambahan di luar mini-game.",
+  refleksi:"Merefleksikan pemahaman awal vs akhir serta menuliskan jurnal reflektif.",
+};
+function showMateri(){
+  document.getElementById("roomBody").innerHTML = `<div class="card">${MATERI_TEXT[currentRoom.id]}</div>`;
+}
+function showTarget(){
+  document.getElementById("roomBody").innerHTML = `<div class="card"><b>Tujuan:</b><br>${TARGET_TEXT[currentRoom.id]}</div>`;
+}
+
+/* ---------- MINI-GAME DATA ---------- */
+const QUIZBANK = {
+  pubertas:[
+    {q:"Tumbuhnya jerawat saat pubertas adalah...", opts:["Tanda tubuh sedang sakit","Hal wajar akibat perubahan hormon","Hukuman karena jarang cuci muka"], correct:1},
+    {q:"Suara yang berubah (\"pecah\") pada remaja laki-laki adalah...", opts:["Gejala penyakit","Bagian normal dari pubertas","Tanda kurang gizi"], correct:1},
+    {q:"Setiap remaja mengalami pubertas di waktu yang...", opts:["Sama persis semua orang","Berbeda-beda, dan itu normal","Bisa dipercepat dengan obat"], correct:1},
+  ],
+  menstruasi:[
+    {q:"Siklus menstruasi normalnya berlangsung sekitar...", opts:["21–35 hari, bervariasi tiap orang","Selalu tepat 28 hari untuk semua orang","1 hari saja"], correct:0},
+    {q:"Saat nyeri haid mengganggu, sebaiknya kamu...", opts:["Menahan diri tanpa bercerita","Boleh istirahat & bercerita ke orang tua/guru terpercaya","Melewatkan sekolah tanpa alasan jelas"], correct:1},
+    {q:"Mimpi basah pada remaja laki-laki adalah tanda...", opts:["Tubuh mulai matang secara reproduksi","Ada yang salah dengan tubuh","Harus dirahasiakan seumur hidup"], correct:0},
+  ],
+  consent:[
+    {q:"Temanmu berkata: \"Boleh pinjam HP-mu buka galeri fotomu?\" Kamu merasa tidak nyaman. Kamu...", opts:["Berhak menolak dengan sopan","Harus mengizinkan agar tidak dibilang pelit","Diam saja walau tidak nyaman"], correct:0},
+    {q:"Consent (persetujuan) yang sehat itu diberikan...", opts:["Karena terpaksa/takut","Dengan sadar & tanpa paksaan","Hanya sekali untuk selamanya, tidak bisa berubah"], correct:1},
+    {q:"Jika kamu sudah bilang \"tidak\" tapi diabaikan, itu artinya...", opts:["Kamu harus mengalah","Batasanmu tidak dihormati, dan itu tidak apa-apa untuk dibicarakan ke orang dewasa terpercaya","Kamu yang salah"], correct:1},
+  ],
+  relasi:[
+    {q:"Kamu mulai merasa suka pada teman sekelas. Hal yang sehat untuk dilakukan adalah...", opts:["Memaksa perasaanmu diterima","Menyampaikan perasaan dengan wajar dan menerima apapun jawabannya","Mengancam kalau tidak dibalas"], correct:1},
+    {q:"Ada teman yang mengajak pacaran dan kamu belum siap. Kamu boleh...", opts:["Berkata jujur kalau kamu belum siap","Berpura-pura setuju agar tidak canggung","Menjauhi teman itu selamanya tanpa bicara"], correct:0},
+    {q:"Ciri teman yang toxic (merugikan) adalah...", opts:["Menghargai waktumu","Sering mengontrol & memaksakan kehendak","Mendukung tanpa syarat"], correct:1},
+  ],
+  medsos:[
+    {q:"Akun yang meminta foto pribadimu dengan iming-iming hadiah biasanya...", opts:["Aman untuk dituruti","Patut dicurigai sebagai modus KBGO","Wajib diladeni agar tidak dianggap sombong"], correct:1},
+    {q:"Jika ada yang menyebarkan fotomu tanpa izin, langkah pertamamu adalah...", opts:["Diam dan menyimpan sendiri","Laporkan/blokir dan cerita ke orang dewasa terpercaya","Membalas dengan menyebarkan hal serupa"], correct:1},
+    {q:"Ciri akun media sosial palsu biasanya...", opts:["Aktivitas & follower jelas bertahun-tahun","Baru dibuat, minim aktivitas, memaksa buru-buru","Selalu terverifikasi resmi"], correct:1},
+  ],
+  gizi:[
+    {q:"Piring makan remaja sehat sebaiknya diisi...", opts:["Hanya nasi & gorengan","Kombinasi karbohidrat, protein, sayur & buah","Camilan manis sepanjang hari"], correct:1},
+    {q:"Sarapan pagi bagi remaja berguna untuk...", opts:["Membantu konsentrasi belajar","Tidak berpengaruh sama sekali","Hanya untuk anak kecil"], correct:0},
+    {q:"Minum air putih yang cukup setiap hari membantu...", opts:["Menjaga tubuh tetap terhidrasi & fokus","Membuat mudah lapar","Tidak ada manfaatnya"], correct:0},
+  ],
+};
+
+/* ---------- MINI-GAME ENGINE (quiz-based rooms) ---------- */
+let quizIdx = 0, quizScore = 0;
+function startMechanic(roomId){
+  if(roomId === "konseling"){ renderKonseling(); return; }
+  if(roomId === "perpustakaan"){ renderPerpustakaan(); return; }
+  if(roomId === "refleksi"){ renderRefleksi(); return; }
+  quizIdx = 0; quizScore = 0;
+  renderQuiz(roomId);
+}
+function renderQuiz(roomId){
+  const bank = QUIZBANK[roomId];
+  const body = document.getElementById("roomBody");
+  if(quizIdx >= bank.length){ completeRoom(roomId); return; }
+  const item = bank[quizIdx];
+  body.innerHTML = `
+    <span class="badge-pill">Pertanyaan ${quizIdx+1}/${bank.length}</span>
+    <div class="card">
+      <div class="quiz-q">${item.q}</div>
+      <div id="quizOpts">${item.opts.map((o,i)=>`<button class="quiz-opt btn-block" onclick="answerQuiz('${roomId}',${i},${item.correct})">${o}</button>`).join("")}</div>
+      <div id="quizFeedback"></div>
+    </div>
+  `;
+}
+function answerQuiz(roomId, chosen, correct){
+  const opts = document.querySelectorAll("#quizOpts .quiz-opt");
+  opts.forEach((el,i)=>{
+    el.onclick = null;
+    if(i===correct) el.classList.add("correct");
+    else if(i===chosen) el.classList.add("wrong");
+  });
+  if(chosen===correct) quizScore++;
+  document.getElementById("quizFeedback").innerHTML =
+    `<div class="feedback">Kak Hana: ${chosen===correct ? "Pilihan yang lebih sehat! Kamu memahaminya dengan baik." : "Tidak apa — yuk lihat pilihan yang lebih sehat, dan ingat ini untuk ke depannya."}</div>
+     <button class="btn-primary btn-block" style="margin-top:10px;" onclick="quizIdx++;renderQuiz('${roomId}')">Lanjut →</button>`;
+}
+function completeRoom(roomId){
+  const room = getRooms().find(r=>r.id===roomId);
+  STATE.roomsDone[roomId] = true;
+  STATE.points += 10;
+  if(room.badge) STATE.badges[roomId] = true;
+  if(room.kunci) STATE.kunciNilai[roomId] = true;
+  saveState();
+  logToSheet("selesai_ruangan", {ruangan: roomId, skor: quizScore});
+  const hikmah = HIKMAH[roomId];
+  if(hikmah && !STATE.hikmah[roomId]){
+    STATE.hikmah[roomId] = true; saveState();
+    document.getElementById("hikmahModalText").textContent = "\u201C"+hikmah.text+"\u201D";
+    document.getElementById("hikmahModalSource").textContent = "— "+hikmah.source;
+    openModal("modalHikmah");
+  }
+  document.getElementById("roomBody").innerHTML = `
+    <div class="card center">
+      <div style="font-size:34px;">${room.badge || "💬"}</div>
+      <h3>Ruangan Selesai!</h3>
+      <p>${room.badge ? "Kamu mendapat Badge "+room.badgeLabel+"." : "Terima kasih sudah berbagi cerita."}</p>
+      <button class="btn-primary btn-block" onclick="goTo('screen-lobby');renderLobby();">Kembali ke Lobby</button>
+    </div>
+  `;
+}
+
+/* ---------- KONSELING (no score) ---------- */
+const KONSELING_RESPON = {
+  sedih:"Wajar merasa sedih. Kadang perasaan itu perlu didengar dulu, bukan buru-buru diselesaikan.",
+  takut:"Rasa takut adalah sinyal tubuhmu sedang menjaga diri. Kamu boleh bicara pelan-pelan soal apa yang kamu takutkan.",
+  marah:"Marah itu manusiawi. Yang penting, cara menyalurkannya tidak menyakiti diri sendiri atau orang lain.",
+  bingung:"Bingung itu tanda kamu sedang berpikir. Tidak apa belum punya jawaban sekarang.",
+};
+function renderKonseling(){
+  document.getElementById("roomBody").innerHTML = `
+    <div class="card">
+      <p><b>Kak Hana:</b> Hari ini kamu sedang merasa apa?</p>
+      <div class="col">
+        ${Object.keys(KONSELING_RESPON).map(k=>`<button class="choice-btn btn-block" onclick="konselingPick('${k}')">${k.charAt(0).toUpperCase()+k.slice(1)}</button>`).join("")}
+      </div>
+    </div>
+  `;
+}
+function konselingPick(mood){
+  STATE.roomsDone["konseling"] = true;
+  STATE.kunciNilai["konseling"] = true;
+  STATE.points += 5;
+  saveState();
+  logToSheet("konseling", {mood});
+  const hikmah = HIKMAH.konseling;
+  document.getElementById("roomBody").innerHTML = `
+    <div class="card">
+      <p><b>Kak Hana:</b> ${KONSELING_RESPON[mood]}</p>
+      <button class="btn-outline btn-block" onclick="showBantuanNyata()">Butuh teman cerita di dunia nyata?</button>
+      <div id="bantuanNyataBox"></div>
+      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="goTo('screen-lobby');renderLobby();">Kembali ke Lobby</button>
+    </div>
+  `;
+  if(hikmah && !STATE.hikmah.konseling){
+    STATE.hikmah.konseling = true; saveState();
+    document.getElementById("hikmahModalText").textContent = "\u201C"+hikmah.text+"\u201D";
+    document.getElementById("hikmahModalSource").textContent = "— "+hikmah.source;
+    openModal("modalHikmah");
+  }
+}
+function showBantuanNyata(){
+  document.getElementById("bantuanNyataBox").innerHTML = `
+    <div class="contact-card"><b>LBH 'Aisyiyah</b><br>Layanan bantuan hukum & pendampingan resmi 'Aisyiyah.</div>
+    <div class="contact-card"><b>SAPA 129</b><br>Layanan Sahabat Perempuan dan Anak — hotline nasional.</div>
+    <div class="contact-card"><b>Jakarta Siaga 112</b><br>Khusus untuk wilayah Jakarta.</div>
+    <p style="font-size:12px;color:var(--grey);">Kamu tidak sendiri. Menghubungi bantuan ini bukan tanda lemah.</p>
+  `;
+}
+
+/* ---------- PERPUSTAKAAN ---------- */
+function renderPerpustakaan(){
+  document.getElementById("roomBody").innerHTML = `
+    <div class="card">📖 Komik: "Cerita dari Rumah 'Aisyiyah" — segera hadir</div>
+    <div class="card">🎬 Video: "Mengenal Tubuhku" — segera hadir</div>
+    <div class="card">🖼️ Infografis: "Mitos vs Fakta Pubertas" — segera hadir</div>
+    <p style="font-size:12px;color:var(--grey);">Koleksi terbuka setelah kamu menyelesaikan ruangan terkait.</p>
+  `;
+}
+
+/* ---------- REFLEKSI (before-after + jurnal) ---------- */
+function renderRefleksi(){
+  const requiredRooms = ["pubertas","menstruasi","consent","relasi","medsos","gizi","konseling"];
+  const doneCount = requiredRooms.filter(r=>STATE.roomsDone[r]).length;
+  const body = document.getElementById("roomBody");
+  if(doneCount < requiredRooms.length){
+    body.innerHTML = `<div class="card center">Selesaikan dulu ruangan lain (${doneCount}/${requiredRooms.length}) sebelum masuk Ruang Refleksi.</div>`;
+    return;
+  }
+  body.innerHTML = `
+    <div class="card">
+      <span class="badge-pill">Pemahaman Akhir</span>
+      ${beforeQuestions.map((item,i)=>`
+        <div class="quiz-q">${item.q}</div>
+        ${item.opts.map((o,oi)=>`<button class="quiz-opt btn-block" onclick="answerAfter(${i},${oi})">${o}</button>`).join("")}
+      `).join("<hr style='border:none;border-top:1px dashed #e2d9bd;margin:10px 0;'>")}
+    </div>
+    <div id="afterResultBox"></div>
+  `;
+}
+function answerAfter(qIdx, chosen){
+  STATE.after["q"+qIdx] = chosen;
+  saveState();
+  const answeredAll = beforeQuestions.every((_,i)=> STATE.after["q"+i] !== undefined);
+  if(answeredAll) showCompareAndJournal();
+}
+function showCompareAndJournal(){
+  const box = document.getElementById("afterResultBox");
+  let rows = "";
+  beforeQuestions.forEach((item,i)=>{
+    const b = STATE.before["q"+i], a = STATE.after["q"+i];
+    rows += `<div class="compare-row"><span>Awal: ${item.opts[b] ?? "-"}</span></div>
+             <div class="compare-row"><span>Akhir: ${item.opts[a] ?? "-"}</span></div>`;
+  });
+  box.innerHTML = `
+    <div class="card">
+      <h3>Perbandingan Pemahaman</h3>
+      ${rows}
+      <p style="font-size:13px;margin-top:10px;"><b>Kak Hana:</b> Bukan soal benar atau salah — ini soal seberapa jauh kamu bertumbuh.</p>
+    </div>
+    <div class="card">
+      <h3>Jurnal Refleksi</h3>
+      <p style="font-size:13px;">Apa yang kamu pelajari hari ini? Apa yang masih membingungkan?</p>
+      <textarea id="journalInput" placeholder="Tulis di sini...">${STATE.journal||""}</textarea>
+      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="submitJournal()">Simpan & Selesai</button>
+    </div>
+  `;
+}
+function submitJournal(){
+  STATE.journal = document.getElementById("journalInput").value;
+  STATE.roomsDone["refleksi"] = true;
+  saveState();
+  logToSheet("refleksi", {before: STATE.before, after: STATE.after, jurnal: STATE.journal});
+  goTo("screen-ending");
+}
+
+/* ---------- PROGRESS / TROPHY / HIKMAH ---------- */
+function renderProgress(){
+  const rooms = getRooms();
+  document.getElementById("progressContent").innerHTML = rooms.map(r=>`
+    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+      <span>${r.icon} ${r.name}</span><span>${STATE.roomsDone[r.id] ? "✅ Selesai" : "⬜ Belum"}</span>
+    </div>
+  `).join("");
+}
+function renderTrophy(){
+  const rooms = getRooms().filter(r=>r.badge);
+  document.getElementById("trophyGrid").innerHTML = rooms.map(r=>{
+    const got = STATE.badges[r.id];
+    return `<div class="badge-cell ${got?'':'locked'}">
+      <span class="emoji">${r.badge}</span>
+      <div class="label">${r.badgeLabel}</div>
+    </div>`;
+  }).join("");
+}
+function renderHikmah(){
+  const keys = Object.keys(HIKMAH);
+  document.getElementById("hikmahContent").innerHTML = keys.map(k=>{
+    const got = STATE.hikmah[k];
+    const h = HIKMAH[k];
+    return `<div class="card ${got?'':'locked'}" style="${got?'':'opacity:.4;'}">
+      <p class="hikmah-quote">${got ? '\u201C'+h.text+'\u201D' : '🔒 Belum ditemukan'}</p>
+      ${got ? `<p class="hikmah-source">— ${h.source}</p>` : ""}
+    </div>`;
+  }).join("");
+}
+
+/* ---------- ENDING ---------- */
+function showEndingCredit(){ document.getElementById("endingCredit").style.display = "block"; }
+</script>
+</body>
+</html>
