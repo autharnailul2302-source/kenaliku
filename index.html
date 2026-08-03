@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Rumah 'Aisyiyah — Karena Setiap Remaja Berharga</title>
+<title>KenaliKu — Karena Setiap Remaja Berharga</title>
 <style>
   /* ===================== DESIGN TOKENS ===================== */
   :root{
@@ -353,7 +353,7 @@
   <section class="screen active" id="screen-splash">
     <div class="grow"></div>
     <div class="logo-leaf">🌱</div>
-    <h1 class="brand-title">RUMAH 'AISYIYAH</h1>
+    <h1 class="brand-title">KENALIKU</h1>
     <p class="tagline">Karena Setiap Remaja Berharga</p>
     <div class="grow"></div>
   </section>
@@ -406,6 +406,9 @@
     </div>
     <label style="font-size:13px;font-weight:700;color:var(--green-deep);">Masukkan Nama Karaktermu</label>
     <input type="text" id="nameInput" placeholder="Nama panggilan..." maxlength="20">
+    <label style="font-size:13px;font-weight:700;color:var(--green-deep);margin-top:10px;display:block;">Buat PIN 4 Angka</label>
+    <p style="font-size:12px;color:var(--grey);margin:2px 0 6px;">Ingat-ingat PIN ini — dipakai buat lanjutkan progresmu dari HP/laptop lain.</p>
+    <input type="text" id="pinInput" placeholder="cth. 1234" maxlength="4" inputmode="numeric" pattern="[0-9]*">
     <button class="btn-primary btn-block" id="btnLanjutChar" disabled onclick="confirmCharacter()">LANJUT</button>
   </section>
 
@@ -467,7 +470,7 @@
     <button class="btn-gold btn-block" onclick="showEndingCredit()">❤️ Ajak ke Rumah 'Aisyiyah</button>
     <div id="endingCredit" style="display:none;margin-top:20px;">
       <p class="center" style="font-weight:700;color:var(--green-deep);">"Setiap remaja memiliki cerita. Setiap cerita layak didengar.<br>Karena setiap remaja berharga."</p>
-      <p class="center tagline">RUMAH 'AISYIYAH</p>
+      <p class="center tagline">KENALIKU</p>
       <button class="btn-outline btn-block" onclick="resetGame()">Mulai Ulang</button>
     </div>
     <div class="grow"></div>
@@ -501,7 +504,7 @@
   <div class="modal-backdrop" id="modalTentang">
     <div class="modal-card">
       <h3>Tentang</h3>
-      <p style="font-size:13px;">Rumah 'Aisyiyah adalah game edukasi kesehatan seksual & reproduksi remaja, dikembangkan untuk REACH 2026 — "Reaching Teens. Inspiring Inclusive Healthy Futures".</p>
+      <p style="font-size:13px;">KenaliKu adalah game edukasi kesehatan seksual & reproduksi remaja, dikembangkan untuk REACH 2026 — "Reaching Teens. Inspiring Inclusive Healthy Futures". Dalam game ini, kamu akan menjelajahi Rumah 'Aisyiyah — ruang aman tempat belajar dan bertanya.</p>
       <button class="btn-primary btn-block" onclick="closeModal('modalTentang')">Tutup</button>
     </div>
   </div>
@@ -533,8 +536,22 @@
       <p class="center" style="font-size:13px;margin-bottom:16px;color:var(--ink);">Pilih salah satu untuk melanjutkan:</p>
       <button class="btn-modal-choice primary" id="btnLanjutkanProgress" style="margin-bottom:10px;" onclick="entryContinueProgress()">LANJUTKAN PROGRESS</button>
       <button class="btn-modal-choice secondary" style="margin-bottom:10px;" onclick="entryNewAccount()">BUAT AKUN BARU</button>
+      <button class="btn-modal-choice secondary" id="btnLanjutkanRemote" style="margin-bottom:10px;" onclick="openContinueRemoteModal()">LANJUTKAN DARI PERANGKAT LAIN</button>
       <button class="btn-modal-choice secondary" onclick="entryFasilitatorLogin()">LOGIN FASILITATOR</button>
       <button class="btn-ghost" style="margin-top:12px;" onclick="closeModal('modalEntryChoice')">Batal</button>
+    </div>
+  </div>
+
+  <!-- Modal lanjutkan progres dari perangkat lain (via Google Sheets, kunci nama+PIN) -->
+  <div class="modal-backdrop" id="modalContinueRemote">
+    <div class="modal-card modal-card-themed">
+      <span class="modal-plaque">LANJUTKAN DARI PERANGKAT LAIN</span>
+      <p class="center" style="font-size:13px;margin-bottom:4px;color:var(--ink);">Masukkan nama karakter dan PIN yang kamu buat sebelumnya.</p>
+      <input type="text" id="continueNama" placeholder="Nama karakter" maxlength="20">
+      <input type="text" id="continuePin" placeholder="PIN 4 angka" maxlength="4" inputmode="numeric" pattern="[0-9]*">
+      <p id="continueRemoteError" style="color:var(--danger);font-size:12px;display:none;margin:-8px 0 10px;">Nama/PIN belum ditemukan. Coba periksa lagi.</p>
+      <button class="btn-modal-choice primary" id="btnSubmitContinueRemote" onclick="submitContinueRemote()">TARIK PROGRESKU</button>
+      <button class="btn-ghost" style="margin-top:10px;" onclick="closeModal('modalContinueRemote');openModal('modalEntryChoice')">← Kembali</button>
     </div>
   </div>
 
@@ -573,22 +590,56 @@
 
 <script>
 /* =========================================================================
-   RUMAH 'AISYIYAH — single-file HTML game
+   KENALIKU — single-file HTML game
+   (Lokasi dalam cerita game ini bernama "Rumah 'Aisyiyah")
    Backend: Google Sheets via Google Apps Script (lihat Code.gs terlampir)
    Ganti GAME_API_URL di bawah dengan URL Web App Apps Script kamu.
    ========================================================================= */
-const GAME_API_URL = ""; // <-- tempel URL Web App Google Apps Script di sini
+const GAME_API_URL = "https://script.google.com/macros/s/AKfycbzRQ7HJK6dK_Ac5L1lLeV4mIL_8-elR-EFUObxh_UumLFzBKmpb17kFAwyo-An9iCr0/exec"; // <-- tempel URL Web App Google Apps Script di sini
 
 /* ---------- STATE ---------- */
 let STATE = loadState() || {
-  name: "", gender: "perempuan", points: 0, level: 1,
+  name: "", pin: "", gender: "perempuan", points: 0, level: 1,
   badges: {}, kunciNilai: {}, hikmah: {}, roomsDone: {},
   before: {}, after: {}, journal: "",
 };
 
-function saveState(){ localStorage.setItem("rumah_aisyiyah_state", JSON.stringify(STATE)); }
+function saveState(){
+  localStorage.setItem("rumah_aisyiyah_state", JSON.stringify(STATE));
+  syncStateToSheet();
+}
 function loadState(){ try{ return JSON.parse(localStorage.getItem("rumah_aisyiyah_state")); }catch(e){ return null; } }
 function resetGame(){ localStorage.removeItem("rumah_aisyiyah_state"); location.reload(); }
+
+// Kirim salinan STATE lengkap ke Google Sheets (sheet "State"), supaya bisa
+// ditarik lagi lewat "Lanjutkan dari perangkat lain". localStorage tetap
+// sumber utama; ini cuma cadangan lintas device, fire-and-forget.
+function syncStateToSheet(){
+  if(!GAME_API_URL || !STATE.name || !STATE.pin) return;
+  try{
+    fetch(GAME_API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({
+        action: "save_state",
+        nama: STATE.name,
+        pin: STATE.pin,
+        state: STATE,
+        waktu: new Date().toISOString(),
+      }),
+    }).catch(()=>{});
+  }catch(e){ /* silent fail: localStorage tetap jadi sumber utama progres */ }
+}
+
+// Ambil STATE dari Google Sheets berdasarkan nama+PIN. Beda dari
+// syncStateToSheet, ini HARUS baca balasannya, jadi tanpa no-cors.
+async function loadStateFromSheet(nama, pin){
+  if(!GAME_API_URL) return { status: "no_api" };
+  const url = GAME_API_URL + "?action=load_state&nama=" + encodeURIComponent(nama) + "&pin=" + encodeURIComponent(pin);
+  const res = await fetch(url);
+  return await res.json();
+}
 
 function logToSheet(action, data){
   if(!GAME_API_URL) return;
@@ -782,7 +833,48 @@ function openEntryChoice(){
   const hasProgress = !!(STATE && STATE.name);
   const btnContinue = document.getElementById("btnLanjutkanProgress");
   btnContinue.style.display = hasProgress ? "block" : "none";
+  document.getElementById("btnLanjutkanRemote").style.display = GAME_API_URL ? "block" : "none";
   openModal("modalEntryChoice");
+}
+function openContinueRemoteModal(){
+  closeModal("modalEntryChoice");
+  document.getElementById("continueNama").value = "";
+  document.getElementById("continuePin").value = "";
+  document.getElementById("continueRemoteError").style.display = "none";
+  openModal("modalContinueRemote");
+}
+async function submitContinueRemote(){
+  const nama = document.getElementById("continueNama").value.trim();
+  const pin = document.getElementById("continuePin").value.trim();
+  const errorEl = document.getElementById("continueRemoteError");
+  const btn = document.getElementById("btnSubmitContinueRemote");
+  if(!nama || !/^\d{4}$/.test(pin)){
+    errorEl.textContent = "Isi nama dan PIN 4 angka dulu, ya.";
+    errorEl.style.display = "block";
+    return;
+  }
+  errorEl.style.display = "none";
+  btn.disabled = true;
+  btn.textContent = "MENCARI...";
+  try{
+    const result = await loadStateFromSheet(nama, pin);
+    if(result && result.status === "ok" && result.state){
+      STATE = result.state;
+      localStorage.setItem("rumah_aisyiyah_state", JSON.stringify(STATE));
+      closeModal("modalContinueRemote");
+      goTo("screen-lobby");
+      renderLobby();
+    } else {
+      errorEl.textContent = "Nama/PIN belum ditemukan. Coba periksa lagi.";
+      errorEl.style.display = "block";
+    }
+  }catch(e){
+    errorEl.textContent = "Gagal menghubungi server. Cek koneksi internet, lalu coba lagi.";
+    errorEl.style.display = "block";
+  }finally{
+    btn.disabled = false;
+    btn.textContent = "TARIK PROGRESKU";
+  }
 }
 function entryContinueProgress(){
   closeModal("modalEntryChoice");
@@ -804,7 +896,7 @@ function confirmNewAccountProceed(){
   proceedNewAccount();
 }
 function proceedNewAccount(){
-  STATE = { name:"", gender:"perempuan", points:0, level:1, badges:{}, kunciNilai:{}, hikmah:{}, roomsDone:{}, before:{}, after:{}, journal:"" };
+  STATE = { name:"", pin:"", gender:"perempuan", points:0, level:1, badges:{}, kunciNilai:{}, hikmah:{}, roomsDone:{}, before:{}, after:{}, journal:"" };
   saveState();
   closeModal("modalEntryChoice");
   goTo("screen-charselect");
@@ -849,15 +941,18 @@ function pickGender(g){
 }
 document.addEventListener("DOMContentLoaded", ()=>{
   document.getElementById("nameInput").addEventListener("input", checkCharForm);
+  document.getElementById("pinInput").addEventListener("input", checkCharForm);
   pickGender(STATE.gender);
   openModal("modalAudioChoice");
 });
 function checkCharForm(){
   const name = document.getElementById("nameInput").value.trim();
-  document.getElementById("btnLanjutChar").disabled = name.length === 0;
+  const pin = document.getElementById("pinInput").value.trim();
+  document.getElementById("btnLanjutChar").disabled = !(name.length > 0 && /^\d{4}$/.test(pin));
 }
 function confirmCharacter(){
   STATE.name = document.getElementById("nameInput").value.trim();
+  STATE.pin = document.getElementById("pinInput").value.trim();
   saveState();
   logToSheet("mulai_karakter", {gender: STATE.gender});
   goTo("screen-story");
