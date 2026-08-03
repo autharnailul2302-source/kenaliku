@@ -10,6 +10,7 @@
     --cream:#F4EEDD;
     --card:#FBF8EF;
     --green-deep:#1F5E4A;
+    --text-accent:var(--green-deep);
     --green-mid:#3E8E6E;
     --green-soft:#E7F2EA;
     --gold:#C08A2E;
@@ -37,6 +38,7 @@
   html,body{margin:0;padding:0;background:var(--cream);height:100%;overflow:hidden;}
   body{
     background:var(--cream);
+    color:var(--ink);
   }
   #game{
     position:fixed;inset:0;width:100%;height:100%;
@@ -56,7 +58,7 @@
   #game.fullbleed .roofline{display:none;}
   .ctrl-btn{
     display:flex;align-items:center;justify-content:center;gap:8px;
-    background:var(--green-soft);color:var(--green-deep);border:none;border-radius:12px;
+    background:var(--green-soft);color:var(--text-accent);border:none;border-radius:12px;
     padding:13px 16px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;
   }
   .ctrl-btn:active{transform:scale(.97);}
@@ -69,7 +71,7 @@
   .screen.active{display:flex;}
   @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
-  h1,h2,h3{font-family:'Georgia','Iowan Old Style',serif;color:var(--green-deep);margin:0 0 6px;}
+  h1,h2,h3{font-family:'Georgia','Iowan Old Style',serif;color:var(--text-accent);margin:0 0 6px;}
   p{color:var(--ink);line-height:1.5;margin:0 0 12px;}
   .tagline{color:var(--gold);font-style:italic;font-size:14px;margin-bottom:18px;}
   .center{text-align:center;}
@@ -80,13 +82,21 @@
   button{
     font-family:inherit;cursor:pointer;border:none;border-radius:12px;
     padding:13px 16px;font-size:15px;font-weight:700;letter-spacing:.2px;
-    transition:transform .12s ease, box-shadow .12s ease;
+    transition:transform .15s cubic-bezier(.2,.8,.3,1.4), box-shadow .15s ease, filter .15s ease, opacity .15s ease;
   }
-  button:active{transform:scale(.97);}
+  button:active:not(:disabled){transform:scale(.96);filter:brightness(.94);}
+  button:disabled{cursor:not-allowed;}
+  button:focus-visible{outline:3px solid var(--gold);outline-offset:3px;}
+  @media (hover:hover) and (pointer:fine){
+    button:not(:disabled):hover{transform:translateY(-2px);filter:brightness(1.06);}
+    button.btn-ghost:hover{transform:none;filter:none;opacity:.72;}
+  }
+  @keyframes btnPop{0%{transform:scale(1);}40%{transform:scale(.92);}100%{transform:scale(1);}}
+  .btn-pop{animation:btnPop .24s cubic-bezier(.3,1.4,.4,1);}
   .btn-primary{background:var(--green-deep);color:#fff;box-shadow:0 6px 14px rgba(31,94,74,.35);}
   .btn-gold{background:var(--gold);color:#fff;box-shadow:0 6px 14px rgba(192,138,46,.35);}
-  .btn-outline{background:var(--card);color:var(--green-deep);border:2px solid var(--green-mid);}
-  .btn-ghost{background:transparent;color:var(--green-deep);text-decoration:underline;font-weight:600;padding:8px;}
+  .btn-outline{background:var(--card);color:var(--text-accent);border:2px solid var(--green-mid);}
+  .btn-ghost{background:transparent;color:var(--text-accent);text-decoration:underline;font-weight:600;padding:8px;}
   .btn-block{width:100%;}
   .btn-sm{padding:9px 12px;font-size:13px;border-radius:10px;}
 
@@ -95,7 +105,7 @@
     box-shadow:var(--shadow);margin-bottom:14px;
   }
   .badge-pill{
-    display:inline-block;background:var(--green-soft);color:var(--green-deep);
+    display:inline-block;background:var(--green-soft);color:var(--text-accent);
     border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700;margin-bottom:10px;
   }
 
@@ -168,6 +178,9 @@
   }
   .btn-masuk img{width:100%;display:block;}
   .btn-masuk:active{transform:scale(.96);}
+  @media (hover:hover) and (pointer:fine){
+    .btn-masuk:hover{transform:scale(1.05);}
+  }
   @keyframes btnPulse{
     0%,100%{filter:drop-shadow(0 6px 14px rgba(0,0,0,.3));}
     50%{filter:drop-shadow(0 8px 20px rgba(192,138,46,.55));}
@@ -207,7 +220,7 @@
   .modal-card.modal-audio-card{
     max-width:300px;
   }
-  .modal-audio-card h3{color:var(--green-deep);}
+  .modal-audio-card h3{color:var(--text-accent);}
   .modal-audio-card p{color:var(--ink);}
   .audio-icon-circle{
     width:78px;height:78px;border-radius:50%;margin:0 auto 14px;
@@ -215,18 +228,91 @@
     background:var(--green-soft);border:2px solid var(--gold);
     box-shadow:0 0 20px rgba(192,138,46,.35);
   }
-  .audio-btn-outline{background:var(--card);color:var(--green-deep);border:2px solid var(--green-mid);}
+  .audio-btn-outline{background:var(--card);color:var(--text-accent);border:2px solid var(--green-mid);}
 
-  /* character select */
-  .avatar-choice{
-    flex:1;background:var(--card);border-radius:16px;padding:16px;text-align:center;
-    border:3px solid transparent;cursor:pointer;
-  }
-  .avatar-choice.selected{border-color:var(--gold);box-shadow:0 0 0 4px rgba(192,138,46,.15);}
-  .avatar-emoji{font-size:44px;}
-  input[type=text]{
+  input[type=text],input[type=password]{
     width:100%;padding:12px 14px;border-radius:10px;border:2px solid #ddd0ac;
     font-size:15px;background:#fff;margin:10px 0 16px;
+  }
+
+  /* character select */
+  #screen-charselect{
+    background:
+      radial-gradient(circle at 12% 8%, rgba(62,142,110,.10) 0%, transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(192,138,46,.10) 0%, transparent 40%),
+      var(--cream);
+  }
+  .floating-topbtns{position:absolute;top:14px;right:14px;z-index:6;display:flex;gap:8px;}
+  .floating-topbtns .title-iconbtn{
+    background:var(--green-deep);color:#fff;box-shadow:0 4px 10px rgba(31,94,74,.35);
+  }
+  .floating-topbtns .title-iconbtn.on{background:var(--gold);}
+  .charselect-banner{
+    position:relative;align-self:center;display:flex;align-items:center;gap:10px;
+    background:var(--green-deep);color:#fff;border:2px solid var(--gold);border-radius:999px;
+    padding:9px 26px;margin:0 auto 8px;box-shadow:0 6px 14px rgba(0,0,0,.25);
+  }
+  .charselect-banner::before,.charselect-banner::after{
+    content:'🌿';position:absolute;top:50%;transform:translateY(-50%);font-size:16px;
+  }
+  .charselect-banner::before{left:-24px;transform:translateY(-50%) scaleX(-1);}
+  .charselect-banner::after{right:-24px;}
+  .charselect-banner-num{
+    background:var(--gold);color:#fff;border-radius:999px;width:24px;height:24px;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex:none;
+  }
+  .charselect-banner-text{font-weight:800;letter-spacing:.4px;font-size:14px;}
+  .charselect-sub{text-align:center;font-size:12.5px;color:var(--ink);margin-bottom:14px;}
+
+  .char-card-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;max-width:640px;margin-left:auto;margin-right:auto;}
+  .char-card{
+    position:relative;cursor:pointer;
+    border:3px solid transparent;border-radius:16px;overflow:hidden;
+    aspect-ratio:3/4;
+    box-shadow:0 6px 16px rgba(31,94,74,.16);
+    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  }
+  .char-card:active{transform:scale(.96);}
+  @media (hover:hover) and (pointer:fine){
+    .char-card:not(.selected):hover{transform:translateY(-4px);box-shadow:0 12px 22px rgba(31,94,74,.24);border-color:var(--green-mid);}
+  }
+  .char-card img{width:100%;height:100%;object-fit:contain;display:block;}
+  .char-card.selected{
+    border-color:var(--gold);border-radius:16px;
+    box-shadow:0 0 0 4px rgba(192,138,46,.22),0 10px 22px rgba(192,138,46,.3);
+    transform:translateY(-3px);
+  }
+  .char-card.selected::after{
+    content:'✓';position:absolute;top:6px;right:6px;z-index:2;
+    width:22px;height:22px;border-radius:50%;background:var(--gold);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;
+    box-shadow:0 2px 6px rgba(0,0,0,.3);
+  }
+
+  .charselect-form{max-width:640px;margin:0 auto;width:100%;}
+  .charselect-field{position:relative;display:flex;align-items:center;}
+  .charselect-field .charselect-icon{position:absolute;left:14px;font-size:15px;pointer-events:none;z-index:1;color:var(--text-accent);}
+  .charselect-field input[type=text],.charselect-field input[type=password]{
+    padding-left:40px;border:1px solid #e8ddbc;box-shadow:0 3px 10px rgba(31,94,74,.08);
+  }
+  .charselect-field .charselect-eye{
+    position:absolute;right:6px;background:none;border:none;padding:8px;font-size:15px;
+    color:var(--grey);cursor:pointer;box-shadow:none;
+  }
+  .charselect-field .charselect-eye:active{transform:none;}
+
+  .btn-lanjut-themed{
+    position:relative;display:block;width:100%;margin-top:6px;
+    background:linear-gradient(180deg,#2a6e57,var(--green-deep));color:#fff;
+    border:2px solid var(--gold);border-radius:999px;padding:14px 20px;
+    font-weight:800;font-size:15px;letter-spacing:.4px;cursor:pointer;
+    box-shadow:0 6px 14px rgba(31,94,74,.35);transition:opacity .15s ease;
+  }
+  .btn-lanjut-themed .arrow{margin-left:6px;}
+  .btn-lanjut-themed:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-lanjut-themed:active:not(:disabled){transform:scale(.97);}
+  @media (hover:hover) and (pointer:fine){
+    .btn-lanjut-themed:not(:disabled):hover{box-shadow:0 10px 20px rgba(31,94,74,.45);filter:brightness(1.08);}
   }
 
   /* story / dialog */
@@ -234,25 +320,31 @@
     background:var(--card);border-left:5px solid var(--gold);border-radius:0 14px 14px 14px;
     padding:16px;box-shadow:var(--shadow);
   }
-  .speaker{font-weight:800;color:var(--green-deep);font-size:13px;margin-bottom:4px;}
+  .speaker{font-weight:800;color:var(--text-accent);font-size:13px;margin-bottom:4px;}
   .choice-btn{
-    background:var(--green-soft);color:var(--green-deep);border-radius:12px;
+    background:var(--green-soft);color:var(--text-accent);border-radius:12px;
     padding:12px 14px;text-align:left;font-weight:600;border:2px solid transparent;
   }
-  .choice-btn:hover{border-color:var(--green-mid);}
+  .choice-btn:hover{border-color:var(--green-mid);background:#dcefe4;}
+  .choice-btn:active{transform:scale(.97);}
 
   /* lobby doors */
   .doors-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
   .door{
     background:var(--card);border-radius:16px;padding:14px 10px;text-align:center;
-    box-shadow:var(--shadow);position:relative;
+    box-shadow:var(--shadow);position:relative;cursor:pointer;
+    transition:transform .15s cubic-bezier(.2,.8,.3,1.4), box-shadow .15s ease;
   }
-  .door.locked{opacity:.55;}
+  .door:active{transform:scale(.95);}
+  .door.locked{opacity:.55;cursor:not-allowed;}
+  @media (hover:hover) and (pointer:fine){
+    .door:not(.locked):hover{transform:translateY(-3px);box-shadow:0 12px 22px rgba(31,94,74,.22);}
+  }
   .door .door-icon{font-size:30px;display:block;margin-bottom:6px;}
-  .door .door-name{font-weight:800;font-size:13px;color:var(--green-deep);}
+  .door .door-name{font-weight:800;font-size:13px;color:var(--text-accent);}
   .door .check{position:absolute;top:6px;right:8px;font-size:14px;}
   .lobby-actions{display:flex;justify-content:space-around;margin-top:16px;}
-  .lobby-actions .a{background:none;border:none;color:var(--green-deep);font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;}
+  .lobby-actions .a{background:none;border:none;color:var(--text-accent);font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;}
   .lobby-actions .a span.emoji{font-size:20px;}
 
   /* room */
@@ -262,7 +354,7 @@
   .quiz-opt{background:var(--card);border:2px solid #e2d9bd;border-radius:12px;padding:11px 14px;margin-bottom:8px;text-align:left;font-weight:600;color:var(--ink);}
   .quiz-opt.correct{border-color:var(--green-mid);background:var(--green-soft);}
   .quiz-opt.wrong{border-color:var(--danger);background:#fbeae5;}
-  .feedback{font-size:13px;padding:10px 12px;border-radius:10px;background:var(--green-soft);color:var(--green-deep);margin-top:8px;}
+  .feedback{font-size:13px;padding:10px 12px;border-radius:10px;background:var(--green-soft);color:var(--text-accent);margin-top:8px;}
 
   .modal-backdrop{position:absolute;inset:0;background:rgba(20,20,15,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:20;display:none;align-items:center;justify-content:center;padding:24px;}
   .modal-backdrop.active{display:flex;}
@@ -284,6 +376,21 @@
   }
   .modal-card-themed::before{left:-10px;transform:rotate(-25deg);}
   .modal-card-themed::after{right:-10px;transform:rotate(25deg) scaleX(-1);}
+  .avatar-row{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;padding:2px 2px 10px;margin:0 0 4px;scrollbar-width:none;-ms-overflow-style:none;}
+  .avatar-row::-webkit-scrollbar{display:none;height:0;}
+  .avatar-row img{flex:0 0 auto;width:72px;height:72px;border-radius:50%;object-fit:cover;object-position:center;border:3px solid var(--gold);box-shadow:0 6px 14px rgba(0,0,0,.3);scroll-snap-align:center;background:#f2e9cf;}
+  /* hide scrollbar but keep it scrollable — used on scrollable modal content */
+  .scroll-clean{scrollbar-width:none;-ms-overflow-style:none;}
+  .scroll-clean::-webkit-scrollbar{display:none;width:0;height:0;}
+  /* wider, more horizontal "Tentang" modal */
+  .tentang-card{max-width:400px;}
+  .tentang-grid{display:block;}
+  .tentang-grid .tentang-col-right{margin-top:12px;}
+  @media (min-width:640px){
+    .tentang-card{max-width:680px;}
+    .tentang-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:22px;align-items:start;}
+    .tentang-grid .tentang-col-right{margin-top:0;border-left:1px dashed #d8cba0;padding-left:20px;}
+  }
   .modal-plaque{
     display:inline-block;background:var(--green-deep);color:#fff;
     border-radius:999px;padding:9px 22px;font-size:14px;font-weight:800;
@@ -306,17 +413,21 @@
     border:2px solid #8f671f;box-shadow:0 6px 14px rgba(192,138,46,.4);
   }
   .btn-modal-choice.secondary{
-    background:var(--green-soft);color:var(--green-deep);
+    background:var(--green-soft);color:var(--text-accent);
     border:2px solid var(--green-mid);
   }
-  .hikmah-quote{font-style:italic;color:var(--green-deep);font-size:15px;margin:10px 0;}
+  @media (hover:hover) and (pointer:fine){
+    .btn-modal-choice.primary:hover{box-shadow:0 10px 20px rgba(192,138,46,.5);}
+    .btn-modal-choice.secondary:hover{background:#dcefe4;border-color:var(--green-deep);}
+  }
+  .hikmah-quote{font-style:italic;color:var(--text-accent);font-size:15px;margin:10px 0;}
   .hikmah-source{font-size:12px;color:var(--grey);margin-bottom:14px;}
 
   .badge-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
   .badge-cell{background:var(--card);border-radius:14px;padding:12px 6px;text-align:center;box-shadow:var(--shadow);}
   .badge-cell.locked{opacity:.35;}
   .badge-cell .emoji{font-size:26px;display:block;}
-  .badge-cell .label{font-size:10px;font-weight:700;color:var(--green-deep);margin-top:4px;}
+  .badge-cell .label{font-size:10px;font-weight:700;color:var(--text-accent);margin-top:4px;}
 
   textarea{
     width:100%;min-height:90px;border-radius:10px;border:2px solid #ddd0ac;
@@ -325,7 +436,7 @@
   .compare-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px dashed #e2d9bd;}
   .footer-note{font-size:11px;color:var(--grey);text-align:center;margin-top:auto;padding-top:10px;}
   .contact-card{background:var(--green-soft);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:13px;}
-  .contact-card b{color:var(--green-deep);}
+  .contact-card b{color:var(--text-accent);}
   .settings-toggle{display:flex;align-items:center;justify-content:space-between;background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
   .switch{width:42px;height:24px;border-radius:20px;background:#ddd0ac;position:relative;cursor:pointer;flex:none;}
   .switch.on{background:var(--green-mid);}
@@ -333,7 +444,7 @@
   .switch.on .knob{left:20px;}
 
   /* accessibility modes */
-  body.mode-contrast #game{--cream:#0f0f0f;--card:#1c1c1c;--ink:#f5f5f5;--green-soft:#123324;background:#000;}
+  body.mode-contrast #game{--cream:#0f0f0f;--card:#1c1c1c;--ink:#f5f5f5;--green-soft:#123324;--grey:#cfcfcf;--text-accent:#8CE6B0;background:#000;}
   body.mode-contrast .tip,body.mode-contrast .footer-note,body.mode-contrast .grey-text{color:#cfcfcf;}
   body.mode-bigfont #game{font-size:19px;}
   body.mode-bigfont h1{font-size:36px;}
@@ -351,6 +462,12 @@
 
   <!-- 1. SPLASH -->
   <section class="screen active" id="screen-splash">
+    <div class="floating-topbtns">
+      <button class="title-iconbtn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+      <button class="title-iconbtn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
+      <button class="title-iconbtn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
+      <button class="title-iconbtn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+    </div>
     <div class="grow"></div>
     <div class="logo-leaf">🌱</div>
     <h1 class="brand-title">KENALIKU</h1>
@@ -377,6 +494,8 @@
     <div class="title-leaves" id="titleLeaves"></div>
     <div class="title-topbtns">
       <button class="title-iconbtn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+      <button class="title-iconbtn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
+      <button class="title-iconbtn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
       <button class="title-iconbtn" onclick="openModal('modalTentang')" aria-label="Tentang">ℹ</button>
       <button class="title-iconbtn" onclick="openModal('modalKeluar')" aria-label="Keluar">✕</button>
     </div>
@@ -392,28 +511,53 @@
 
   <!-- 4. CHARACTER SELECT -->
   <section class="screen" id="screen-charselect">
-    <h2>Pilih Karaktermu</h2>
-    <p style="font-size:13px;color:var(--grey)">Kamu bisa menggantinya nanti di pengaturan.</p>
-    <div class="row" style="margin:14px 0;">
-      <div class="avatar-choice" id="pickLaki" onclick="pickGender('laki')">
-        <div class="avatar-emoji">👦</div>
-        <div style="font-weight:700;margin-top:6px;">Laki-laki</div>
+    <div class="floating-topbtns">
+      <button class="title-iconbtn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+      <button class="title-iconbtn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
+      <button class="title-iconbtn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
+      <button class="title-iconbtn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+    </div>
+    <div class="charselect-banner">
+      <span class="charselect-banner-num">01</span>
+      <span class="charselect-banner-text">PILIH KARAKTERMU</span>
+    </div>
+    <p class="center charselect-sub">Pilih karakter yang paling menggambarkan dirimu.<br>Kamu bisa mengubahnya nanti di lobby.</p>
+    <div class="char-card-grid">
+      <div class="char-card" id="cardCowoSmp" onclick="pickCharacter('laki','smp')">
+        <img src="images/cowo_smp.png" alt="Karakter SMP Laki-laki">
       </div>
-      <div class="avatar-choice" id="pickPerempuan" onclick="pickGender('perempuan')">
-        <div class="avatar-emoji">👧</div>
-        <div style="font-weight:700;margin-top:6px;">Perempuan</div>
+      <div class="char-card" id="cardCowoSma" onclick="pickCharacter('laki','sma')">
+        <img src="images/cowo_sma.png" alt="Karakter SMA Laki-laki">
+      </div>
+      <div class="char-card" id="cardCeweSmp" onclick="pickCharacter('perempuan','smp')">
+        <img src="images/cewe_smp.png" alt="Karakter SMP Perempuan">
+      </div>
+      <div class="char-card" id="cardCeweSma" onclick="pickCharacter('perempuan','sma')">
+        <img src="images/cewe_sma.png" alt="Karakter SMA Perempuan">
       </div>
     </div>
-    <label style="font-size:13px;font-weight:700;color:var(--green-deep);">Masukkan Nama Karaktermu</label>
-    <input type="text" id="nameInput" placeholder="Nama panggilan..." maxlength="20">
-    <label style="font-size:13px;font-weight:700;color:var(--green-deep);margin-top:10px;display:block;">Buat PIN 4 Angka</label>
-    <p style="font-size:12px;color:var(--grey);margin:2px 0 6px;">Ingat-ingat PIN ini — dipakai buat lanjutkan progresmu dari HP/laptop lain.</p>
-    <input type="text" id="pinInput" placeholder="cth. 1234" maxlength="4" inputmode="numeric" pattern="[0-9]*">
-    <button class="btn-primary btn-block" id="btnLanjutChar" disabled onclick="confirmCharacter()">LANJUT</button>
+    <div class="charselect-form">
+      <div class="charselect-field">
+        <span class="charselect-icon">👤</span>
+        <input type="text" id="nameInput" placeholder="Masukkan Nama Karaktermu" maxlength="20">
+      </div>
+      <div class="charselect-field">
+        <span class="charselect-icon">🔒</span>
+        <input type="password" id="pinInput" placeholder="Masukkan PIN (4 digit)" maxlength="4" inputmode="numeric" pattern="[0-9]*">
+        <button type="button" class="charselect-eye" id="pinToggleBtn" onclick="togglePinVisibility()" aria-label="Tampilkan PIN">👁</button>
+      </div>
+      <button class="btn-lanjut-themed" id="btnLanjutChar" disabled onclick="confirmCharacter()">LANJUT <span class="arrow">→</span></button>
+    </div>
   </section>
 
   <!-- 5. STORY (dynamic content injected) -->
   <section class="screen" id="screen-story">
+    <div class="floating-topbtns">
+      <button class="title-iconbtn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+      <button class="title-iconbtn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
+      <button class="title-iconbtn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
+      <button class="title-iconbtn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+    </div>
     <div id="storyContent"></div>
   </section>
 
@@ -421,7 +565,13 @@
   <section class="screen" id="screen-lobby">
     <div class="topbar">
       <div class="who"><span id="lobbyName">Aisyah</span><small>Level <span id="lobbyLevel">1</span></small></div>
-      <div class="coin">🪙 <span id="lobbyPoints">0</span></div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="coin">🪙 <span id="lobbyPoints">0</span></div>
+        <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+        <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
+        <button class="icon-btn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
+        <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+      </div>
     </div>
     <p class="center" style="margin-bottom:10px;color:var(--grey);font-size:13px;">Rumah ini akan selalu terbuka untukmu. Pilih ruangan untuk mulai belajar.</p>
     <div class="doors-grid" id="doorsGrid"></div>
@@ -438,30 +588,63 @@
     <div class="topbar">
       <button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button>
       <div class="who" id="roomTitleTop">Ruangan</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+        <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
+        <button class="icon-btn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
+        <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+      </div>
     </div>
     <div id="roomContent"></div>
   </section>
 
   <!-- PROGRESS -->
   <section class="screen" id="screen-progress">
-    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button><div class="who">Progress</div></div>
+    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button><div class="who">Progress</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+        <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
+        <button class="icon-btn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
+        <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+      </div>
+    </div>
     <div id="progressContent"></div>
   </section>
 
   <!-- TROPHY -->
   <section class="screen" id="screen-trophy">
-    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button><div class="who">Trophy</div></div>
+    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button><div class="who">Trophy</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+        <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
+        <button class="icon-btn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
+        <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+      </div>
+    </div>
     <div class="badge-grid" id="trophyGrid"></div>
   </section>
 
   <!-- HIKMAH -->
   <section class="screen" id="screen-hikmah">
-    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button><div class="who">Koleksi Hikmah</div></div>
+    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button><div class="who">Koleksi Hikmah</div>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+        <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
+        <button class="icon-btn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
+        <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+      </div>
+    </div>
     <div id="hikmahContent"></div>
   </section>
 
   <!-- ENDING -->
   <section class="screen" id="screen-ending">
+    <div class="floating-topbtns">
+      <button class="title-iconbtn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+      <button class="title-iconbtn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
+      <button class="title-iconbtn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
+      <button class="title-iconbtn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+    </div>
     <div class="grow"></div>
     <div class="logo-leaf center">🌅</div>
     <h2 class="center">Rumah ini akan selalu terbuka.</h2>
@@ -469,7 +652,7 @@
     <p class="center" style="margin-top:16px;">Di depan gerbang, kamu bertemu remaja lain yang sedang kebingungan.</p>
     <button class="btn-gold btn-block" onclick="showEndingCredit()">❤️ Ajak ke Rumah 'Aisyiyah</button>
     <div id="endingCredit" style="display:none;margin-top:20px;">
-      <p class="center" style="font-weight:700;color:var(--green-deep);">"Setiap remaja memiliki cerita. Setiap cerita layak didengar.<br>Karena setiap remaja berharga."</p>
+      <p class="center" style="font-weight:700;color:var(--text-accent);">"Setiap remaja memiliki cerita. Setiap cerita layak didengar.<br>Karena setiap remaja berharga."</p>
       <p class="center tagline">KENALIKU</p>
       <button class="btn-outline btn-block" onclick="resetGame()">Mulai Ulang</button>
     </div>
@@ -502,10 +685,34 @@
   </div>
 
   <div class="modal-backdrop" id="modalTentang">
-    <div class="modal-card">
-      <h3>Tentang</h3>
-      <p style="font-size:13px;">KenaliKu adalah game edukasi kesehatan seksual & reproduksi remaja, dikembangkan untuk REACH 2026 — "Reaching Teens. Inspiring Inclusive Healthy Futures". Dalam game ini, kamu akan menjelajahi Rumah 'Aisyiyah — ruang aman tempat belajar dan bertanya.</p>
-      <button class="btn-primary btn-block" onclick="closeModal('modalTentang')">Tutup</button>
+    <div class="modal-card modal-card-themed tentang-card" style="padding:0;overflow:visible;">
+    <div class="scroll-clean" style="max-height:88vh;overflow-y:auto;padding:26px 22px 22px;">
+      <div class="avatar-row" style="justify-content:center;">
+        <img src="images/avatar_algha.png" alt="Algha Sanjaya, S.Pd., Gr.">
+        <img src="images/avatar_ulfah.png" alt="Ulfah N Awaliyah, M.Pd">
+        <img src="images/avatar_nailul.png" alt="Nailul Authar, S.Kom.">
+      </div>
+      <div class="modal-plaque" style="display:block;width:fit-content;margin:0 auto 14px;">Tentang KenaliKu</div>
+      <div class="tentang-grid">
+        <div class="tentang-col-left">
+          <p style="font-size:13px;text-align:left;">KenaliKu (Kenali Aku) adalah game edukasi interaktif berbasis web yang mengajak remaja usia 12–18 tahun menjelajahi topik kesehatan seksual &amp; reproduksi, pubertas, menstruasi, consent, relasi sehat, hingga KBGO — lewat suasana "rumah" yang hangat dan tidak menghakimi, didampingi karakter Kak Hana.</p>
+          <p style="font-size:13px;text-align:left;">Dirancang inklusif sejak awal — subtitle, kontras tinggi, navigasi keyboard, dan opsi bahasa isyarat — agar remaja dengan disabilitas turut memperoleh akses setara. Dilengkapi Dashboard Guru berbasis analitik untuk memantau pemahaman before–after siswa, serta Kunci Nilai dan kutipan hikmah tokoh Muhammadiyah/'Aisyiyah yang memperkuat keselarasan nilai.</p>
+          <div style="text-align:left;margin:12px 0 4px;">
+            <span class="badge-pill">🧑‍🤝‍🧑 12–18 Tahun</span>
+            <span class="badge-pill">♿ Inklusif</span>
+            <span class="badge-pill">📊 Dashboard Guru</span>
+          </div>
+        </div>
+        <div class="tentang-col-right">
+          <p style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--grey);text-align:left;margin-bottom:8px;font-weight:700;">Dikembangkan oleh</p>
+          <div class="contact-card" style="text-align:left;"><b>Algha Sanjaya, S.Pd., Gr.</b><br>SMPN 1 Manado</div>
+          <div class="contact-card" style="text-align:left;"><b>Ulfah N Awaliyah, M.Pd</b><br>SMPN 240 Jakarta</div>
+          <div class="contact-card" style="text-align:left;"><b>Nailul Authar, S.Kom.</b><br>SMKN 1 Brondong</div>
+          <p class="footer-note" style="margin-top:8px;">Untuk REACH 2026 — Reaching Teens, Inspiring Inclusive Healthy Futures</p>
+        </div>
+      </div>
+      <button class="btn-primary btn-block" style="margin-top:14px;" onclick="closeModal('modalTentang')">Tutup</button>
+    </div>
     </div>
   </div>
 
@@ -599,7 +806,7 @@ const GAME_API_URL = "https://script.google.com/macros/s/AKfycbzRQ7HJK6dK_Ac5L1l
 
 /* ---------- STATE ---------- */
 let STATE = loadState() || {
-  name: "", pin: "", gender: "perempuan", points: 0, level: 1,
+  name: "", pin: "", gender: "perempuan", jenjang: "sma", points: 0, level: 1,
   badges: {}, kunciNilai: {}, hikmah: {}, roomsDone: {},
   before: {}, after: {}, journal: "",
 };
@@ -653,6 +860,43 @@ function logToSheet(action, data){
   }catch(e){ /* silent fail: localStorage tetap jadi sumber utama progres */ }
 }
 
+/* ---------- SFX: bunyi klik/tap ringan (disintesis, tanpa file audio) ---------- */
+let sfxCtx = null;
+function playClickSfx(kind){
+  if(!musicOn) return; // ikut preferensi suara yang sama dengan musik
+  try{
+    sfxCtx = sfxCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(sfxCtx.state === "suspended") sfxCtx.resume();
+    const t0 = sfxCtx.currentTime;
+    const osc = sfxCtx.createOscillator();
+    const gain = sfxCtx.createGain();
+    osc.type = "sine";
+    const fStart = kind === "back" ? 380 : 560;
+    const fEnd   = kind === "back" ? 260 : 860;
+    osc.frequency.setValueAtTime(fStart, t0);
+    osc.frequency.exponentialRampToValueAtTime(fEnd, t0 + 0.08);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.16, t0 + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.17);
+    osc.connect(gain).connect(sfxCtx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 0.19);
+  }catch(e){ /* abaikan jika Web Audio tidak didukung browser */ }
+}
+/* Setiap tombol/kartu yang bisa diklik: mainkan sfx + animasi "pop" singkat.
+   Delegasi di document supaya otomatis berlaku untuk elemen yang dirender belakangan. */
+document.addEventListener("click", (e)=>{
+  const el = e.target.closest("button:not(:disabled), .char-card, .door:not(.locked)");
+  if(!el) return;
+  const isBack = el.classList.contains("btn-ghost");
+  playClickSfx(isBack ? "back" : "tap");
+  el.classList.remove("btn-pop");
+  void el.offsetWidth; // reset animasi kalau diklik beruntun
+  el.classList.add("btn-pop");
+}, true);
+/* Fix iOS Safari: :active tidak muncul saat tap tanpa listener touchstart aktif */
+document.addEventListener("touchstart", function(){}, {passive:true});
+
 /* ---------- GLOBAL CONTROLS: MUSIK / LAYAR PENUH / KELUAR ---------- */
 let musicOn = false;
 function startMusic(){
@@ -667,6 +911,10 @@ function stopMusic(){
 function syncMusicSwitch(){
   const sw = document.getElementById("swMusic");
   if(sw) sw.classList.toggle("on", musicOn);
+  document.querySelectorAll(".js-music-btn").forEach(btn=>{
+    btn.classList.toggle("on", musicOn);
+    btn.textContent = musicOn ? "🔊" : "🔇";
+  });
 }
 function toggleMusic(){
   musicOn = !musicOn;
@@ -722,13 +970,14 @@ document.addEventListener("fullscreenchange", ()=>{
   const isFull = !!document.fullscreenElement;
   const label = document.getElementById("fsLabel");
   if(label) label.textContent = isFull ? "Keluar Layar Penuh" : "Layar Penuh";
+  document.querySelectorAll(".js-fs-btn").forEach(btn=>{
+    btn.classList.toggle("on", isFull);
+    btn.textContent = isFull ? "⤢" : "⛶";
+  });
 });
 
 function exitGame(){ closeModal("modalSettings"); openModal("modalKeluar"); }
 function confirmExit(){
-  stopMusic(); musicOn = false;
-  syncMusicSwitch();
-  if(document.fullscreenElement) document.exitFullscreen && document.exitFullscreen();
   closeModal("modalKeluar");
   goTo("screen-title");
 }
@@ -781,10 +1030,28 @@ function openModal(id){ document.getElementById(id).classList.add("active"); if(
 function closeModal(id){ document.getElementById(id).classList.remove("active"); }
 
 /* ---------- ACCESSIBILITY ---------- */
+function loadA11yPrefs(){
+  try{ return JSON.parse(localStorage.getItem("kenaliku_a11y")) || {}; }catch(e){ return {}; }
+}
+function saveA11yPrefs(prefs){
+  localStorage.setItem("kenaliku_a11y", JSON.stringify(prefs));
+}
 function toggleMode(mode, el){
   const cls = "mode-"+mode;
-  document.body.classList.toggle(cls);
-  el.classList.toggle("on");
+  const isOn = document.body.classList.toggle(cls);
+  el.classList.toggle("on", isOn);
+  const prefs = loadA11yPrefs();
+  prefs[mode] = isOn;
+  saveA11yPrefs(prefs);
+}
+function applyA11yPrefs(){
+  const prefs = loadA11yPrefs();
+  ["bigfont","contrast","dyslexia"].forEach(mode=>{
+    const on = !!prefs[mode];
+    document.body.classList.toggle("mode-"+mode, on);
+    const el = document.getElementById("sw"+mode.charAt(0).toUpperCase()+mode.slice(1));
+    if(el) el.classList.toggle("on", on);
+  });
 }
 
 /* ---------- LOADING ---------- */
@@ -833,6 +1100,7 @@ function openEntryChoice(){
   const hasProgress = !!(STATE && STATE.name);
   const btnContinue = document.getElementById("btnLanjutkanProgress");
   btnContinue.style.display = hasProgress ? "block" : "none";
+  btnContinue.textContent = hasProgress ? ("LANJUTKAN PROGRESS (" + STATE.name + ")") : "LANJUTKAN PROGRESS";
   document.getElementById("btnLanjutkanRemote").style.display = GAME_API_URL ? "block" : "none";
   openModal("modalEntryChoice");
 }
@@ -896,7 +1164,7 @@ function confirmNewAccountProceed(){
   proceedNewAccount();
 }
 function proceedNewAccount(){
-  STATE = { name:"", pin:"", gender:"perempuan", points:0, level:1, badges:{}, kunciNilai:{}, hikmah:{}, roomsDone:{}, before:{}, after:{}, journal:"" };
+  STATE = { name:"", pin:"", gender:"perempuan", jenjang:"sma", points:0, level:1, badges:{}, kunciNilai:{}, hikmah:{}, roomsDone:{}, before:{}, after:{}, journal:"" };
   saveState();
   closeModal("modalEntryChoice");
   goTo("screen-charselect");
@@ -933,16 +1201,30 @@ function startNewOrContinue(){
 }
 
 /* ---------- CHARACTER SELECT ---------- */
-function pickGender(g){
-  STATE.gender = g;
-  document.getElementById("pickLaki").classList.toggle("selected", g==="laki");
-  document.getElementById("pickPerempuan").classList.toggle("selected", g==="perempuan");
+const CHAR_CARD_IDS = {
+  "laki-smp": "cardCowoSmp", "laki-sma": "cardCowoSma",
+  "perempuan-smp": "cardCeweSmp", "perempuan-sma": "cardCeweSma",
+};
+function pickCharacter(gender, jenjang){
+  STATE.gender = gender;
+  STATE.jenjang = jenjang;
+  Object.values(CHAR_CARD_IDS).forEach(id=>document.getElementById(id).classList.remove("selected"));
+  document.getElementById(CHAR_CARD_IDS[gender+"-"+jenjang]).classList.add("selected");
   checkCharForm();
 }
+function togglePinVisibility(){
+  const pinField = document.getElementById("pinInput");
+  const btn = document.getElementById("pinToggleBtn");
+  const showing = pinField.type === "text";
+  pinField.type = showing ? "password" : "text";
+  btn.textContent = showing ? "👁" : "🙈";
+}
 document.addEventListener("DOMContentLoaded", ()=>{
+  applyA11yPrefs();
+  syncMusicSwitch();
   document.getElementById("nameInput").addEventListener("input", checkCharForm);
   document.getElementById("pinInput").addEventListener("input", checkCharForm);
-  pickGender(STATE.gender);
+  pickCharacter(STATE.gender, STATE.jenjang || "sma");
   openModal("modalAudioChoice");
 });
 function checkCharForm(){
@@ -954,7 +1236,7 @@ function confirmCharacter(){
   STATE.name = document.getElementById("nameInput").value.trim();
   STATE.pin = document.getElementById("pinInput").value.trim();
   saveState();
-  logToSheet("mulai_karakter", {gender: STATE.gender});
+  logToSheet("mulai_karakter", {gender: STATE.gender, jenjang: STATE.jenjang});
   goTo("screen-story");
   renderStory();
 }
