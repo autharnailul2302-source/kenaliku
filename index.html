@@ -230,6 +230,73 @@
   }
   .audio-btn-outline{background:var(--card);color:var(--text-accent);border:2px solid var(--green-mid);}
 
+  /* ===================== STORY / VISUAL NOVEL ===================== */
+  #screen-story{padding:0;overflow:hidden;background:#101a15;}
+  .vn-stage{position:absolute;inset:0;display:flex;flex-direction:column;}
+  .vn-bg{
+    position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;
+    animation:vnBgIn .5s ease;
+  }
+  .vn-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,12,.15) 0%,rgba(10,16,12,.05) 45%,rgba(8,14,10,.75) 100%);}
+  @keyframes vnBgIn{from{opacity:0;}to{opacity:1;}}
+  .vn-portrait{
+    position:absolute;bottom:0;object-fit:contain;
+    filter:drop-shadow(0 14px 22px rgba(0,0,0,.45));
+    opacity:0;transition:opacity .25s ease, filter .25s ease;
+  }
+  .vn-portrait.pos-solo{left:50%;height:94%;max-height:94%;width:auto;max-width:92%;animation:vnCharInCenter .38s ease .05s forwards;}
+  .vn-portrait.pos-left{left:2%;height:80%;max-height:80%;width:auto;max-width:54%;animation:vnCharInSide .38s ease .05s forwards;}
+  .vn-portrait.pos-right{right:2%;left:auto;height:80%;max-height:80%;width:auto;max-width:54%;animation:vnCharInSide .38s ease .05s forwards;}
+  @keyframes vnCharInCenter{from{opacity:0;transform:translate(-50%,26px);}to{opacity:1;transform:translate(-50%,0);}}
+  @keyframes vnCharInSide{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:translateY(0);}}
+  .vn-portrait.idle{opacity:.8;filter:drop-shadow(0 14px 22px rgba(0,0,0,.45)) brightness(.72) saturate(.8);}
+  .vn-portrait.speaking{opacity:1;}
+  #screen-story .floating-topbtns{left:14px;right:auto;top:14px;}
+  .vn-skip{
+    position:absolute;top:14px;right:14px;z-index:6;
+    background:rgba(10,16,12,.55);color:#fff;border:1px solid rgba(255,255,255,.35);
+    border-radius:999px;padding:9px 16px;font-size:12.5px;font-weight:800;letter-spacing:.4px;
+    backdrop-filter:blur(2px);display:flex;align-items:center;gap:6px;
+  }
+  .vn-dialogue{
+    position:relative;z-index:5;margin:0 14px 16px;padding:16px 18px 22px;
+    background:linear-gradient(180deg,rgba(14,22,17,.72),rgba(10,17,13,.92));
+    border:1px solid rgba(255,255,255,.14);border-radius:16px;
+    text-align:left;width:auto;color:#fff;
+    animation:vnDialogueIn .28s ease;
+  }
+  @keyframes vnDialogueIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  .vn-speaker{font-size:12px;font-weight:800;letter-spacing:.6px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;}
+  .vn-text{color:#f2ede0;font-size:14.5px;line-height:1.6;margin:0;}
+  .vn-continue{
+    display:block;text-align:right;font-size:11.5px;color:rgba(255,255,255,.75);
+    margin-top:8px;animation:vnPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes vnPulse{0%,100%{opacity:.55;transform:translateX(0);}50%{opacity:1;transform:translateX(3px);}}
+  .vn-quizwrap{position:relative;z-index:5;margin:auto 14px 16px;width:auto;}
+  .vn-quiz-panel{
+    padding:16px 18px 18px;
+    background:linear-gradient(180deg,rgba(14,22,17,.72),rgba(10,17,13,.92));
+    border:1px solid rgba(255,255,255,.14);border-radius:16px;
+    animation:vnDialogueIn .28s ease;
+  }
+  .vn-quiz-panel .quiz-q{color:#f2ede0;font-size:14.5px;line-height:1.5;margin-bottom:12px;}
+  .vn-quiz-panel .quiz-opt{background:rgba(251,248,239,.96);}
+
+  /* ---- Perjalanan: adegan jalan ketemu teman sebelum sampai Rumah 'Aisyiyah ---- */
+  .jalan-track{position:relative;flex:1;margin:0 0 6px;}
+  .jalan-npc{position:absolute;bottom:8px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;background:none;padding:0;border:none;}
+  .jalan-npc img{width:64px;height:auto;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(0,0,0,.4));animation:jalanBob 2.2s ease-in-out infinite;}
+  .jalan-npc.visited img{filter:drop-shadow(0 8px 10px rgba(0,0,0,.4)) grayscale(.6);opacity:.7;animation:none;}
+  @keyframes jalanBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+  .jalan-badge{position:absolute;top:-2px;right:2px;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#3a2a06;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,.35);}
+  .jalan-npc.visited .jalan-badge{background:var(--green-mid);color:#fff;}
+  .jalan-name{margin-top:2px;font-size:10.5px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.75);}
+  .jalan-player{position:absolute;left:6%;bottom:0;height:92px;width:auto;object-fit:contain;filter:drop-shadow(0 10px 12px rgba(0,0,0,.45));}
+  .jalan-hint{position:relative;z-index:5;text-align:center;color:#fff;font-size:12.5px;margin:0 14px 8px;text-shadow:0 1px 3px rgba(0,0,0,.6);}
+  .jalan-continue{position:relative;z-index:5;margin:0 14px 16px;width:auto;}
+  .jalan-continue:disabled{opacity:.4;}
+
   input[type=text],input[type=password]{
     width:100%;padding:12px 14px;border-radius:10px;border:2px solid #ddd0ac;
     font-size:15px;background:#fff;margin:10px 0 16px;
@@ -321,6 +388,13 @@
     padding:16px;box-shadow:var(--shadow);
   }
   .speaker{font-weight:800;color:var(--text-accent);font-size:13px;margin-bottom:4px;}
+  .hana-line{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
+  .hana-line img{width:46px;height:46px;border-radius:50%;object-fit:cover;object-position:top center;border:2px solid var(--gold);flex:0 0 auto;background:#f2e9cf;}
+  .hana-line .bubble{
+    background:var(--green-soft);border-radius:2px 12px 12px 12px;padding:10px 12px;
+    font-size:13.5px;color:var(--ink);flex:1;
+  }
+  .hana-line .bubble b{color:var(--text-accent);display:block;font-size:11px;letter-spacing:.3px;margin-bottom:2px;}
   .choice-btn{
     background:var(--green-soft);color:var(--text-accent);border-radius:12px;
     padding:12px 14px;text-align:left;font-weight:600;border:2px solid transparent;
@@ -646,7 +720,7 @@
       <button class="title-iconbtn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
     </div>
     <div class="grow"></div>
-    <div class="logo-leaf center">🌅</div>
+    <img src="images/hana_tertawa.png" alt="Kak Hana" style="width:120px;height:120px;border-radius:50%;object-fit:cover;object-position:top center;border:3px solid var(--gold);box-shadow:0 8px 18px rgba(0,0,0,.25);display:block;margin:0 auto 14px;background:#f2e9cf;" onerror="this.remove()">
     <h2 class="center">Rumah ini akan selalu terbuka.</h2>
     <p class="center" style="font-style:italic;">— Kak Hana</p>
     <p class="center" style="margin-top:16px;">Di depan gerbang, kamu bertemu remaja lain yang sedang kebingungan.</p>
@@ -868,6 +942,37 @@ function playClickSfx(kind){
     sfxCtx = sfxCtx || new (window.AudioContext || window.webkitAudioContext)();
     if(sfxCtx.state === "suspended") sfxCtx.resume();
     const t0 = sfxCtx.currentTime;
+
+    // Jawaban benar / dapat badge / dapat hikmah: kejar nada naik ceria (2 nada)
+    if(kind === "correct" || kind === "success"){
+      [523.25, 783.99].forEach((f, i)=>{
+        const osc = sfxCtx.createOscillator(), gain = sfxCtx.createGain();
+        const t = t0 + i*0.09;
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(f, t);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.18, t+0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t+0.22);
+        osc.connect(gain).connect(sfxCtx.destination);
+        osc.start(t); osc.stop(t+0.24);
+      });
+      return;
+    }
+    // Jawaban kurang tepat: nada turun pelan, lembut (bukan buzzer kasar)
+    if(kind === "wrong"){
+      const osc = sfxCtx.createOscillator(), gain = sfxCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(320, t0);
+      osc.frequency.exponentialRampToValueAtTime(190, t0+0.22);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.14, t0+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0+0.26);
+      osc.connect(gain).connect(sfxCtx.destination);
+      osc.start(t0); osc.stop(t0+0.28);
+      return;
+    }
+
+    // Klik/tap umum & tombol kembali/batal
     const osc = sfxCtx.createOscillator();
     const gain = sfxCtx.createGain();
     osc.type = "sine";
@@ -884,9 +989,10 @@ function playClickSfx(kind){
   }catch(e){ /* abaikan jika Web Audio tidak didukung browser */ }
 }
 /* Setiap tombol/kartu yang bisa diklik: mainkan sfx + animasi "pop" singkat.
+   .quiz-opt dikecualikan karena punya bunyi benar/salah sendiri (lihat answerQuiz).
    Delegasi di document supaya otomatis berlaku untuk elemen yang dirender belakangan. */
 document.addEventListener("click", (e)=>{
-  const el = e.target.closest("button:not(:disabled), .char-card, .door:not(.locked)");
+  const el = e.target.closest("button:not(:disabled):not(.quiz-opt), .char-card, .door:not(.locked)");
   if(!el) return;
   const isBack = el.classList.contains("btn-ghost");
   playClickSfx(isBack ? "back" : "tap");
@@ -983,7 +1089,7 @@ function confirmExit(){
 }
 
 /* ---------- NAVIGATION ---------- */
-const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading"];
+const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading","screen-story"];
 function goTo(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -1241,6 +1347,16 @@ function confirmCharacter(){
   renderStory();
 }
 
+/* Avatar Kak Hana dengan ekspresi berbeda-beda sesuai konteks.
+   File yang dipakai: hana_idle.png, hana_semangat.png, hana_bangga.png,
+   hana_tertawa.png, hana_sedih.png, hana_nangis.png (semua di folder images/) */
+function hanaLine(expr, text){
+  return `<div class="hana-line">
+    <img src="images/hana_${expr}.png" alt="Kak Hana" onerror="this.remove()">
+    <div class="bubble"><b>KAK HANA</b>${text}</div>
+  </div>`;
+}
+
 /* ---------- STORY (before-after: pemahaman awal + narasi pembuka) ---------- */
 const beforeQuestions = [
   {q:"Menurutmu, siapa yang berhak menentukan apakah tubuhmu boleh disentuh orang lain?", opts:["Orang lain, kalau mereka lebih tua","Aku sendiri","Tidak ada yang berhak menolak"], correct:1},
@@ -1249,39 +1365,184 @@ const beforeQuestions = [
 ];
 let storyStep = 0;
 let beforeIdx = 0;
+
+/* Aset visual novel — sudah kamu siapkan di folder images/:
+   - narasi_cowo_smp.png, narasi_cowo_sma.png, narasi_cewe_smp.png, narasi_cewe_sma.png (potret pemain)
+   - hana_idle.png / hana_semangat.png / hana_bangga.png / hana_tertawa.png / hana_sedih.png / hana_nangis.png (potret Kak Hana)
+   - narasi_amel_inscure.png (Amel, teman yang tampil di beat "percaya diri")
+   Kalau file belum ada, portrait cuma tidak tampil (tidak error) — background tetap muncul. */
+function playerPortraitSrc(){
+  const g = STATE.gender === "laki" ? "cowo" : "cewe";
+  const j = STATE.jenjang || "sma";
+  return `images/narasi_${g}_${j}.png`;
+}
+const NARASI_CHAR = {
+  player: playerPortraitSrc,
+  hana: ()=>"images/hana_semangat.png",
+  amel: ()=>"images/narasi_amel_inscure.png",
+};
+const NARASI_BG = {
+  refleksi: "images/bg_loadingscreen.png",
+  rumah: "images/bg_titlescreen.png",
+};
+/* Narasi ber-POV "kamu" ditampilkan pakai nama karakter pemain sendiri, bukan kata "Narator" */
+/* Render 1 karakter (di tengah) atau 2 karakter (kiri/kanan, yang lagi ngomong lebih terang) di panggung narasi */
+function renderCharacters(chars, speakingKey){
+  if(!chars || chars.length === 0) return "";
+  if(chars.length === 1){
+    const src = NARASI_CHAR[chars[0]]();
+    return `<img class="vn-portrait pos-solo speaking" src="${src}" alt="" onerror="this.remove()">`;
+  }
+  const positions = ["pos-left", "pos-right"];
+  return chars.slice(0, 2).map((key, i) => {
+    const src = NARASI_CHAR[key]();
+    const state = key === speakingKey ? "speaking" : "idle";
+    return `<img class="vn-portrait ${positions[i]} ${state}" src="${src}" alt="" onerror="this.remove()">`;
+  }).join("");
+}
+function speakerLabel(speaker){
+  if(!speaker || speaker === "Narator") return STATE.name || "Kamu";
+  return speaker;
+}
 const storyBeats = [
-  {speaker:"Narator", text:"Akhir-akhir ini kamu merasa banyak yang berubah — pada tubuhmu, perasaanmu, dan caramu memandang teman-teman di sekitar. Rasanya membingungkan."},
-  {speaker:"", text:"__BEFORE_QUIZ__"},
-  {speaker:"Narator", text:"Suatu sore, kamu menemukan selebaran kecil terselip di antara buku-bukumu: \"RUMAH 'AISYIYAH — Ruang Aman untuk Remaja: Belajar, Bertanya, Bertumbuh.\""},
-  {speaker:"Teman", text:"Aku jadi lebih percaya diri sejak sering ke sana. Kak Hana baik banget, selalu bantu dengerin cerita kita."},
-  {speaker:"Narator", text:"Kamu memutuskan untuk mencoba datang. Rumahnya terlihat hangat — bukan seperti sekolah, bukan seperti rumah sakit."},
-  {speaker:"Kak Hana", text:"Selamat datang. Rumah ini akan selalu terbuka untukmu — kamu tidak sendiri."},
+  {speaker:"Narator", speakerKey:"player", chars:["player"], bg:"refleksi", text:"Akhir-akhir ini kamu merasa banyak yang berubah — pada tubuhmu, perasaanmu, dan caramu memandang teman-teman di sekitar. Rasanya membingungkan."},
+  {text:"__BEFORE_QUIZ__"},
+  {speaker:"Narator", speakerKey:"player", chars:["player"], bg:"refleksi", text:"Suatu sore, kamu menemukan selebaran kecil terselip di antara buku-bukumu: \"RUMAH 'AISYIYAH — Ruang Aman untuk Remaja: Belajar, Bertanya, Bertumbuh.\""},
+  {speaker:"Amel", speakerKey:"amel", chars:["player","amel"], bg:"refleksi", text:"Aku jadi lebih percaya diri sejak sering ke sana. Kak Hana baik banget, selalu bantu dengerin cerita kita."},
+  {speaker:"Narator", speakerKey:"player", chars:["player","amel"], bg:"refleksi", text:"Kamu memutuskan untuk mencoba datang. Di jalan menuju ke sana, kamu berpapasan dengan beberapa orang."},
+  {text:"__PERJALANAN__"},
+  {speaker:"Narator", speakerKey:"player", chars:["player"], bg:"rumah", text:"Akhirnya kamu sampai. Rumahnya terlihat hangat — bukan seperti sekolah, bukan seperti rumah sakit."},
+  {speaker:"Kak Hana", speakerKey:"hana", chars:["player","hana"], bg:"rumah", text:"Selamat datang. Rumah ini akan selalu terbuka untukmu — kamu tidak sendiri."},
 ];
 function renderStory(){
   const c = document.getElementById("storyContent");
   if(storyStep >= storyBeats.length){ finishStoryIntro(); return; }
   const beat = storyBeats[storyStep];
   if(beat.text === "__BEFORE_QUIZ__"){ renderBeforeQuiz(); return; }
+  if(beat.text === "__PERJALANAN__"){ renderPerjalanan(); return; }
+  const bgSrc = NARASI_BG[beat.bg] || NARASI_BG.refleksi;
   c.innerHTML = `
-    <div class="grow"></div>
-    <div class="dialog-box">
-      <div class="speaker">${beat.speaker}</div>
-      <p>${beat.text}</p>
+    <div class="vn-stage">
+      <div class="vn-bg" style="background-image:url('${bgSrc}')"></div>
+      ${renderCharacters(beat.chars, beat.speakerKey)}
+      <button type="button" class="vn-skip" onclick="skipStory()">LEWATI ⏭</button>
+      <div class="grow"></div>
+      <button type="button" class="vn-dialogue btn-block" onclick="nextStoryBeat()">
+        <div class="vn-speaker">${speakerLabel(beat.speaker)}</div>
+        <p class="vn-text">${beat.text}</p>
+        <span class="vn-continue">Ketuk untuk lanjut ▶</span>
+      </button>
     </div>
-    <button class="btn-primary btn-block" style="margin-top:16px;" onclick="nextStoryBeat()">Lanjut →</button>
   `;
 }
 function nextStoryBeat(){ storyStep++; renderStory(); }
+/* Lewati semua narasi teks, tapi tetap berhenti di sesi Pemahaman Awal (kuis) — datanya penting untuk Dashboard Guru. */
+function skipStory(){
+  while(storyStep < storyBeats.length && storyBeats[storyStep].text !== "__BEFORE_QUIZ__"){
+    storyStep++;
+  }
+  renderStory();
+}
+
+/* ---------- PERJALANAN: ketemu teman di jalan menuju Rumah 'Aisyiyah ---------- */
+/* Aset yang dipakai per NPC: sprite_xxx.png (figur kecil di jalan) + narasi_xxx.png (potret closeup pas ngobrol) */
+const PERJALANAN_NPCS = [
+  {id:"aldo", name:"Aldo", pos:22,
+   sprite:"images/sprite_aldo_tunarungu.png", portrait:"images/narasi_aldo_tunarungu.png",
+   lines:["Eh, kamu mau ke Rumah 'Aisyiyah juga?", "Di sana ramah buat aku yang tunarungu — ada opsi bahasa isyarat dan subtitle di semua materinya."]},
+  {id:"arka", name:"Arka", pos:52,
+   sprite:"images/sprite_arka_kakicacat.png", portrait:"images/narasi_arka_kakicacat.png",
+   lines:["Dulu aku sempat minder soal kondisi kakiku.", "Tapi di sana aku belajar, tubuh yang berbeda itu tetap berharga — nggak perlu dibanding-bandingkan sama orang lain."]},
+  {id:"vira", name:"Vira", pos:80,
+   sprite:"images/sprite_vira_disabilitas.png", portrait:"images/narasi_vira_disabilitas.png",
+   lines:["Aku pernah diperlakukan nggak baik sama orang lain gara-gara kondisiku.", "Tapi Kak Hana bantu aku sadar aku berhak dihargai — dan ada tempat buat cerita kalau itu terjadi lagi. Kamu juga, ya, kalau butuh."]},
+];
+let jalanVisited = new Set();
+let jalanNpcActive = null;
+let jalanLineIdx = 0;
+
+function renderPerjalanan(){
+  if(jalanNpcActive){ renderNpcTalk(); return; }
+  const c = document.getElementById("storyContent");
+  const g = STATE.gender === "laki" ? "cowo" : "cewe";
+  const j = STATE.jenjang || "sma";
+  const playerSprite = `images/sprite_${g}_${j}.png`;
+  const allVisited = PERJALANAN_NPCS.every(n=>jalanVisited.has(n.id));
+  c.innerHTML = `
+    <div class="vn-stage">
+      <div class="vn-bg" style="background-image:url('${NARASI_BG.refleksi}')"></div>
+      <button type="button" class="vn-skip" onclick="skipPerjalanan()">LEWATI ⏭</button>
+      <div class="jalan-track">
+        ${PERJALANAN_NPCS.map(n=>`
+          <button type="button" class="jalan-npc ${jalanVisited.has(n.id)?"visited":""}" style="left:${n.pos}%" onclick="talkNpc('${n.id}')">
+            <img src="${n.sprite}" alt="${n.name}" onerror="this.style.visibility='hidden'">
+            <span class="jalan-badge">${jalanVisited.has(n.id) ? "✓" : "!"}</span>
+            <span class="jalan-name">${n.name}</span>
+          </button>
+        `).join("")}
+        <img class="jalan-player" src="${playerSprite}" alt="" onerror="this.remove()">
+      </div>
+      <p class="jalan-hint">${allVisited ? "Semua sudah kamu ajak ngobrol." : "Ketuk teman di jalan untuk ngobrol dulu, yuk."}</p>
+      <button type="button" class="btn-primary btn-block jalan-continue" ${allVisited?"":"disabled"} onclick="continuePerjalanan()">Lanjut ke Rumah 'Aisyiyah →</button>
+    </div>
+  `;
+}
+function talkNpc(id){
+  jalanNpcActive = PERJALANAN_NPCS.find(n=>n.id===id);
+  jalanLineIdx = 0;
+  renderPerjalanan();
+}
+function renderNpcTalk(){
+  const c = document.getElementById("storyContent");
+  const n = jalanNpcActive;
+  c.innerHTML = `
+    <div class="vn-stage">
+      <div class="vn-bg" style="background-image:url('${NARASI_BG.refleksi}')"></div>
+      <img class="vn-portrait pos-left idle" src="${playerPortraitSrc()}" alt="" onerror="this.remove()">
+      <img class="vn-portrait pos-right speaking" src="${n.portrait}" alt="${n.name}" onerror="this.remove()">
+      <div class="grow"></div>
+      <button type="button" class="vn-dialogue btn-block" onclick="nextNpcLine()">
+        <div class="vn-speaker">${n.name}</div>
+        <p class="vn-text">${n.lines[jalanLineIdx]}</p>
+        <span class="vn-continue">Ketuk untuk lanjut ▶</span>
+      </button>
+    </div>
+  `;
+}
+function nextNpcLine(){
+  jalanLineIdx++;
+  if(jalanLineIdx >= jalanNpcActive.lines.length){
+    jalanVisited.add(jalanNpcActive.id);
+    jalanNpcActive = null;
+  }
+  renderPerjalanan();
+}
+/* Lewati adegan jalan sepenuhnya (anggap semua sudah "ditemui") */
+function skipPerjalanan(){
+  PERJALANAN_NPCS.forEach(n=>jalanVisited.add(n.id));
+  jalanNpcActive = null;
+  continuePerjalanan();
+}
+function continuePerjalanan(){ storyStep++; renderStory(); }
 
 function renderBeforeQuiz(){
   const c = document.getElementById("storyContent");
   if(beforeIdx >= beforeQuestions.length){ storyStep++; renderStory(); return; }
   const item = beforeQuestions[beforeIdx];
+  const bgSrc = NARASI_BG.refleksi;
+  const charSrc = playerPortraitSrc();
   c.innerHTML = `
-    <span class="badge-pill">Pemahaman Awal ${beforeIdx+1}/${beforeQuestions.length}</span>
-    <div class="card">
-      <div class="quiz-q">${item.q}</div>
-      ${item.opts.map((o,i)=>`<button class="quiz-opt btn-block" onclick="answerBefore(${i})">${o}</button>`).join("")}
+    <div class="vn-stage">
+      <div class="vn-bg" style="background-image:url('${bgSrc}')"></div>
+      <img class="vn-portrait pos-solo speaking" src="${charSrc}" alt="" onerror="this.remove()">
+      <div class="grow"></div>
+      <div class="vn-quizwrap">
+        <div class="vn-quiz-panel">
+          <div class="vn-speaker">Pemahaman Awal ${beforeIdx+1}/${beforeQuestions.length}</div>
+          <div class="quiz-q">${item.q}</div>
+          ${item.opts.map((o,i)=>`<button class="quiz-opt btn-block" onclick="answerBefore(${i})">${o}</button>`).join("")}
+        </div>
+      </div>
     </div>
   `;
 }
@@ -1344,6 +1605,25 @@ function renderLobby(){
 
 /* ---------- ROOM RENDERING ---------- */
 let currentRoom = null;
+/* "Kata Teman": testimoni singkat dari teman sekelas, muncul pas buka ruangan yang temanya cocok.
+   Aset yang dipakai: sprite_arga_kutubuku.png, sprite_arka_kakicacat.png, sprite_aldo_tunarungu.png,
+   sprite_vira_disabilitas.png, sprite_rara_minder.png, sprite_rama_nerd.png (semua di images/) */
+const TEMAN_ROOM = {
+  perpustakaan: {name:"Arga", img:"images/sprite_arga_kutubuku.png", text:"Aku suka banget baca buku di sini, tenang dan banyak yang bisa dipelajari."},
+  pubertas:     {name:"Arka", img:"images/sprite_arka_kakicacat.png", text:"Tubuhku beda dari kebanyakan, tapi perubahan yang aku alami tetap sama kok — itu bikin aku makin paham diriku."},
+  consent:      {name:"Aldo", img:"images/sprite_aldo_tunarungu.png", text:"Aku komunikasi pakai bahasa isyarat, tapi hak buat bilang 'tidak' tetap sama kayak orang lain."},
+  relasi:       {name:"Vira", img:"images/sprite_vira_disabilitas.png", text:"Pertemanan yang sehat itu nggak lihat aku pakai kursi roda atau nggak — yang penting saling menghargai."},
+  konseling:    {name:"Rara", img:"images/sprite_rara_minder.png", text:"Dulu aku malu cerita perasaanku, sekarang aku belajar itu nggak apa-apa."},
+  medsos:       {name:"Rama", img:"images/sprite_rama_nerd.png", text:"Sebelum ikut share apapun, aku selalu cek dulu — sekali jadi kebiasaan, jadi kebal hoaks."},
+};
+function temanCard(roomId){
+  const t = TEMAN_ROOM[roomId];
+  if(!t) return "";
+  return `<div class="hana-line" style="margin-bottom:14px;">
+    <img src="${t.img}" alt="${t.name}" onerror="this.remove()">
+    <div class="bubble"><b>KATA ${t.name.toUpperCase()}</b>${t.text}</div>
+  </div>`;
+}
 function openRoom(id){
   currentRoom = getRooms().find(r=>r.id===id);
   document.getElementById("roomTitleTop").textContent = currentRoom.name;
@@ -1357,6 +1637,7 @@ function renderRoomHome(){
       <h2>${currentRoom.icon} ${currentRoom.name}</h2>
       <p class="tagline">${currentRoom.tema}</p>
     </div>
+    ${temanCard(currentRoom.id)}
     <div class="room-tabs">
       <button class="btn-outline" onclick="showMateri()">MATERI</button>
       <button class="btn-primary" onclick="startMechanic('${currentRoom.id}')">MULAI GAME</button>
@@ -1458,10 +1739,11 @@ function answerQuiz(roomId, chosen, correct){
     if(i===correct) el.classList.add("correct");
     else if(i===chosen) el.classList.add("wrong");
   });
+  playClickSfx(chosen===correct ? "correct" : "wrong");
   if(chosen===correct) quizScore++;
   document.getElementById("quizFeedback").innerHTML =
-    `<div class="feedback">Kak Hana: ${chosen===correct ? "Pilihan yang lebih sehat! Kamu memahaminya dengan baik." : "Tidak apa — yuk lihat pilihan yang lebih sehat, dan ingat ini untuk ke depannya."}</div>
-     <button class="btn-primary btn-block" style="margin-top:10px;" onclick="quizIdx++;renderQuiz('${roomId}')">Lanjut →</button>`;
+    hanaLine(chosen===correct ? "bangga" : "semangat", chosen===correct ? "Pilihan yang lebih sehat! Kamu memahaminya dengan baik." : "Tidak apa — yuk lihat pilihan yang lebih sehat, dan ingat ini untuk ke depannya.") +
+    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="quizIdx++;renderQuiz('${roomId}')">Lanjut →</button>`;
 }
 function completeRoom(roomId){
   const room = getRooms().find(r=>r.id===roomId);
@@ -1477,6 +1759,7 @@ function completeRoom(roomId){
     document.getElementById("hikmahModalText").textContent = "\u201C"+hikmah.text+"\u201D";
     document.getElementById("hikmahModalSource").textContent = "— "+hikmah.source;
     openModal("modalHikmah");
+    playClickSfx("success");
   }
   document.getElementById("roomBody").innerHTML = `
     <div class="card center">
@@ -1495,10 +1778,11 @@ const KONSELING_RESPON = {
   marah:"Marah itu manusiawi. Yang penting, cara menyalurkannya tidak menyakiti diri sendiri atau orang lain.",
   bingung:"Bingung itu tanda kamu sedang berpikir. Tidak apa belum punya jawaban sekarang.",
 };
+const KONSELING_EKSPRESI = {sedih:"sedih", takut:"sedih", marah:"idle", bingung:"idle"};
 function renderKonseling(){
   document.getElementById("roomBody").innerHTML = `
     <div class="card">
-      <p><b>Kak Hana:</b> Hari ini kamu sedang merasa apa?</p>
+      ${hanaLine("idle", "Hari ini kamu sedang merasa apa?")}
       <div class="col">
         ${Object.keys(KONSELING_RESPON).map(k=>`<button class="choice-btn btn-block" onclick="konselingPick('${k}')">${k.charAt(0).toUpperCase()+k.slice(1)}</button>`).join("")}
       </div>
@@ -1514,7 +1798,7 @@ function konselingPick(mood){
   const hikmah = HIKMAH.konseling;
   document.getElementById("roomBody").innerHTML = `
     <div class="card">
-      <p><b>Kak Hana:</b> ${KONSELING_RESPON[mood]}</p>
+      ${hanaLine(KONSELING_EKSPRESI[mood] || "idle", KONSELING_RESPON[mood])}
       <button class="btn-outline btn-block" onclick="showBantuanNyata()">Butuh teman cerita di dunia nyata?</button>
       <div id="bantuanNyataBox"></div>
       <button class="btn-primary btn-block" style="margin-top:10px;" onclick="goTo('screen-lobby');renderLobby();">Kembali ke Lobby</button>
@@ -1584,7 +1868,7 @@ function showCompareAndJournal(){
     <div class="card">
       <h3>Perbandingan Pemahaman</h3>
       ${rows}
-      <p style="font-size:13px;margin-top:10px;"><b>Kak Hana:</b> Bukan soal benar atau salah — ini soal seberapa jauh kamu bertumbuh.</p>
+      ${hanaLine("bangga", "Bukan soal benar atau salah — ini soal seberapa jauh kamu bertumbuh.")}
     </div>
     <div class="card">
       <h3>Jurnal Refleksi</h3>
