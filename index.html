@@ -249,11 +249,15 @@
   .vn-portrait.pos-right{right:2%;left:auto;height:80%;max-height:min(80%,700px);width:auto;max-width:54%;animation:vnCharInSide .38s ease .05s forwards;}
   @keyframes vnCharInCenter{from{opacity:0;transform:translate(-50%,26px);}to{opacity:1;transform:translate(-50%,0);}}
   @keyframes vnCharInSide{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes vnBreatheCenter{0%,100%{transform:translate(-50%,0) scale(1);}50%{transform:translate(-50%,-4px) scale(1.008);}}
+  @keyframes vnBreatheSide{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-4px) scale(1.008);}}
+  .vn-portrait.pos-solo.breathing{animation:vnBreatheCenter 3.6s ease-in-out infinite;}
+  .vn-portrait.pos-left.breathing,.vn-portrait.pos-right.breathing{animation:vnBreatheSide 3.6s ease-in-out infinite;}
+  .vn-portrait.idle.breathing{animation-play-state:paused;}
   .vn-portrait.idle{opacity:.8;filter:drop-shadow(0 14px 22px rgba(0,0,0,.45)) brightness(.72) saturate(.8);}
   .vn-portrait.speaking{opacity:1;}
-  #screen-story .floating-topbtns{left:14px;right:auto;top:14px;}
   .vn-skip{
-    position:absolute;top:14px;right:14px;z-index:6;
+    position:absolute;top:14px;left:14px;right:auto;z-index:6;
     background:rgba(10,16,12,.55);color:#fff;border:1px solid rgba(255,255,255,.35);
     border-radius:999px;padding:9px 16px;font-size:12.5px;font-weight:800;letter-spacing:.4px;
     backdrop-filter:blur(2px);display:flex;align-items:center;gap:6px;
@@ -284,19 +288,89 @@
   .vn-quiz-panel .quiz-q{color:#f2ede0;font-size:14.5px;line-height:1.5;margin-bottom:12px;}
   .vn-quiz-panel .quiz-opt{background:rgba(251,248,239,.96);}
 
-  /* ---- Perjalanan: adegan jalan ketemu teman sebelum sampai Rumah 'Aisyiyah ---- */
-  .jalan-track{position:relative;flex:1;margin:0 0 6px;}
-  .jalan-npc{position:absolute;bottom:8px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;background:none;padding:0;border:none;}
-  .jalan-npc img{width:64px;height:auto;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(0,0,0,.4));animation:jalanBob 2.2s ease-in-out infinite;}
-  .jalan-npc.visited img{filter:drop-shadow(0 8px 10px rgba(0,0,0,.4)) grayscale(.6);opacity:.7;animation:none;}
-  @keyframes jalanBob{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
-  .jalan-badge{position:absolute;top:-2px;right:2px;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#3a2a06;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,.35);}
-  .jalan-npc.visited .jalan-badge{background:var(--green-mid);color:#fff;}
-  .jalan-name{margin-top:2px;font-size:10.5px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.75);}
-  .jalan-player{position:absolute;left:6%;bottom:0;height:92px;width:auto;object-fit:contain;filter:drop-shadow(0 10px 12px rgba(0,0,0,.45));}
-  .jalan-hint{position:relative;z-index:5;text-align:center;color:#fff;font-size:12.5px;margin:0 14px 8px;text-shadow:0 1px 3px rgba(0,0,0,.6);}
-  .jalan-continue{position:relative;z-index:5;margin:0 14px 16px;width:auto;}
-  .jalan-continue:disabled{opacity:.4;}
+  /* ---- Perjalanan: side-scrolling adventure sebelum sampai Rumah 'Aisyiyah ----
+     4 layer paralaks: langit (paling lambat) → laut → bangunan/pohon tepi jalan → jalan (paling cepat, tempat player+NPC berpijak).
+     Player digerakkan pakai tombol panah / tombol sentuh, dunia & NPC discroll relatif ke kamera. */
+  .ss-stage{position:absolute;inset:0;overflow:hidden;background:#0b1c22;}
+  .ss-viewport{position:absolute;inset:0;overflow:hidden;}
+  .ss-layer{position:absolute;inset:0;}
+  .ss-sky{background:linear-gradient(180deg,#5EC6F2 0%,#8FD8F5 42%,#D8F2FA 100%);}
+  .ss-sky .ss-cloud{position:absolute;font-size:clamp(22px,4vh,38px);opacity:.92;filter:drop-shadow(0 4px 5px rgba(0,0,0,.08));}
+  .ss-sky .ss-bird{position:absolute;left:0;font-size:clamp(14px,2.4vh,22px);opacity:.88;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.15));animation-timing-function:linear;animation-iteration-count:infinite;
+    transform-origin:center;}
+  .ss-bird.fly-right{animation-name:ssFlyRight;}
+  .ss-bird.fly-left{animation-name:ssFlyLeft;}
+  @keyframes ssFlyRight{
+    0%{transform:translate(-8vw,0) scaleX(-1);}
+    25%{transform:translate(29vw,-14px) scaleX(-1);}
+    50%{transform:translate(66vw,6px) scaleX(-1);}
+    75%{transform:translate(92vw,-10px) scaleX(-1);}
+    100%{transform:translate(112vw,0) scaleX(-1);}
+  }
+  @keyframes ssFlyLeft{
+    0%{transform:translate(112vw,0) scaleX(1);}
+    25%{transform:translate(83vw,-12px) scaleX(1);}
+    50%{transform:translate(46vw,6px) scaleX(1);}
+    75%{transform:translate(20vw,-14px) scaleX(1);}
+    100%{transform:translate(-8vw,0) scaleX(1);}
+  }
+  .ss-sea{top:36%;bottom:0;background:linear-gradient(180deg,#1C9AD6 0%,#0E74AC 55%,#0A5C8A 100%);overflow:hidden;}
+  .ss-sea::after{content:'';position:absolute;inset:-10% -20%;
+    background:repeating-linear-gradient(96deg,rgba(255,255,255,.14) 0 2px,transparent 2px 46px);
+    animation:ssShimmer 5s linear infinite;}
+  @keyframes ssShimmer{from{transform:translateX(0);}to{transform:translateX(180px);}}
+  .ss-mid{top:auto;bottom:21%;height:26%;}
+  .ss-mid .ss-house{position:absolute;bottom:0;font-size:clamp(38px,7.5vh,66px);line-height:1;filter:drop-shadow(0 6px 6px rgba(0,0,0,.2)) brightness(.92);}
+  /* Strip rumput/tanah tambahan di paling bawah layar, di bawah jalan yang bisa
+     dilewati player — biar jalannya nggak nempel mentok ke tepi bawah layar. */
+  .ss-grassbase{top:auto;bottom:0;height:6%;background:linear-gradient(180deg,#1F5E4A 0%,#12362A 100%);}
+  .ss-grassbase::before{content:'';position:absolute;inset:0;pointer-events:none;
+    background-image:radial-gradient(circle,rgba(255,255,255,.10) 1px,transparent 1.6px);
+    background-size:16px 11px;background-position:0 3px;}
+  .ss-ground{top:auto;bottom:6%;height:15%;background:linear-gradient(180deg,#2E8058 0%,#1F5E4A 100%);border-top:3px solid rgba(255,255,255,.22);}
+  /* Rumput bergerigi di tepi atas jalan, biar jalan yang bisa dilewati player
+     kelihatan seperti jalan setapak di antara rumput, bukan cuma potongan warna polos. */
+  .ss-ground::before{content:'';position:absolute;left:0;right:0;top:-9px;height:13px;z-index:1;pointer-events:none;
+    background:
+      repeating-linear-gradient(115deg,#4FA873 0 7px,transparent 7px 14px),
+      repeating-linear-gradient(65deg,#6FCB93 0 7px,transparent 7px 14px);
+    background-position:0 0,7px 0;background-repeat:repeat-x;
+    filter:drop-shadow(0 2px 1px rgba(0,0,0,.18));}
+  .ss-ground::after{content:'';position:absolute;left:0;right:0;top:6px;bottom:0;
+    background:repeating-linear-gradient(90deg,rgba(255,255,255,.14) 0 10px,transparent 10px 48px);}
+  .ss-world{position:absolute;left:0;bottom:0;height:100%;}
+  .ss-sprite{position:absolute;bottom:2px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;}
+  .ss-sprite img{width:clamp(56px,10vh,92px);height:clamp(56px,10vh,92px);object-fit:contain;filter:drop-shadow(0 8px 10px rgba(0,0,0,.4));}
+  .ss-npc-name{margin-top:2px;font-size:10.5px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.75);}
+  .ss-npc-badge{position:absolute;top:-4px;right:8px;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#3a2a06;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,.35);z-index:1;}
+  .ss-npc.visited .ss-npc-badge{background:var(--green-mid);color:#fff;}
+  .ss-npc.visited img{filter:drop-shadow(0 8px 10px rgba(0,0,0,.4)) grayscale(.55);opacity:.78;}
+  .ss-goal{font-size:clamp(30px,6vh,48px);filter:drop-shadow(0 6px 6px rgba(0,0,0,.3));}
+  .ss-player img{transform:scaleX(1);}
+  .ss-player.facing-left img{transform:scaleX(-1);}
+  .ss-player.walking img{animation:ssBob .32s ease-in-out infinite;}
+  @keyframes ssBob{0%,100%{transform:translateY(0) scaleX(var(--ssfx,1));}50%{transform:translateY(-5px) scaleX(var(--ssfx,1));}}
+  .ss-player.facing-left{--ssfx:-1;}
+  .ss-player.facing-right{--ssfx:1;}
+  .ss-topbar{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:6;
+    background:rgba(10,16,12,.55);color:#fff;border:1px solid rgba(255,255,255,.35);
+    border-radius:999px;padding:8px 18px;font-size:12px;font-weight:800;letter-spacing:.3px;
+    display:flex;align-items:center;gap:9px;backdrop-filter:blur(2px);white-space:nowrap;}
+  .ss-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35);}
+  .ss-dot.current{background:#fff;}
+  .ss-dot.done{background:var(--gold);}
+  .ss-interact{position:absolute;left:50%;bottom:25%;transform:translateX(-50%);z-index:6;animation:vnDialogueIn .2s ease;white-space:nowrap;}
+  .ss-interact button{box-shadow:0 8px 18px rgba(0,0,0,.35);}
+  .ss-hint-banner{position:absolute;left:50%;bottom:25%;transform:translateX(-50%);z-index:5;
+    background:rgba(10,16,12,.6);color:#fff;font-size:12.5px;padding:9px 16px;border-radius:999px;
+    text-shadow:0 1px 3px rgba(0,0,0,.6);white-space:nowrap;}
+  .ss-controls{position:absolute;left:0;right:0;bottom:14px;z-index:6;display:flex;justify-content:space-between;align-items:flex-end;padding:0 16px;pointer-events:none;}
+  .ss-dpad{pointer-events:auto;width:58px;height:58px;border-radius:50%;
+    background:rgba(10,16,12,.55);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;
+    border:2px solid rgba(255,255,255,.35);box-shadow:0 8px 16px rgba(0,0,0,.35);touch-action:none;-webkit-user-select:none;user-select:none;}
+  .ss-dpad:active{background:rgba(31,94,74,.9);transform:scale(.94);}
+  .ss-dialogue{position:absolute;left:14px;right:14px;bottom:16px;z-index:6;margin:0;width:auto;}
 
   input[type=text],input[type=password]{
     width:100%;padding:12px 14px;border-radius:10px;border:2px solid #ddd0ac;
@@ -359,7 +433,7 @@
 
   .charselect-form{max-width:640px;margin:0 auto;width:100%;}
   .charselect-field{position:relative;display:flex;align-items:center;}
-  .charselect-field .charselect-icon{position:absolute;left:14px;font-size:15px;pointer-events:none;z-index:1;color:var(--text-accent);}
+  .charselect-field .charselect-icon{position:absolute;left:14px;font-size:15px;pointer-events:none;z-index:1;color:var(--text-accent);display:flex;align-items:center;}
   .charselect-field input[type=text],.charselect-field input[type=password]{
     padding-left:40px;border:1px solid #e8ddbc;box-shadow:0 3px 10px rgba(31,94,74,.08);
   }
@@ -429,6 +503,8 @@
   .quiz-opt{background:var(--card);border:2px solid #e2d9bd;border-radius:12px;padding:11px 14px;margin-bottom:8px;text-align:left;font-weight:600;color:var(--ink);}
   .quiz-opt.correct{border-color:var(--green-mid);background:var(--green-soft);}
   .quiz-opt.wrong{border-color:var(--danger);background:#fbeae5;}
+  .quiz-opt.selected{border-color:var(--gold);background:#f7ecd9;}
+  .quiz-opt:disabled{opacity:.75;}
   .feedback{font-size:13px;padding:10px 12px;border-radius:10px;background:var(--green-soft);color:var(--text-accent);margin-top:8px;}
 
   .modal-backdrop{position:absolute;inset:0;background:rgba(20,20,15,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:20;display:none;align-items:center;justify-content:center;padding:24px;}
@@ -495,6 +571,74 @@
     .btn-modal-choice.primary:hover{box-shadow:0 10px 20px rgba(192,138,46,.5);}
     .btn-modal-choice.secondary:hover{background:#dcefe4;border-color:var(--green-deep);}
   }
+  /* wider themed modal for horizontal (grid) layouts, e.g. entry-choice */
+  .modal-card-wide{max-width:460px;}
+  .entry-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  }
+  .entry-grid .btn-modal-choice{
+    width:100%;padding:14px 10px;font-size:12.5px;
+    display:flex;align-items:center;justify-content:center;
+    min-height:52px;line-height:1.25;
+  }
+  .entry-grid .btn-modal-choice::before,.entry-grid .btn-modal-choice::after{
+    display:none;
+  }
+  .entry-role-label{
+    font-size:11px;font-weight:800;letter-spacing:.4px;color:var(--grey);
+    text-transform:uppercase;margin:14px 0 8px;display:flex;align-items:center;gap:8px;
+  }
+  .entry-role-label::before,.entry-role-label::after{content:'';flex:1;height:1px;background:#e2d9bd;}
+  .entry-grid .btn-modal-choice.role-fasilitator{
+    background:#EAF1FA;color:#1F4E79;border:2px solid #4C86C4;
+  }
+  .entry-grid .btn-modal-choice.role-admin{
+    background:#F7EAF2;color:#7A2456;border:2px solid #B0508A;
+  }
+  @media (hover:hover) and (pointer:fine){
+    .entry-grid .btn-modal-choice.role-fasilitator:hover{background:#dcebf9;}
+    .entry-grid .btn-modal-choice.role-admin:hover{background:#f0dcea;}
+  }
+
+  select{
+    width:100%;padding:12px 14px;border-radius:10px;border:2px solid #ddd0ac;
+    font-size:15px;background:#fff;margin:10px 0 16px;font-family:inherit;color:var(--ink);
+    appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%231F5E4A' stroke-width='3'><path d='M6 9l6 6 6-6'/></svg>");
+    background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;
+  }
+  .field-label{font-size:12.5px;font-weight:700;color:var(--text-accent);margin:0 0 -8px 2px;display:block;}
+
+  /* ===== Admin panel ===== */
+  #screen-admin{padding:0;}
+  .admin-tabs{display:flex;gap:8px;padding:0 22px 14px;flex:none;}
+  .admin-tab{
+    flex:1;background:var(--green-soft);color:var(--text-accent);border:2px solid transparent;
+    border-radius:12px;padding:10px 8px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;
+    display:flex;flex-direction:column;align-items:center;gap:2px;
+  }
+  .admin-tab .count{background:var(--gold);color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;}
+  .admin-tab.active{background:var(--green-deep);color:#fff;border-color:var(--green-deep);}
+  .admin-body{padding:0 22px 22px;overflow-y:auto;flex:1;}
+  .admin-row{
+    background:var(--card);border-radius:14px;padding:14px;margin-bottom:10px;
+    box-shadow:0 4px 12px rgba(31,94,74,.10);
+  }
+  .admin-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
+  .admin-row-name{font-weight:800;font-size:14.5px;color:var(--ink);}
+  .admin-row-sub{font-size:12px;color:var(--grey);margin-top:2px;}
+  .status-pill{
+    display:inline-block;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:800;flex:none;
+    white-space:nowrap;
+  }
+  .status-pill.pending{background:#fbe9d0;color:#8a5a12;}
+  .status-pill.approved{background:var(--green-soft);color:var(--green-deep);}
+  .admin-row-actions{display:flex;gap:8px;}
+  .admin-row-actions button{flex:1;padding:9px 8px;font-size:12.5px;border-radius:10px;}
+  .btn-approve{background:var(--green-deep);color:#fff;}
+  .btn-reject{background:transparent;color:var(--danger);border:2px solid var(--danger);}
+  .admin-row select{margin:8px 0 0;padding:9px 12px;font-size:13px;}
+  .admin-empty{text-align:center;color:var(--grey);font-size:13px;padding:30px 10px;}
   .hikmah-quote{font-style:italic;color:var(--text-accent);font-size:15px;margin:10px 0;}
   .hikmah-source{font-size:12px;color:var(--grey);margin-bottom:14px;}
 
@@ -526,8 +670,9 @@
   body.mode-bigfont .vn-text{font-size:17.5px;}
   body.mode-bigfont .vn-speaker{font-size:14.5px;}
   body.mode-bigfont .vn-continue{font-size:13.5px;}
-  body.mode-bigfont .jalan-hint{font-size:15px;}
-  body.mode-bigfont .jalan-name{font-size:12.5px;}
+  body.mode-bigfont .ss-hint-banner{font-size:15px;}
+  body.mode-bigfont .ss-npc-name{font-size:12.5px;}
+  body.mode-bigfont .ss-topbar{font-size:13.5px;}
   body.mode-bigfont .hana-line .bubble{font-size:15.5px;}
   body.mode-bigfont .vn-quiz-panel .quiz-q{font-size:16.5px;}
   body.mode-dyslexia #game{font-family:'Comic Sans MS','Comic Sans', 'Verdana', sans-serif;letter-spacing:.3px;}
@@ -603,7 +748,7 @@
       <span class="charselect-banner-num">01</span>
       <span class="charselect-banner-text">PILIH KARAKTERMU</span>
     </div>
-    <p class="center charselect-sub">Pilih karakter yang paling menggambarkan dirimu.<br>Kamu bisa mengubahnya nanti di lobby.</p>
+    <p class="center charselect-sub" style="font-weight:600;">Pilih karakter yang paling menggambarkan dirimu.<br>Kamu bisa mengubahnya nanti di lobby.</p>
     <div class="char-card-grid">
       <div class="char-card" id="cardCowoSmp" onclick="pickCharacter('laki','smp')">
         <img src="images/cowo_smp.png" alt="Karakter SMP Laki-laki">
@@ -620,14 +765,15 @@
     </div>
     <div class="charselect-form">
       <div class="charselect-field">
-        <span class="charselect-icon">👤</span>
+        <span class="charselect-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"></path></svg></span>
         <input type="text" id="nameInput" placeholder="Masukkan Nama Karaktermu" maxlength="20">
       </div>
       <div class="charselect-field">
-        <span class="charselect-icon">🔒</span>
+        <span class="charselect-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg></span>
         <input type="password" id="pinInput" placeholder="Masukkan PIN (4 digit)" maxlength="4" inputmode="numeric" pattern="[0-9]*">
         <button type="button" class="charselect-eye" id="pinToggleBtn" onclick="togglePinVisibility()" aria-label="Tampilkan PIN">👁</button>
       </div>
+      <p style="font-size:11.5px;color:var(--grey);margin:-8px 0 12px 4px;">🔒 PIN dipakai untuk melindungi progresmu — guru bisa memakainya untuk melihat perkembangan belajarmu di dashboard.</p>
       <button class="btn-lanjut-themed" id="btnLanjutChar" disabled onclick="confirmCharacter()">LANJUT <span class="arrow">→</span></button>
     </div>
   </section>
@@ -741,6 +887,23 @@
     <div class="grow"></div>
   </section>
 
+  <!-- PANEL ADMIN -->
+  <section class="screen" id="screen-admin">
+    <div class="topbar"><div class="who">Panel Admin<small id="adminWhoLabel"></small></div>
+      <button class="icon-btn" onclick="adminLogout()" aria-label="Keluar">🚪 Keluar</button>
+    </div>
+    <div class="admin-tabs">
+      <button class="admin-tab active" id="adminTabPending" onclick="switchAdminTab('pending')">
+        <span>✅ Persetujuan Fasilitator</span><span class="count" id="adminPendingCount">0</span>
+      </button>
+      <button class="admin-tab" id="adminTabUsers" onclick="switchAdminTab('users')">
+        <span>👥 Penempatan Siswa</span><span class="count" id="adminUsersCount">0</span>
+      </button>
+    </div>
+    <div class="admin-body" id="adminPendingList"></div>
+    <div class="admin-body" id="adminUsersList" style="display:none;"></div>
+  </section>
+
   <!-- ===== MODALS ===== -->
   <div class="modal-backdrop" id="modalHikmah">
     <div class="modal-card">
@@ -820,14 +983,20 @@
 
   <!-- Modal pilihan saat klik MASUK -->
   <div class="modal-backdrop" id="modalEntryChoice">
-    <div class="modal-card modal-card-themed">
+    <div class="modal-card modal-card-themed modal-card-wide">
       <span class="modal-plaque">MASUK KE RUMAH 'AISYIYAH</span>
       <p class="center" style="font-size:13px;margin-bottom:16px;color:var(--ink);">Pilih salah satu untuk melanjutkan:</p>
       <button class="btn-modal-choice primary" id="btnLanjutkanProgress" style="margin-bottom:10px;" onclick="entryContinueProgress()">LANJUTKAN PROGRESS</button>
-      <button class="btn-modal-choice secondary" style="margin-bottom:10px;" onclick="entryNewAccount()">BUAT AKUN BARU</button>
-      <button class="btn-modal-choice secondary" id="btnLanjutkanRemote" style="margin-bottom:10px;" onclick="openContinueRemoteModal()">LANJUTKAN DARI PERANGKAT LAIN</button>
-      <button class="btn-modal-choice secondary" onclick="entryFasilitatorLogin()">LOGIN FASILITATOR</button>
-      <button class="btn-ghost" style="margin-top:12px;" onclick="closeModal('modalEntryChoice')">Batal</button>
+      <div class="entry-grid">
+        <button class="btn-modal-choice secondary" onclick="entryNewAccount()">👤 BUAT AKUN BARU</button>
+        <button class="btn-modal-choice secondary" id="btnLanjutkanRemote" onclick="openContinueRemoteModal()">👤 LANJUTKAN DARI PERANGKAT LAIN</button>
+      </div>
+      <div class="entry-role-label">Untuk Fasilitator &amp; Admin</div>
+      <div class="entry-grid">
+        <button class="btn-modal-choice role-fasilitator" onclick="openFasilitatorChoice()">🎓 FASILITATOR</button>
+        <button class="btn-modal-choice role-admin" onclick="entryAdminLogin()">🛡️ LOGIN ADMIN</button>
+      </div>
+      <button class="btn-ghost" style="margin-top:14px;" onclick="closeModal('modalEntryChoice')">Batal</button>
     </div>
   </div>
 
@@ -844,16 +1013,66 @@
     </div>
   </div>
 
+  <!-- Modal pilihan saat klik FASILITATOR: daftar baru atau login -->
+  <div class="modal-backdrop" id="modalFasilitatorChoice">
+    <div class="modal-card modal-card-themed">
+      <span class="modal-plaque">FASILITATOR</span>
+      <p class="center" style="font-size:13px;margin-bottom:16px;color:var(--ink);">Untuk guru BK / pendamping yang memantau progres remaja.</p>
+      <button class="btn-modal-choice primary" style="margin-bottom:10px;" onclick="openFasilitatorRegister()">DAFTAR FASILITATOR</button>
+      <button class="btn-modal-choice secondary" onclick="openFasilitatorLogin()">LOGIN FASILITATOR</button>
+      <button class="btn-ghost" style="margin-top:12px;" onclick="closeModal('modalFasilitatorChoice');openModal('modalEntryChoice')">← Kembali</button>
+    </div>
+  </div>
+
+  <!-- Modal daftar fasilitator baru (perlu di-ACC admin dulu) -->
+  <div class="modal-backdrop" id="modalFasilitatorRegister">
+    <div class="modal-card modal-card-themed">
+      <span class="modal-plaque">DAFTAR FASILITATOR</span>
+      <p class="center" style="font-size:13px;margin-bottom:4px;color:var(--ink);">Akunmu perlu disetujui admin dulu sebelum bisa dipakai.</p>
+      <input type="text" id="fasilitatorRegNama" placeholder="Nama lengkap">
+      <input type="text" id="fasilitatorRegInstansi" placeholder="Instansi / Sekolah">
+      <input type="text" id="fasilitatorRegUsername" placeholder="Buat username">
+      <input type="password" id="fasilitatorRegPassword" placeholder="Buat kata sandi">
+      <p id="fasilitatorRegError" style="color:var(--danger);font-size:12px;display:none;margin:-8px 0 10px;"></p>
+      <button class="btn-modal-choice primary" id="btnSubmitFasilitatorReg" onclick="submitFasilitatorRegister()">DAFTAR</button>
+      <button class="btn-ghost" style="margin-top:10px;" onclick="closeModal('modalFasilitatorRegister');openModal('modalFasilitatorChoice')">← Kembali</button>
+    </div>
+  </div>
+
   <!-- Modal login fasilitator -->
   <div class="modal-backdrop" id="modalFasilitatorLogin">
     <div class="modal-card modal-card-themed">
       <span class="modal-plaque">LOGIN FASILITATOR</span>
       <p class="center" style="font-size:13px;margin-bottom:4px;color:var(--ink);">Khusus guru BK / pendamping untuk memantau progres remaja.</p>
-      <input type="text" id="fasilitatorNama" placeholder="Nama fasilitator">
-      <input type="text" id="fasilitatorKode" placeholder="Kode akses fasilitator">
-      <p id="fasilitatorError" style="color:var(--danger);font-size:12px;display:none;margin:-8px 0 10px;">Nama atau kode akses belum diisi.</p>
-      <button class="btn-modal-choice primary" onclick="submitFasilitatorLogin()">MASUK SEBAGAI FASILITATOR</button>
-      <button class="btn-ghost" style="margin-top:10px;" onclick="closeModal('modalFasilitatorLogin');openModal('modalEntryChoice')">← Kembali</button>
+      <input type="text" id="fasilitatorUsername" placeholder="Username">
+      <input type="password" id="fasilitatorPassword" placeholder="Kata sandi">
+      <p id="fasilitatorError" style="color:var(--danger);font-size:12px;display:none;margin:-8px 0 10px;">Username atau kata sandi belum diisi.</p>
+      <button class="btn-modal-choice primary" id="btnSubmitFasilitatorLogin" onclick="submitFasilitatorLogin()">MASUK SEBAGAI FASILITATOR</button>
+      <button class="btn-ghost" style="margin-top:10px;" onclick="closeModal('modalFasilitatorLogin');openModal('modalFasilitatorChoice')">← Kembali</button>
+    </div>
+  </div>
+
+  <!-- Modal pilih fasilitator saat membuat akun baru -->
+  <div class="modal-backdrop" id="modalChooseFasilitator">
+    <div class="modal-card modal-card-themed">
+      <span class="modal-plaque">PILIH FASILITATOR</span>
+      <p class="center" style="font-size:13px;margin-bottom:4px;color:var(--ink);">Kalau gurumu sudah terdaftar sebagai fasilitator, pilih namanya di sini supaya progresmu bisa dipantau.</p>
+      <label class="field-label" for="fasilitatorSelect">Fasilitator (opsional)</label>
+      <select id="fasilitatorSelect"><option value="">-- Tanpa Fasilitator --</option></select>
+      <button class="btn-modal-choice primary" onclick="confirmChooseFasilitator()">LANJUTKAN</button>
+    </div>
+  </div>
+
+  <!-- Modal login admin -->
+  <div class="modal-backdrop" id="modalAdminLogin">
+    <div class="modal-card modal-card-themed">
+      <span class="modal-plaque">LOGIN ADMIN</span>
+      <p class="center" style="font-size:13px;margin-bottom:4px;color:var(--ink);">Khusus admin/pengelola untuk mengatur konten dan data game.</p>
+      <input type="text" id="adminUsername" placeholder="Username admin">
+      <input type="password" id="adminPassword" placeholder="Kata sandi admin">
+      <p id="adminError" style="color:var(--danger);font-size:12px;display:none;margin:-8px 0 10px;">Username atau kata sandi salah.</p>
+      <button class="btn-modal-choice primary" id="btnSubmitAdminLogin" onclick="submitAdminLogin()">MASUK SEBAGAI ADMIN</button>
+      <button class="btn-ghost" style="margin-top:10px;" onclick="closeModal('modalAdminLogin');openModal('modalEntryChoice')">← Kembali</button>
     </div>
   </div>
 
@@ -890,7 +1109,12 @@ const GAME_API_URL = "https://script.google.com/macros/s/AKfycbzRQ7HJK6dK_Ac5L1l
 let STATE = loadState() || {
   name: "", pin: "", gender: "perempuan", jenjang: "sma", points: 0, level: 1,
   badges: {}, kunciNilai: {}, hikmah: {}, roomsDone: {},
-  before: {}, after: {}, journal: "",
+  before: {}, after: {}, journal: "", charChosen: false, fasilitator: "",
+  /* Progres intro cerita (narasi + kuis pemahaman awal + perjalanan ketemu teman).
+     storyDone sengaja TIDAK diisi default false di sini — dicek pakai "!== false"
+     di tempat lain, supaya akun lama (sebelum fitur ini ada) yang belum punya
+     field ini tetap dianggap sudah selesai intro-nya (nggak dilempar ulang). */
+  storyStep: 0, beforeIdx: 0, perjalanan: null,
 };
 
 function saveState(){
@@ -1013,10 +1237,25 @@ document.addEventListener("touchstart", function(){}, {passive:true});
 
 /* ---------- GLOBAL CONTROLS: MUSIK / LAYAR PENUH / KELUAR ---------- */
 let musicOn = false;
+/* Dulu ada kotak debug audio yang nongol di layar pemain — sekarang cuma dicatat ke console,
+   nggak ditampilkan lagi di UI. */
+function showAudioDebug(msg){
+  console.log("[Audio Debug]", msg);
+}
 function startMusic(){
   const audio = document.getElementById("bgmAudio");
   audio.volume = 0.5;
-  audio.play().catch(()=>{ /* browser mungkin memblokir autoplay tanpa gestur; ini selalu dipicu dari klik pengguna */ });
+  // Tangkap error native elemen <audio> (gagal load/decode file), bukan cuma error dari play()
+  audio.onerror = ()=>{
+    const err = audio.error;
+    const codes = {1:"MEDIA_ERR_ABORTED",2:"MEDIA_ERR_NETWORK",3:"MEDIA_ERR_DECODE",4:"MEDIA_ERR_SRC_NOT_SUPPORTED"};
+    showAudioDebug("Gagal load audio: " + (err ? (codes[err.code]||err.code) : "unknown"));
+  };
+  audio.play().then(()=>{
+    showAudioDebug("play() berhasil, volume=" + audio.volume + ", muted=" + audio.muted);
+  }).catch((e)=>{
+    showAudioDebug("play() gagal: " + e.name + " — " + e.message);
+  });
 }
 function stopMusic(){
   const audio = document.getElementById("bgmAudio");
@@ -1225,6 +1464,22 @@ function openContinueRemoteModal(){
   document.getElementById("continueRemoteError").style.display = "none";
   openModal("modalContinueRemote");
 }
+/* Dipakai tiap kali user "melanjutkan" progres yang sudah tersimpan (baik dari
+   localStorage maupun ditarik dari server). Kalau intro cerita (narasi + kuis +
+   perjalanan ketemu teman) belum kelar pas terakhir keluar, lanjutkan persis
+   dari situ — bukan lompat ke Lobby dan menganggap sudah selesai. */
+function enterGameFromSavedState(){
+  if(STATE.storyDone === false){
+    storyStep = STATE.storyStep || 0;
+    beforeIdx = STATE.beforeIdx || 0;
+    ss = null; // renderPerjalanan akan re-init dari STATE.perjalanan kalau posisi terakhir ada di segmen jalan
+    goTo("screen-story");
+    renderStory();
+  } else {
+    goTo("screen-lobby");
+    renderLobby();
+  }
+}
 async function submitContinueRemote(){
   const nama = document.getElementById("continueNama").value.trim();
   const pin = document.getElementById("continuePin").value.trim();
@@ -1244,8 +1499,7 @@ async function submitContinueRemote(){
       STATE = result.state;
       localStorage.setItem("rumah_aisyiyah_state", JSON.stringify(STATE));
       closeModal("modalContinueRemote");
-      goTo("screen-lobby");
-      renderLobby();
+      enterGameFromSavedState();
     } else {
       errorEl.textContent = "Nama/PIN belum ditemukan. Coba periksa lagi.";
       errorEl.style.display = "block";
@@ -1260,8 +1514,7 @@ async function submitContinueRemote(){
 }
 function entryContinueProgress(){
   closeModal("modalEntryChoice");
-  goTo("screen-lobby");
-  renderLobby();
+  enterGameFromSavedState();
 }
 function entryNewAccount(){
   if(STATE && STATE.name){
@@ -1278,15 +1531,98 @@ function confirmNewAccountProceed(){
   proceedNewAccount();
 }
 function proceedNewAccount(){
-  STATE = { name:"", pin:"", gender:"perempuan", jenjang:"sma", points:0, level:1, badges:{}, kunciNilai:{}, hikmah:{}, roomsDone:{}, before:{}, after:{}, journal:"" };
+  STATE = { name:"", pin:"", gender:"perempuan", jenjang:"sma", points:0, level:1, badges:{}, kunciNilai:{}, hikmah:{}, roomsDone:{}, before:{}, after:{}, journal:"", charChosen:false, fasilitator:"" };
   saveState();
   closeModal("modalEntryChoice");
+  openChooseFasilitator();
+}
+
+/* ---------- API helper (GET, dibaca balasannya) ---------- */
+async function apiGet(action, params){
+  if(!GAME_API_URL) return { status: "no_api" };
+  const qs = Object.entries(Object.assign({action}, params||{}))
+    .map(([k,v])=>encodeURIComponent(k)+"="+encodeURIComponent(v==null?"":v)).join("&");
+  try{
+    const res = await fetch(GAME_API_URL + "?" + qs);
+    return await res.json();
+  }catch(e){
+    return { status: "network_error" };
+  }
+}
+
+/* ---------- PILIH FASILITATOR (saat daftar akun baru) ---------- */
+let FASILITATOR_LIST = [];
+async function loadFasilitatorList(){
+  const result = await apiGet("list_fasilitator", {});
+  FASILITATOR_LIST = (result && result.status === "ok" && result.list) ? result.list : [];
+  return FASILITATOR_LIST;
+}
+async function openChooseFasilitator(){
+  const sel = document.getElementById("fasilitatorSelect");
+  sel.innerHTML = `<option value="">-- Tanpa Fasilitator --</option>`;
+  openModal("modalChooseFasilitator");
+  const list = await loadFasilitatorList();
+  list.forEach(f=>{
+    const opt = document.createElement("option");
+    opt.value = f.username;
+    opt.textContent = f.nama + (f.instansi ? " — "+f.instansi : "");
+    sel.appendChild(opt);
+  });
+}
+function confirmChooseFasilitator(){
+  STATE.fasilitator = document.getElementById("fasilitatorSelect").value || "";
+  saveState();
+  closeModal("modalChooseFasilitator");
   goTo("screen-charselect");
 }
-function entryFasilitatorLogin(){
+
+/* ---------- FASILITATOR: daftar baru atau login ---------- */
+function openFasilitatorChoice(){
   closeModal("modalEntryChoice");
-  document.getElementById("fasilitatorNama").value = "";
-  document.getElementById("fasilitatorKode").value = "";
+  openModal("modalFasilitatorChoice");
+}
+function openFasilitatorRegister(){
+  closeModal("modalFasilitatorChoice");
+  ["fasilitatorRegNama","fasilitatorRegInstansi","fasilitatorRegUsername","fasilitatorRegPassword"].forEach(id=>{
+    document.getElementById(id).value = "";
+  });
+  document.getElementById("fasilitatorRegError").style.display = "none";
+  openModal("modalFasilitatorRegister");
+}
+async function submitFasilitatorRegister(){
+  const nama = document.getElementById("fasilitatorRegNama").value.trim();
+  const instansi = document.getElementById("fasilitatorRegInstansi").value.trim();
+  const username = document.getElementById("fasilitatorRegUsername").value.trim();
+  const password = document.getElementById("fasilitatorRegPassword").value.trim();
+  const errorEl = document.getElementById("fasilitatorRegError");
+  const btn = document.getElementById("btnSubmitFasilitatorReg");
+  if(!nama || !username || !password){
+    errorEl.textContent = "Nama, username, dan kata sandi wajib diisi.";
+    errorEl.style.display = "block";
+    return;
+  }
+  errorEl.style.display = "none";
+  btn.disabled = true; btn.textContent = "MENDAFTARKAN...";
+  const result = await apiGet("register_fasilitator", {nama, instansi, username, password});
+  btn.disabled = false; btn.textContent = "DAFTAR";
+  if(result.status === "ok"){
+    closeModal("modalFasilitatorRegister");
+    showInfoModal("PENDAFTARAN BERHASIL", "Terima kasih, "+nama+". Akun fasilitatormu menunggu persetujuan admin sebelum bisa dipakai login.");
+  } else if(result.status === "duplicate"){
+    errorEl.textContent = "Username sudah dipakai, coba username lain.";
+    errorEl.style.display = "block";
+  } else if(result.status === "no_api" || result.status === "network_error"){
+    errorEl.textContent = "Gagal menghubungi server. Cek koneksi internet, lalu coba lagi.";
+    errorEl.style.display = "block";
+  } else {
+    errorEl.textContent = "Nama, username, dan kata sandi wajib diisi.";
+    errorEl.style.display = "block";
+  }
+}
+function openFasilitatorLogin(){
+  closeModal("modalFasilitatorChoice");
+  document.getElementById("fasilitatorUsername").value = "";
+  document.getElementById("fasilitatorPassword").value = "";
   document.getElementById("fasilitatorError").style.display = "none";
   openModal("modalFasilitatorLogin");
 }
@@ -1295,22 +1631,167 @@ function showInfoModal(title, text){
   document.getElementById("modalInfoText").textContent = text;
   openModal("modalInfoMsg");
 }
-function submitFasilitatorLogin(){
-  const nama = document.getElementById("fasilitatorNama").value.trim();
-  const kode = document.getElementById("fasilitatorKode").value.trim();
+async function submitFasilitatorLogin(){
+  const username = document.getElementById("fasilitatorUsername").value.trim();
+  const password = document.getElementById("fasilitatorPassword").value.trim();
   const errorEl = document.getElementById("fasilitatorError");
-  if(!nama || !kode){
-    errorEl.textContent = "Nama dan kode akses wajib diisi.";
+  const btn = document.getElementById("btnSubmitFasilitatorLogin");
+  if(!username || !password){
+    errorEl.textContent = "Username dan kata sandi wajib diisi.";
     errorEl.style.display = "block";
     return;
   }
   errorEl.style.display = "none";
-  logToSheet("login_fasilitator", {nama});
-  closeModal("modalFasilitatorLogin");
-  showInfoModal("INFO", "Terima kasih, "+nama+". Dashboard fasilitator sedang disiapkan dan akan segera hadir.");
+  btn.disabled = true; btn.textContent = "MASUK...";
+  const result = await apiGet("login_fasilitator", {username, password});
+  btn.disabled = false; btn.textContent = "MASUK SEBAGAI FASILITATOR";
+  if(result.status === "ok"){
+    logToSheet("login_fasilitator", {nama: result.nama});
+    closeModal("modalFasilitatorLogin");
+    showInfoModal("INFO", "Selamat datang, "+result.nama+". Dashboard fasilitator sedang disiapkan dan akan segera hadir.");
+  } else if(result.status === "pending"){
+    errorEl.textContent = "Akun fasilitatormu masih menunggu persetujuan admin.";
+    errorEl.style.display = "block";
+  } else if(result.status === "no_api" || result.status === "network_error"){
+    errorEl.textContent = "Gagal menghubungi server. Cek koneksi internet, lalu coba lagi.";
+    errorEl.style.display = "block";
+  } else {
+    errorEl.textContent = "Username atau kata sandi salah.";
+    errorEl.style.display = "block";
+  }
+}
+
+/* ---------- ADMIN ---------- */
+function entryAdminLogin(){
+  closeModal("modalEntryChoice");
+  document.getElementById("adminUsername").value = "";
+  document.getElementById("adminPassword").value = "";
+  document.getElementById("adminError").style.display = "none";
+  openModal("modalAdminLogin");
+}
+let ADMIN_SESSION = null; // {username, password} — disimpan di memori saja, dikirim ulang tiap panggilan API admin
+
+async function submitAdminLogin(){
+  const username = document.getElementById("adminUsername").value.trim();
+  const password = document.getElementById("adminPassword").value.trim();
+  const errorEl = document.getElementById("adminError");
+  const btn = document.getElementById("btnSubmitAdminLogin");
+  if(!username || !password){
+    errorEl.textContent = "Username dan kata sandi wajib diisi.";
+    errorEl.style.display = "block";
+    return;
+  }
+  errorEl.style.display = "none";
+  if(btn){ btn.disabled = true; btn.textContent = "MASUK..."; }
+  const result = await apiGet("login_admin", {username, password});
+  if(btn){ btn.disabled = false; btn.textContent = "MASUK SEBAGAI ADMIN"; }
+  if(result.status === "ok"){
+    ADMIN_SESSION = {username, password};
+    logToSheet("login_admin", {username});
+    closeModal("modalAdminLogin");
+    document.getElementById("adminWhoLabel").textContent = username;
+    goTo("screen-admin");
+    switchAdminTab("pending");
+  } else if(result.status === "no_api" || result.status === "network_error"){
+    errorEl.textContent = "Gagal menghubungi server. Cek koneksi internet, lalu coba lagi.";
+    errorEl.style.display = "block";
+  } else {
+    errorEl.textContent = "Username atau kata sandi salah.";
+    errorEl.style.display = "block";
+  }
+}
+function adminLogout(){
+  ADMIN_SESSION = null;
+  goTo("screen-title");
+}
+function switchAdminTab(tab){
+  document.getElementById("adminTabPending").classList.toggle("active", tab==="pending");
+  document.getElementById("adminTabUsers").classList.toggle("active", tab==="users");
+  document.getElementById("adminPendingList").style.display = tab==="pending" ? "block" : "none";
+  document.getElementById("adminUsersList").style.display = tab==="users" ? "block" : "none";
+  if(tab === "pending") renderAdminPending();
+  else renderAdminUsers();
+}
+async function renderAdminPending(){
+  const box = document.getElementById("adminPendingList");
+  box.innerHTML = `<p class="admin-empty">Memuat...</p>`;
+  const result = await apiGet("list_fasilitator_pending", ADMIN_SESSION||{});
+  if(result.status !== "ok"){
+    box.innerHTML = `<p class="admin-empty">Gagal memuat data. Coba lagi.</p>`;
+    document.getElementById("adminPendingCount").textContent = "0";
+    return;
+  }
+  const list = result.list || [];
+  document.getElementById("adminPendingCount").textContent = list.length;
+  if(list.length === 0){
+    box.innerHTML = `<p class="admin-empty">🎉 Tidak ada pendaftaran fasilitator yang menunggu persetujuan.</p>`;
+    return;
+  }
+  box.innerHTML = list.map(f=>`
+    <div class="admin-row">
+      <div class="admin-row-top">
+        <div>
+          <div class="admin-row-name">${f.nama}</div>
+          <div class="admin-row-sub">${f.instansi||"-"} · @${f.username}</div>
+        </div>
+        <span class="status-pill pending">MENUNGGU</span>
+      </div>
+      <div class="admin-row-actions">
+        <button class="btn-approve" onclick="approveFasilitatorAction('${f.username.replace(/'/g,"\\'")}', true)">✔ Setujui</button>
+        <button class="btn-reject" onclick="approveFasilitatorAction('${f.username.replace(/'/g,"\\'")}', false)">✕ Tolak</button>
+      </div>
+    </div>
+  `).join("");
+}
+async function approveFasilitatorAction(username, approve){
+  await apiGet("approve_fasilitator", Object.assign({}, ADMIN_SESSION, {username, approve: approve?"1":"0"}));
+  renderAdminPending();
+}
+async function renderAdminUsers(){
+  const box = document.getElementById("adminUsersList");
+  box.innerHTML = `<p class="admin-empty">Memuat...</p>`;
+  const [usersResult] = await Promise.all([
+    apiGet("list_users", ADMIN_SESSION||{}),
+    loadFasilitatorList(),
+  ]);
+  if(usersResult.status !== "ok"){
+    box.innerHTML = `<p class="admin-empty">Gagal memuat data. Coba lagi.</p>`;
+    document.getElementById("adminUsersCount").textContent = "0";
+    return;
+  }
+  const list = usersResult.list || [];
+  document.getElementById("adminUsersCount").textContent = list.length;
+  if(list.length === 0){
+    box.innerHTML = `<p class="admin-empty">Belum ada siswa yang tersimpan di server.</p>`;
+    return;
+  }
+  const fasilitatorOptions = FASILITATOR_LIST.map(f=>`<option value="${f.username}">${f.nama}${f.instansi?" — "+f.instansi:""}</option>`).join("");
+  box.innerHTML = list.map((u,i)=>`
+    <div class="admin-row">
+      <div class="admin-row-top">
+        <div>
+          <div class="admin-row-name">${u.nama}</div>
+          <div class="admin-row-sub">${u.points||0} poin · ${u.roomsDone||0} ruangan selesai</div>
+        </div>
+        <span class="status-pill ${u.fasilitator?'approved':'pending'}">${u.fasilitator ? "ADA FASILITATOR" : "BELUM ADA"}</span>
+      </div>
+      <select id="assignSel${i}">
+        <option value="">-- Tanpa Fasilitator --</option>
+        ${fasilitatorOptions}
+      </select>
+      <div class="admin-row-actions">
+        <button class="btn-approve" onclick="assignFasilitatorAction('${u.nama.replace(/'/g,"\\'")}','${u.pin}',document.getElementById('assignSel${i}').value)">💾 Simpan</button>
+      </div>
+    </div>
+  `).join("");
+  list.forEach((u,i)=>{ document.getElementById("assignSel"+i).value = u.fasilitator || ""; });
+}
+async function assignFasilitatorAction(nama, pin, fasilitatorUsername){
+  await apiGet("assign_fasilitator", Object.assign({}, ADMIN_SESSION, {nama, pin, fasilitator: fasilitatorUsername}));
+  renderAdminUsers();
 }
 function startNewOrContinue(){
-  if(STATE.name){ goTo("screen-lobby"); renderLobby(); }
+  if(STATE.name){ enterGameFromSavedState(); }
   else { goTo("screen-charselect"); }
 }
 
@@ -1322,6 +1803,7 @@ const CHAR_CARD_IDS = {
 function pickCharacter(gender, jenjang){
   STATE.gender = gender;
   STATE.jenjang = jenjang;
+  STATE.charChosen = true;
   Object.values(CHAR_CARD_IDS).forEach(id=>document.getElementById(id).classList.remove("selected"));
   document.getElementById(CHAR_CARD_IDS[gender+"-"+jenjang]).classList.add("selected");
   checkCharForm();
@@ -1338,17 +1820,28 @@ document.addEventListener("DOMContentLoaded", ()=>{
   syncMusicSwitch();
   document.getElementById("nameInput").addEventListener("input", checkCharForm);
   document.getElementById("pinInput").addEventListener("input", checkCharForm);
-  pickCharacter(STATE.gender, STATE.jenjang || "sma");
+  if(STATE.charChosen){
+    pickCharacter(STATE.gender, STATE.jenjang || "sma");
+  } else {
+    checkCharForm(); // tombol LANJUT tetap nonaktif sampai user benar-benar memilih kartu
+  }
   openModal("modalAudioChoice");
 });
 function checkCharForm(){
   const name = document.getElementById("nameInput").value.trim();
   const pin = document.getElementById("pinInput").value.trim();
-  document.getElementById("btnLanjutChar").disabled = !(name.length > 0 && /^\d{4}$/.test(pin));
+  document.getElementById("btnLanjutChar").disabled = !(STATE.charChosen && name.length > 0 && /^\d{4}$/.test(pin));
 }
 function confirmCharacter(){
   STATE.name = document.getElementById("nameInput").value.trim();
   STATE.pin = document.getElementById("pinInput").value.trim();
+  STATE.storyDone = false;
+  STATE.storyStep = 0;
+  STATE.beforeIdx = 0;
+  STATE.perjalanan = null;
+  storyStep = 0;
+  beforeIdx = 0;
+  ss = null;
   saveState();
   logToSheet("mulai_karakter", {gender: STATE.gender, jenjang: STATE.jenjang});
   goTo("screen-story");
@@ -1373,6 +1866,14 @@ const beforeQuestions = [
 ];
 let storyStep = 0;
 let beforeIdx = 0;
+/* Simpan posisi terkini di intro cerita (beat ke berapa, soal pemahaman awal
+   ke berapa) ke STATE supaya kalau tiba-tiba keluar/nutup gim, pas dibuka lagi
+   nggak diulang dari awal. Dipanggil tiap kali beat/soal berpindah. */
+function saveStoryProgress(){
+  STATE.storyStep = storyStep;
+  STATE.beforeIdx = beforeIdx;
+  saveState();
+}
 
 /* Aset visual novel — sudah kamu siapkan di folder images/:
    - narasi_cowo_smp.png, narasi_cowo_sma.png, narasi_cewe_smp.png, narasi_cewe_sma.png (potret pemain)
@@ -1399,13 +1900,13 @@ function renderCharacters(chars, speakingKey){
   if(!chars || chars.length === 0) return "";
   if(chars.length === 1){
     const src = NARASI_CHAR[chars[0]]();
-    return `<img class="vn-portrait pos-solo speaking" src="${src}" alt="" onerror="this.remove()">`;
+    return `<img class="vn-portrait pos-solo speaking" src="${src}" alt="" onerror="this.remove()" onanimationend="this.classList.add('breathing')">`;
   }
   const positions = ["pos-left", "pos-right"];
   return chars.slice(0, 2).map((key, i) => {
     const src = NARASI_CHAR[key]();
     const state = key === speakingKey ? "speaking" : "idle";
-    return `<img class="vn-portrait ${positions[i]} ${state}" src="${src}" alt="" onerror="this.remove()">`;
+    return `<img class="vn-portrait ${positions[i]} ${state}" src="${src}" alt="" onerror="this.remove()" onanimationend="this.classList.add('breathing')">`;
   }).join("");
 }
 /* Narasi sudut pandang orang ketiga tetap tampil sebagai "Narator".
@@ -1434,11 +1935,16 @@ function renderStory(){
   if(beat.text === "__BEFORE_QUIZ__"){ renderBeforeQuiz(); return; }
   if(beat.text === "__PERJALANAN__"){ renderPerjalanan(); return; }
   const bgSrc = NARASI_BG[beat.bg] || NARASI_BG.refleksi;
+  /* Tombol LEWATI cuma berguna (dan cuma ditampilkan) kalau masih ada sesi checkpoint
+     di depan (kuis / perjalanan ketemu teman) yang bisa dituju. Kalau sisa cerita cuma
+     narasi pendek biasa, jangan tampilkan tombolnya — biar pemain baca sampai selesai,
+     nggak kelempar langsung ke Lobby. */
+  const hasCheckpointAhead = storyBeats.slice(storyStep+1).some(b=>b.text==="__BEFORE_QUIZ__"||b.text==="__PERJALANAN__");
   c.innerHTML = `
     <div class="vn-stage">
       <div class="vn-bg" style="background-image:url('${bgSrc}')"></div>
       ${renderCharacters(beat.chars, beat.speakerKey)}
-      <button type="button" class="vn-skip" onclick="skipStory()">LEWATI ⏭</button>
+      ${hasCheckpointAhead ? `<button type="button" class="vn-skip" onclick="skipStory()">LEWATI ⏭</button>` : ""}
       <div class="grow"></div>
       <button type="button" class="vn-dialogue btn-block" onclick="nextStoryBeat()">
         <div class="vn-speaker ${speakerLabel(beat).cls}">${speakerLabel(beat).text}</div>
@@ -1448,95 +1954,324 @@ function renderStory(){
     </div>
   `;
 }
-function nextStoryBeat(){ storyStep++; renderStory(); }
-/* Lewati semua narasi teks, tapi tetap berhenti di sesi Pemahaman Awal (kuis) — datanya penting untuk Dashboard Guru. */
+function nextStoryBeat(){ storyStep++; saveStoryProgress(); renderStory(); }
+/* Lewati narasi teks menuju checkpoint berikutnya (kuis Pemahaman Awal ATAU sesi
+   perjalanan ketemu teman) — datanya/interaksinya penting, jadi jangan pernah dilompati.
+   Kalau nggak ada checkpoint lagi di depan, tombol ini nggak ditampilkan (lihat renderStory). */
 function skipStory(){
-  while(storyStep < storyBeats.length && storyBeats[storyStep].text !== "__BEFORE_QUIZ__"){
-    storyStep++;
-  }
+  const isCheckpoint = b => b.text === "__BEFORE_QUIZ__" || b.text === "__PERJALANAN__";
+  let i = storyStep;
+  while(i < storyBeats.length && !isCheckpoint(storyBeats[i])) i++;
+  if(i >= storyBeats.length) return; // jaga-jaga: nggak ada checkpoint di depan, jangan lompat ke Lobby
+  storyStep = i;
+  saveStoryProgress();
   renderStory();
 }
 
-/* ---------- PERJALANAN: ketemu teman di jalan menuju Rumah 'Aisyiyah ---------- */
-/* Aset yang dipakai per NPC: sprite_xxx.png (figur kecil di jalan) + narasi_xxx.png (potret closeup pas ngobrol) */
-const PERJALANAN_NPCS = [
-  {id:"aldo", name:"Aldo", pos:22,
-   sprite:"images/sprite_aldo_tunarungu.png", portrait:"images/narasi_aldo_tunarungu.png",
-   lines:["Eh, kamu mau ke Rumah 'Aisyiyah juga?", "Di sana ramah buat aku yang tunarungu — ada opsi bahasa isyarat dan subtitle di semua materinya."]},
-  {id:"arka", name:"Arka", pos:52,
-   sprite:"images/sprite_arka_kakicacat.png", portrait:"images/narasi_arka_kakicacat.png",
-   lines:["Dulu aku sempat minder soal kondisi kakiku.", "Tapi di sana aku belajar, tubuh yang berbeda itu tetap berharga — nggak perlu dibanding-bandingkan sama orang lain."]},
-  {id:"vira", name:"Vira", pos:80,
-   sprite:"images/sprite_vira_disabilitas.png", portrait:"images/narasi_vira_disabilitas.png",
-   lines:["Aku pernah diperlakukan nggak baik sama orang lain gara-gara kondisiku.", "Tapi Kak Hana bantu aku sadar aku berhak dihargai — dan ada tempat buat cerita kalau itu terjadi lagi. Kamu juga, ya, kalau butuh."]},
+/* ---------- PERJALANAN: side-scrolling adventure menuju Rumah 'Aisyiyah ----------
+   Dunia dibagi jadi beberapa SEGMEN (scene). Player jalan beneran pakai tombol arah
+   (keyboard di desktop, dua tombol sentuh ◀▶ di HP — bisa ditahan). Kamera + 4 layer
+   (langit, laut, bangunan/pohon, jalan) scroll paralaks mengikuti posisi player, jadi
+   NPC nggak numpuk di satu tampilan — mereka tersebar di sepanjang jalan dan baru
+   kelihatan pas player jalan mendekat, kayak game side-scroller. Segmen berikutnya
+   otomatis kebuka begitu semua teman di segmen itu sudah diajak ngobrol dan player
+   jalan sampai ke ujung kanan. Aset per NPC: sprite_xxx.png (figur di jalan) +
+   narasi_xxx.png (potret closeup pas ngobrol). */
+const SS_SEGMENTS = [
+  { id:"segmen1", label:"Tepi Pantai", width:1500, goal:"🌴",
+    npcs:[
+      {id:"aldo", name:"Aldo", x:430, sprite:"images/sprite_aldo_tunarungu.png", portrait:"images/narasi_aldo_tunarungu.png",
+       lines:["Eh, kamu mau ke Rumah 'Aisyiyah juga?", "Di sana ramah buat aku yang tunarungu — ada opsi bahasa isyarat dan subtitle di semua materinya."]},
+      {id:"arka", name:"Arka", x:1080, sprite:"images/sprite_arka_kakicacat.png", portrait:"images/narasi_arka_kakicacat.png",
+       lines:["Dulu aku sempat minder soal kondisi kakiku.", "Tapi di sana aku belajar, tubuh yang berbeda itu tetap berharga — nggak perlu dibanding-bandingkan sama orang lain."]},
+    ]},
+  { id:"segmen2", label:"Menuju Rumah 'Aisyiyah", width:1100, goal:"🏠",
+    npcs:[
+      {id:"vira", name:"Vira", x:580, sprite:"images/sprite_vira_disabilitas.png", portrait:"images/narasi_vira_disabilitas.png",
+       lines:["Aku pernah diperlakukan nggak baik sama orang lain gara-gara kondisiku.", "Tapi Kak Hana bantu aku sadar aku berhak dihargai — dan ada tempat buat cerita kalau itu terjadi lagi. Kamu juga, ya, kalau butuh."]},
+    ]},
 ];
-let jalanVisited = new Set();
-let jalanNpcActive = null;
-let jalanLineIdx = 0;
+const SS_SPEED = 230;    // kecepatan jalan, px-dunia per detik
+const SS_TALK_DIST = 78; // jarak maksimal buat mulai ngobrol
+const SS_EDGE_PAD = 40;  // jarak minimal dari tepi dunia (biar nggak keluar layar)
+
+let ss = null; // state berjalan — dibuat sekali waktu masuk scene perjalanan
 
 function renderPerjalanan(){
-  if(jalanNpcActive){ renderNpcTalk(); return; }
+  if(!ss){
+    const saved = STATE.perjalanan;
+    ss = {
+      segIdx: saved ? saved.segIdx : 0, playerX:60, dir:0, facing:1, moving:false, nearest:null,
+      visited: new Set(saved ? saved.visited : []), talkingWith:null, lineIdx:0,
+      raf:null, lastT:null, keyDown:null, keyUp:null,
+    };
+  }
+  ssEnterSegment();
+}
+function ssCurrentSegment(){ return SS_SEGMENTS[ss.segIdx]; }
+function ssKey(npcId){ return `${ss.segIdx}:${npcId}`; }
+/* Simpan segmen & daftar teman yang sudah diajak ngobrol, supaya kalau tiba-tiba
+   keluar/nutup gim di tengah perjalanan, pas balik lagi lanjut dari sini —
+   nggak perlu ngobrol ulang sama teman yang udah selesai. */
+function saveSsProgress(){
+  if(!ss) return;
+  STATE.perjalanan = { segIdx: ss.segIdx, visited: Array.from(ss.visited) };
+  saveState();
+}
+
+function ssEnterSegment(){
+  ssBuildDOM();
+  ssAttachInput();
+  ssStartLoop();
+}
+function ssHouseRow(width){
+  const icons = ["🏠","🌴","🌳","🏠","🌳"];
+  let html = "", i = 0;
+  for(let x=30; x<width-30; x+=210){
+    html += `<span class="ss-house" style="left:${x}px;">${icons[i % icons.length]}</span>`;
+    i++;
+  }
+  return html;
+}
+function ssBuildDOM(){
   const c = document.getElementById("storyContent");
+  const seg = ssCurrentSegment();
   const g = STATE.gender === "laki" ? "cowo" : "cewe";
   const j = STATE.jenjang || "sma";
   const playerSprite = `images/sprite_${g}_${j}.png`;
-  const allVisited = PERJALANAN_NPCS.every(n=>jalanVisited.has(n.id));
   c.innerHTML = `
-    <div class="vn-stage">
-      <div class="vn-bg" style="background-image:url('${NARASI_BG.refleksi}')"></div>
-      <button type="button" class="vn-skip" onclick="skipPerjalanan()">LEWATI ⏭</button>
-      <div class="jalan-track">
-        ${PERJALANAN_NPCS.map(n=>`
-          <button type="button" class="jalan-npc ${jalanVisited.has(n.id)?"visited":""}" style="left:${n.pos}%" onclick="talkNpc('${n.id}')">
-            <img src="${n.sprite}" alt="${n.name}" onerror="this.style.visibility='hidden'">
-            <span class="jalan-badge">${jalanVisited.has(n.id) ? "✓" : "!"}</span>
-            <span class="jalan-name">${n.name}</span>
-          </button>
-        `).join("")}
-        <img class="jalan-player" src="${playerSprite}" alt="" onerror="this.remove()">
+    <div class="vn-stage ss-stage">
+      <div class="ss-viewport" id="ssViewport">
+        <div class="ss-layer ss-sky" id="ssSky">
+          <span class="ss-cloud" style="left:8%;top:14%;">☁️</span>
+          <span class="ss-cloud" style="left:36%;top:8%;">☁️</span>
+          <span class="ss-cloud" style="left:64%;top:20%;">☁️</span>
+          <span class="ss-cloud" style="left:88%;top:11%;">☁️</span>
+          <span class="ss-bird fly-right" style="top:16%;animation-duration:16s;animation-delay:-2s;">🐦</span>
+          <span class="ss-bird fly-right" style="top:26%;animation-duration:21s;animation-delay:-11s;">🐦</span>
+          <span class="ss-bird fly-left" style="top:10%;animation-duration:19s;animation-delay:-6s;">🐦</span>
+        </div>
+        <div class="ss-layer ss-sea" id="ssSea"></div>
+        <div class="ss-layer ss-mid" id="ssMid">${ssHouseRow(seg.width)}</div>
+        <div class="ss-layer ss-grassbase"></div>
+        <div class="ss-layer ss-ground" id="ssGround">
+          <div class="ss-world" id="ssWorld">
+            ${seg.npcs.map(n=>`
+              <div class="ss-sprite ss-npc ${ss.visited.has(ssKey(n.id))?"visited":""}" id="ssnpc-${n.id}" style="left:${n.x}px">
+                <span class="ss-npc-badge">${ss.visited.has(ssKey(n.id))?"✓":"!"}</span>
+                <img src="${n.sprite}" alt="${n.name}" onerror="this.style.visibility='hidden'">
+                <span class="ss-npc-name">${n.name}</span>
+              </div>
+            `).join("")}
+            <span class="ss-sprite ss-goal" style="left:${seg.width-24}px">${seg.goal}</span>
+            <div class="ss-sprite ss-player facing-right" id="ssPlayer" style="left:${ss.playerX}px">
+              <img src="${playerSprite}" alt="" onerror="this.remove()">
+            </div>
+          </div>
+        </div>
       </div>
-      <p class="jalan-hint">${allVisited ? "Semua sudah kamu ajak ngobrol." : "Ketuk teman di jalan untuk ngobrol dulu, yuk."}</p>
-      <button type="button" class="btn-primary btn-block jalan-continue" ${allVisited?"":"disabled"} onclick="continuePerjalanan()">Lanjut ke Rumah 'Aisyiyah →</button>
+      <div class="ss-topbar">
+        <span>${seg.label}</span>
+        ${SS_SEGMENTS.map((s,i)=>`<span class="ss-dot ${i<ss.segIdx?"done":i===ss.segIdx?"current":""}"></span>`).join("")}
+      </div>
+      <div id="ssPrompt"></div>
+      <div class="ss-controls">
+        <button type="button" class="ss-dpad" id="ssLeft" aria-label="Jalan ke kiri">◀</button>
+        <div style="pointer-events:none;flex:1"></div>
+        <button type="button" class="ss-dpad" id="ssRight" aria-label="Jalan ke kanan">▶</button>
+      </div>
     </div>
   `;
+  ss.nearest = null;
+  const promptEl = document.getElementById("ssPrompt");
+  if(promptEl) promptEl.dataset.state = "";
+  ssRenderCamera();
 }
-function talkNpc(id){
-  jalanNpcActive = PERJALANAN_NPCS.find(n=>n.id===id);
-  jalanLineIdx = 0;
-  renderPerjalanan();
+function ssRenderCamera(){
+  const seg = ssCurrentSegment();
+  const viewport = document.getElementById("ssViewport");
+  if(!viewport) return;
+  const vw = viewport.clientWidth || 800;
+  const maxCam = Math.max(0, seg.width - vw);
+  const camera = Math.min(maxCam, Math.max(0, ss.playerX - vw*0.32));
+  const mid = document.getElementById("ssMid");
+  const world = document.getElementById("ssWorld");
+  /* Langit & laut sengaja TIDAK ikut digeser: div-nya cuma selebar layar (gradien
+     polos, bukan pola berulang), jadi kalau ikut ditranslate ke kiri, ujung
+     kanannya kehabisan area dan nongol warna hitam panggung di baliknya —
+     itu yang bikin muncul area kosong/hitam. Biar aman di semua ukuran layar,
+     langit & laut cukup diam menutupi layar penuh terus. */
+  if(mid) mid.style.transform = `translateX(${-camera*0.62}px)`;
+  if(world) world.style.transform = `translateX(${-camera}px)`;
 }
-function renderNpcTalk(){
-  const c = document.getElementById("storyContent");
-  const n = jalanNpcActive;
-  c.innerHTML = `
-    <div class="vn-stage">
-      <div class="vn-bg" style="background-image:url('${NARASI_BG.refleksi}')"></div>
-      <img class="vn-portrait pos-left idle" src="${playerPortraitSrc()}" alt="" onerror="this.remove()">
-      <img class="vn-portrait pos-right speaking" src="${n.portrait}" alt="${n.name}" onerror="this.remove()">
-      <div class="grow"></div>
-      <button type="button" class="vn-dialogue btn-block" onclick="nextNpcLine()">
-        <div class="vn-speaker">${n.name}</div>
-        <p class="vn-text">${n.lines[jalanLineIdx]}</p>
-        <span class="vn-continue">Ketuk untuk lanjut ▶</span>
-      </button>
-    </div>
-  `;
+function ssApplyPositions(){
+  const p = document.getElementById("ssPlayer");
+  if(!p) return;
+  p.style.left = ss.playerX+"px";
+  p.classList.toggle("walking", ss.moving);
+  p.classList.toggle("facing-left", ss.facing<0);
+  p.classList.toggle("facing-right", ss.facing>=0);
 }
-function nextNpcLine(){
-  jalanLineIdx++;
-  if(jalanLineIdx >= jalanNpcActive.lines.length){
-    jalanVisited.add(jalanNpcActive.id);
-    jalanNpcActive = null;
+function ssSetPrompt(){
+  const el = document.getElementById("ssPrompt");
+  if(!el) return;
+  if(ss.talkingWith) return; // dialog punya render sendiri
+  const seg = ssCurrentSegment();
+  const allVisited = seg.npcs.every(n=>ss.visited.has(ssKey(n.id)));
+  const key = ss.nearest ? `n:${ss.nearest.id}` : (allVisited?"go":"walk");
+  if(el.dataset.state === key) return;
+  el.dataset.state = key;
+  if(ss.nearest){
+    el.innerHTML = `<div class="ss-interact"><button type="button" class="btn-gold" onclick="ssTalk('${ss.nearest.id}')">💬 Ngobrol dengan ${ss.nearest.name}</button></div>`;
+  } else {
+    const txt = allVisited ? "Jalan terus ke kanan untuk lanjut →" : "Jalan dan ketuk teman di jalan untuk ngobrol dulu, yuk.";
+    el.innerHTML = `<div class="ss-hint-banner">${txt}</div>`;
   }
-  renderPerjalanan();
 }
-/* Lewati adegan jalan sepenuhnya (anggap semua sudah "ditemui") */
-function skipPerjalanan(){
-  PERJALANAN_NPCS.forEach(n=>jalanVisited.add(n.id));
-  jalanNpcActive = null;
+function ssCheckTriggers(){
+  const seg = ssCurrentSegment();
+  if(ss.talkingWith){ ss.nearest = null; return; }
+  let nearest = null, nearestDist = SS_TALK_DIST;
+  seg.npcs.forEach(n=>{
+    const d = Math.abs(n.x - ss.playerX);
+    if(d < nearestDist){ nearest = n; nearestDist = d; }
+  });
+  ss.nearest = nearest;
+  ssSetPrompt();
+  const allVisited = seg.npcs.every(n=>ss.visited.has(ssKey(n.id)));
+  const nearEdge = ss.playerX >= seg.width - SS_EDGE_PAD - 4;
+  if(nearEdge && allVisited){ ssAdvanceSegment(); }
+}
+function ssStartLoop(){
+  if(ss.raf) cancelAnimationFrame(ss.raf);
+  ss.lastT = null;
+  const token = {}; // identitas loop ini — dipakai buat mendeteksi loop lama yang harus berhenti
+  ss.loopToken = token;
+  const step = (t)=>{
+    if(!ss || ss.loopToken !== token) return; // scene sudah ganti segmen / selesai — hentikan loop lama ini
+    if(ss.lastT===null) ss.lastT = t;
+    const dt = Math.min(0.05, (t-ss.lastT)/1000);
+    ss.lastT = t;
+    if(!ss.talkingWith && ss.dir !== 0){
+      const seg = ssCurrentSegment();
+      const nx = ss.playerX + ss.dir*SS_SPEED*dt;
+      ss.playerX = Math.max(SS_EDGE_PAD, Math.min(seg.width-SS_EDGE_PAD, nx));
+      ss.facing = ss.dir;
+      ss.moving = true;
+    } else {
+      ss.moving = false;
+    }
+    ssApplyPositions();
+    ssRenderCamera();
+    ssCheckTriggers();
+    if(!ss || ss.loopToken !== token) return; // bisa berubah di dalam ssCheckTriggers (ganti segmen/selesai)
+    ss.raf = requestAnimationFrame(step);
+  };
+  ss.raf = requestAnimationFrame(step);
+}
+function ssTalk(id){
+  const seg = ssCurrentSegment();
+  const n = seg.npcs.find(x=>x.id===id);
+  if(!n) return;
+  ss.dir = 0; ss.moving = false;
+  ss.talkingWith = n;
+  ss.lineIdx = 0;
+  if(typeof playClickSfx === "function") playClickSfx("tap");
+  ssRenderTalk();
+}
+function ssRenderTalk(){
+  const el = document.getElementById("ssPrompt");
+  if(!el) return;
+  const n = ss.talkingWith;
+  el.dataset.state = "talk";
+  el.innerHTML = `
+    <img class="vn-portrait pos-left idle" src="${playerPortraitSrc()}" alt="" onerror="this.remove()" onanimationend="this.classList.add('breathing')">
+    <img class="vn-portrait pos-right speaking" src="${n.portrait}" alt="${n.name}" onerror="this.remove()" onanimationend="this.classList.add('breathing')">
+    <button type="button" class="vn-dialogue btn-block ss-dialogue" onclick="ssNextLine()">
+      <div class="vn-speaker">${n.name}</div>
+      <p class="vn-text">${n.lines[ss.lineIdx]}</p>
+      <span class="vn-continue">Ketuk untuk lanjut ▶</span>
+    </button>
+  `;
+}
+function ssNextLine(){
+  ss.lineIdx++;
+  if(ss.lineIdx >= ss.talkingWith.lines.length){
+    ss.visited.add(ssKey(ss.talkingWith.id));
+    const npcEl = document.getElementById(`ssnpc-${ss.talkingWith.id}`);
+    if(npcEl){
+      npcEl.classList.add("visited");
+      const badge = npcEl.querySelector(".ss-npc-badge");
+      if(badge) badge.textContent = "✓";
+    }
+    ss.talkingWith = null;
+    const el = document.getElementById("ssPrompt");
+    if(el) el.dataset.state = "";
+    saveSsProgress();
+  } else {
+    ssRenderTalk();
+  }
+}
+function ssAdvanceSegment(){
+  if(ss.talkingWith) return;
+  if(ss.segIdx < SS_SEGMENTS.length-1){
+    ss.segIdx++;
+    ss.playerX = 60;
+    ss.dir = 0;
+    saveSsProgress();
+    ssEnterSegment();
+  } else {
+    ssFinish();
+  }
+}
+function ssAttachInput(){
+  ssDetachInput();
+  const onKeyDown = (e)=>{
+    if(!ss || ss.talkingWith) return;
+    if(e.key==="ArrowRight"||e.key==="d"||e.key==="D"){ ss.dir = 1; }
+    else if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A"){ ss.dir = -1; }
+    else if((e.key===" "||e.key==="Enter") && ss.nearest){ ssTalk(ss.nearest.id); }
+  };
+  const onKeyUp = (e)=>{
+    if(!ss) return;
+    if((e.key==="ArrowRight"||e.key==="d"||e.key==="D") && ss.dir===1) ss.dir=0;
+    if((e.key==="ArrowLeft"||e.key==="a"||e.key==="A") && ss.dir===-1) ss.dir=0;
+  };
+  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keyup", onKeyUp);
+  ss.keyDown = onKeyDown;
+  ss.keyUp = onKeyUp;
+  const bindDpad = (elId, dir)=>{
+    const el = document.getElementById(elId);
+    if(!el) return;
+    const start = (e)=>{ e.preventDefault(); if(ss && !ss.talkingWith) ss.dir = dir; };
+    const end = (e)=>{ e.preventDefault(); if(ss && ss.dir===dir) ss.dir = 0; };
+    el.addEventListener("pointerdown", start);
+    el.addEventListener("pointerup", end);
+    el.addEventListener("pointerleave", end);
+    el.addEventListener("pointercancel", end);
+  };
+  bindDpad("ssLeft", -1);
+  bindDpad("ssRight", 1);
+}
+function ssDetachInput(){
+  if(ss && ss.keyDown){
+    window.removeEventListener("keydown", ss.keyDown);
+    window.removeEventListener("keyup", ss.keyUp);
+    ss.keyDown = null; ss.keyUp = null;
+  }
+}
+function ssTeardown(){
+  if(ss && ss.raf) cancelAnimationFrame(ss.raf);
+  ssDetachInput();
+  ss = null;
+}
+function ssFinish(){
+  ssTeardown();
+  STATE.perjalanan = null; // segmen perjalanan sudah tuntas, nggak perlu di-resume lagi
   continuePerjalanan();
 }
-function continuePerjalanan(){ storyStep++; renderStory(); }
+function continuePerjalanan(){ storyStep++; saveStoryProgress(); renderStory(); }
 
 function renderBeforeQuiz(){
   const c = document.getElementById("storyContent");
@@ -1547,7 +2282,7 @@ function renderBeforeQuiz(){
   c.innerHTML = `
     <div class="vn-stage">
       <div class="vn-bg" style="background-image:url('${bgSrc}')"></div>
-      <img class="vn-portrait pos-solo speaking" src="${charSrc}" alt="" onerror="this.remove()">
+      <img class="vn-portrait pos-solo speaking" src="${charSrc}" alt="" onerror="this.remove()" onanimationend="this.classList.add('breathing')">
       <div class="grow"></div>
       <div class="vn-quizwrap">
         <div class="vn-quiz-panel">
@@ -1560,13 +2295,26 @@ function renderBeforeQuiz(){
   `;
 }
 function answerBefore(i){
+  const opts = document.querySelectorAll(".vn-quiz-panel .quiz-opt");
+  opts.forEach((el,idx)=>{
+    el.disabled = true;
+    if(idx===i) el.classList.add("selected");
+  });
+  playClickSfx("tap");
   STATE.before["q"+beforeIdx] = i;
-  beforeIdx++;
-  saveState();
-  renderBeforeQuiz();
+  setTimeout(()=>{
+    beforeIdx++;
+    saveStoryProgress();
+    renderBeforeQuiz();
+  }, 350);
 }
 function finishStoryIntro(){
   logToSheet("pemahaman_awal", {jawaban: STATE.before});
+  /* Intro cerita (narasi + kuis + perjalanan ketemu teman) resmi selesai —
+     dari sini kalau keluar-masuk gim lagi, langsung ke Lobby, nggak diulang. */
+  STATE.storyDone = true;
+  STATE.perjalanan = null;
+  saveState();
   goTo("screen-lobby");
   renderLobby();
 }
@@ -1857,13 +2605,18 @@ function renderRefleksi(){
       <span class="badge-pill">Pemahaman Akhir</span>
       ${beforeQuestions.map((item,i)=>`
         <div class="quiz-q">${item.q}</div>
-        ${item.opts.map((o,oi)=>`<button class="quiz-opt btn-block" onclick="answerAfter(${i},${oi})">${o}</button>`).join("")}
+        ${item.opts.map((o,oi)=>`<button class="quiz-opt btn-block" data-q="${i}" data-oi="${oi}" onclick="answerAfter(${i},${oi})">${o}</button>`).join("")}
       `).join("<hr style='border:none;border-top:1px dashed #e2d9bd;margin:10px 0;'>")}
     </div>
     <div id="afterResultBox"></div>
   `;
 }
 function answerAfter(qIdx, chosen){
+  document.querySelectorAll(`.quiz-opt[data-q="${qIdx}"]`).forEach(el=>{
+    el.disabled = true;
+    el.classList.toggle("selected", Number(el.dataset.oi)===chosen);
+  });
+  playClickSfx("tap");
   STATE.after["q"+qIdx] = chosen;
   saveState();
   const answeredAll = beforeQuestions.every((_,i)=> STATE.after["q"+i] !== undefined);
