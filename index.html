@@ -240,7 +240,7 @@
   .vn-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,16,12,.15) 0%,rgba(10,16,12,.05) 45%,rgba(8,14,10,.75) 100%);}
   @keyframes vnBgIn{from{opacity:0;}to{opacity:1;}}
   .vn-portrait{
-    position:absolute;bottom:0;object-fit:contain;
+    position:absolute;bottom:0;object-fit:contain;z-index:4;
     filter:drop-shadow(0 14px 22px rgba(0,0,0,.45));
     opacity:0;transition:opacity .25s ease, filter .25s ease;
   }
@@ -295,8 +295,14 @@
   .ss-viewport{position:absolute;inset:0;overflow:hidden;}
   .ss-layer{position:absolute;inset:0;}
   .ss-sky{background:linear-gradient(180deg,#5EC6F2 0%,#8FD8F5 42%,#D8F2FA 100%);}
-  .ss-sky .ss-cloud{position:absolute;font-size:clamp(22px,4vh,38px);opacity:.92;filter:drop-shadow(0 4px 5px rgba(0,0,0,.08));}
-  .ss-sky .ss-bird{position:absolute;left:0;font-size:clamp(14px,2.4vh,22px);opacity:.88;
+  .ss-sky .ss-cloud{position:absolute;left:0;width:clamp(22px,4vh,38px);height:auto;opacity:.92;filter:drop-shadow(0 4px 5px rgba(0,0,0,.08));
+    animation-name:ssCloudDrift;animation-timing-function:linear;animation-iteration-count:infinite;}
+  @keyframes ssCloudDrift{
+    0%{transform:translate(-15vw,0);}
+    50%{transform:translate(50vw,-6px);}
+    100%{transform:translate(115vw,0);}
+  }
+  .ss-sky .ss-bird{position:absolute;left:0;width:clamp(14px,2.4vh,22px);height:auto;opacity:.88;
     filter:drop-shadow(0 2px 3px rgba(0,0,0,.15));animation-timing-function:linear;animation-iteration-count:infinite;
     transform-origin:center;}
   .ss-bird.fly-right{animation-name:ssFlyRight;}
@@ -317,38 +323,69 @@
   }
   .ss-sea{top:36%;bottom:0;background:linear-gradient(180deg,#1C9AD6 0%,#0E74AC 55%,#0A5C8A 100%);overflow:hidden;}
   .ss-sea::after{content:'';position:absolute;inset:-10% -20%;
-    background:repeating-linear-gradient(96deg,rgba(255,255,255,.14) 0 2px,transparent 2px 46px);
+    background-image:url('images/ss_kilau_laut.png');background-repeat:repeat;background-size:46px 46px;
     animation:ssShimmer 5s linear infinite;}
   @keyframes ssShimmer{from{transform:translateX(0);}to{transform:translateX(180px);}}
   .ss-mid{top:auto;bottom:21%;height:26%;}
   .ss-mid .ss-house{position:absolute;bottom:0;font-size:clamp(38px,7.5vh,66px);line-height:1;filter:drop-shadow(0 6px 6px rgba(0,0,0,.2)) brightness(.92);}
-  /* Strip rumput/tanah tambahan di paling bawah layar, di bawah jalan yang bisa
-     dilewati player — biar jalannya nggak nempel mentok ke tepi bawah layar. */
-  .ss-grassbase{top:auto;bottom:0;height:6%;background:linear-gradient(180deg,#1F5E4A 0%,#12362A 100%);}
-  .ss-grassbase::before{content:'';position:absolute;inset:0;pointer-events:none;
-    background-image:radial-gradient(circle,rgba(255,255,255,.10) 1px,transparent 1.6px);
-    background-size:16px 11px;background-position:0 3px;}
-  .ss-ground{top:auto;bottom:6%;height:15%;background:linear-gradient(180deg,#2E8058 0%,#1F5E4A 100%);border-top:3px solid rgba(255,255,255,.22);}
+  /* Strip rumput/tanah tambahan di paling bawah layar — dibikin agak besar dan
+     ditumpuk DI DEPAN jalan (z-index lebih tinggi dari ss-world) supaya kelihatan
+     seperti rumput ada di depan kamera, dan jalan + pemain/NPC seolah jalan di
+     belakangnya (kaki ketutup dikit di bagian bawah, kesan kedalaman). */
+  .ss-grassbase{top:auto;bottom:0;height:16%;z-index:3;pointer-events:none;
+    background-image:url('images/ss_rumput_bawah.png');
+    background-repeat:repeat-x;background-position:bottom;background-size:auto 100%;}
+  .ss-ground{top:auto;bottom:6%;height:15%;
+    background-color:#2E8058;background-image:url('images/ss_jalan.png');
+    background-repeat:repeat-x;background-size:auto 100%;}
   /* Rumput bergerigi di tepi atas jalan, biar jalan yang bisa dilewati player
      kelihatan seperti jalan setapak di antara rumput, bukan cuma potongan warna polos. */
   .ss-ground::before{content:'';position:absolute;left:0;right:0;top:-9px;height:13px;z-index:1;pointer-events:none;
-    background:
-      repeating-linear-gradient(115deg,#4FA873 0 7px,transparent 7px 14px),
-      repeating-linear-gradient(65deg,#6FCB93 0 7px,transparent 7px 14px);
-    background-position:0 0,7px 0;background-repeat:repeat-x;
+    background-color:#4FA873;background-image:url('images/ss_rumput_tepi.png');
+    background-repeat:repeat-x;background-size:auto 100%;
     filter:drop-shadow(0 2px 1px rgba(0,0,0,.18));}
-  .ss-ground::after{content:'';position:absolute;left:0;right:0;top:6px;bottom:0;
-    background:repeating-linear-gradient(90deg,rgba(255,255,255,.14) 0 10px,transparent 10px 48px);}
-  .ss-world{position:absolute;left:0;bottom:0;height:100%;}
+  .ss-world{position:absolute;left:0;bottom:0;height:100%;z-index:2;}
   .ss-sprite{position:absolute;bottom:2px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;}
-  .ss-sprite img{width:clamp(56px,10vh,92px);height:clamp(56px,10vh,92px);object-fit:contain;filter:drop-shadow(0 8px 10px rgba(0,0,0,.4));}
+  .ss-sprite img{width:clamp(96px,17vh,160px);height:clamp(96px,17vh,160px);object-fit:contain;filter:drop-shadow(0 8px 10px rgba(0,0,0,.4));
+    animation:ssBreathe 2.6s ease-in-out infinite;transform-origin:bottom center;}
+  @keyframes ssBreathe{
+    0%,100%{transform:translateY(0) scale(1,1) scaleX(var(--ssfx,1));}
+    50%{transform:translateY(-3px) scale(1.02,1.03) scaleX(var(--ssfx,1));}
+  }
   .ss-npc-name{margin-top:2px;font-size:10.5px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.75);}
-  .ss-npc-badge{position:absolute;top:-4px;right:8px;width:18px;height:18px;border-radius:50%;background:var(--gold);color:#3a2a06;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,.35);z-index:1;}
-  .ss-npc.visited .ss-npc-badge{background:var(--green-mid);color:#fff;}
+  /* tanda "bisa diajak ngobrol" — bubble mengambang di atas kepala NPC, ada animasi
+     mengambang + titik-titik berkedip supaya kesannya benar-benar "lagi mau ngajak ngomong",
+     bukan cuma tanda seru statis. */
+  .ss-npc-badge{
+    position:absolute;top:-26px;left:50%;transform:translateX(-50%);
+    min-width:34px;height:24px;padding:0 8px;border-radius:14px 14px 14px 4px;
+    background:#fff;color:var(--green-deep);border:2px solid var(--gold);
+    font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:2px;
+    box-shadow:0 4px 10px rgba(0,0,0,.3);z-index:1;
+    animation:ssBadgeFloat 1.7s ease-in-out infinite;
+  }
+  .ss-npc-badge::after{
+    content:'';position:absolute;left:9px;bottom:-7px;width:0;height:0;
+    border-left:5px solid transparent;border-right:6px solid transparent;
+    border-top:7px solid var(--gold);
+  }
+  .ss-npc-badge::before{
+    content:'';position:absolute;left:10px;bottom:-4.5px;width:0;height:0;
+    border-left:4px solid transparent;border-right:5px solid transparent;
+    border-top:5.5px solid #fff;z-index:1;
+  }
+  .ss-npc-badge .ss-badge-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);animation:ssBadgeDot 1s ease-in-out infinite;}
+  .ss-npc-badge .ss-badge-dot:nth-child(2){animation-delay:.15s;}
+  .ss-npc-badge .ss-badge-dot:nth-child(3){animation-delay:.3s;}
+  @keyframes ssBadgeFloat{0%,100%{transform:translateX(-50%) translateY(0);}50%{transform:translateX(-50%) translateY(-6px);}}
+  @keyframes ssBadgeDot{0%,60%,100%{opacity:.3;transform:translateY(0);}30%{opacity:1;transform:translateY(-2px);}}
+  .ss-npc.visited .ss-npc-badge{
+    background:var(--green-mid);color:#fff;border-color:var(--green-mid);
+    min-width:22px;width:22px;height:22px;padding:0;border-radius:50%;animation:none;
+  }
+  .ss-npc.visited .ss-npc-badge::after,.ss-npc.visited .ss-npc-badge::before{display:none;}
   .ss-npc.visited img{filter:drop-shadow(0 8px 10px rgba(0,0,0,.4)) grayscale(.55);opacity:.78;}
   .ss-goal{font-size:clamp(30px,6vh,48px);filter:drop-shadow(0 6px 6px rgba(0,0,0,.3));}
-  .ss-player img{transform:scaleX(1);}
-  .ss-player.facing-left img{transform:scaleX(-1);}
   .ss-player.walking img{animation:ssBob .32s ease-in-out infinite;}
   @keyframes ssBob{0%,100%{transform:translateY(0) scaleX(var(--ssfx,1));}50%{transform:translateY(-5px) scaleX(var(--ssfx,1));}}
   .ss-player.facing-left{--ssfx:-1;}
@@ -360,8 +397,33 @@
   .ss-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35);}
   .ss-dot.current{background:#fff;}
   .ss-dot.done{background:var(--gold);}
-  .ss-interact{position:absolute;left:50%;bottom:25%;transform:translateX(-50%);z-index:6;animation:vnDialogueIn .2s ease;white-space:nowrap;}
-  .ss-interact button{box-shadow:0 8px 18px rgba(0,0,0,.35);}
+  .ss-interact{position:absolute;left:50%;bottom:25%;transform:translateX(-50%);z-index:6;white-space:nowrap;}
+  /* tombol ajakan ngobrol didesain jadi bubble chat sungguhan (bukan pil biasa) —
+     ada "ekor" runcing di bawah, mengarah ke NPC/pemain, dan animasi muncul-nya
+     kayak balon chat yang barusan nongol. */
+  .btn-chat{
+    position:relative;display:inline-flex;align-items:center;gap:9px;
+    background:linear-gradient(180deg,#ffffff 0%,#fbf3df 100%);
+    color:var(--green-deep);border:3px solid var(--gold);border-radius:24px;
+    padding:12px 24px 12px 20px;font-size:14.5px;font-weight:800;letter-spacing:.1px;
+    cursor:pointer;font-family:inherit;
+    box-shadow:0 10px 22px rgba(0,0,0,.32);
+    animation:ssChatPop .22s cubic-bezier(.2,.9,.3,1.2);
+  }
+  .btn-chat:active{transform:scale(.96);}
+  .btn-chat .btn-chat-icon{font-size:17px;line-height:1;}
+  .btn-chat::after{
+    content:'';position:absolute;left:26px;bottom:-11px;width:0;height:0;
+    border-left:9px solid transparent;border-right:9px solid transparent;border-top:12px solid var(--gold);
+  }
+  .btn-chat::before{
+    content:'';position:absolute;left:29px;bottom:-6.5px;width:0;height:0;
+    border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid #fbf3df;z-index:1;
+  }
+  @keyframes ssChatPop{from{opacity:0;transform:scale(.82) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  @media (hover:hover) and (pointer:fine){
+    .btn-chat:hover{box-shadow:0 14px 26px rgba(0,0,0,.4);background:linear-gradient(180deg,#ffffff 0%,#f7ecd9 100%);}
+  }
   .ss-hint-banner{position:absolute;left:50%;bottom:25%;transform:translateX(-50%);z-index:5;
     background:rgba(10,16,12,.6);color:#fff;font-size:12.5px;padding:9px 16px;border-radius:999px;
     text-shadow:0 1px 3px rgba(0,0,0,.6);white-space:nowrap;}
@@ -371,6 +433,16 @@
     border:2px solid rgba(255,255,255,.35);box-shadow:0 8px 16px rgba(0,0,0,.35);touch-action:none;-webkit-user-select:none;user-select:none;}
   .ss-dpad:active{background:rgba(31,94,74,.9);transform:scale(.94);}
   .ss-dialogue{position:absolute;left:14px;right:14px;bottom:16px;z-index:6;margin:0;width:auto;}
+  /* tutorial jalan & ngobrol — muncul sekali di awal sebelum pemain bisa gerak */
+  .ss-tutorial{position:absolute;inset:0;z-index:30;background:rgba(10,16,12,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px;}
+  .ss-tutorial-card{background:var(--card);border-radius:20px;padding:24px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.45);animation:modalPop .28s cubic-bezier(.2,.9,.3,1.2);}
+  .ss-tutorial-card h3{margin:0 0 4px;}
+  .ss-tutorial-sub{font-size:12.5px;color:var(--grey);margin:0 0 16px;}
+  .ss-tutorial-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;text-align:left;}
+  .ss-tutorial-step{display:flex;align-items:center;gap:12px;background:var(--green-soft);border-radius:14px;padding:11px 13px;}
+  .ss-tutorial-step .ss-tutorial-icon{font-size:24px;flex:none;width:36px;text-align:center;}
+  .ss-tutorial-step p{margin:0;font-size:12.5px;line-height:1.4;color:var(--ink);}
+  .ss-tutorial-step strong{color:var(--text-accent);}
 
   input[type=text],input[type=password]{
     width:100%;padding:12px 14px;border-radius:10px;border:2px solid #ddd0ac;
@@ -661,6 +733,20 @@
   .switch.on{background:var(--green-mid);}
   .switch .knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;}
   .switch.on .knob{left:20px;}
+  /* settings modal — landscape layout: two columns side-by-side so it stays short on wide/short (landscape) screens */
+  .modal-card-settings{max-width:600px;max-height:90vh;overflow-y:auto;}
+  .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px;align-items:start;}
+  .settings-col-right{border-left:1px dashed #d8cba0;padding-left:22px;}
+  .settings-col h3{margin-top:0;}
+  .settings-note{font-size:12px;color:var(--grey);margin:14px 0 0;grid-column:1 / -1;}
+  .settings-footer{grid-column:1 / -1;display:flex;gap:10px;margin-top:4px;}
+  .settings-footer .btn-outline,.settings-footer .btn-primary{margin-top:0;}
+  @media (max-width:480px){
+    .settings-grid{display:block;}
+    .settings-col-right{border-left:none;padding-left:0;margin-top:4px;}
+    .settings-footer{display:block;}
+    .settings-footer .btn-outline{margin-bottom:8px;}
+  }
 
   /* accessibility modes */
   body.mode-contrast #game{--cream:#0f0f0f;--card:#1c1c1c;--ink:#f5f5f5;--green-soft:#123324;--grey:#cfcfcf;--text-accent:#8CE6B0;background:#000;}
@@ -915,17 +1001,25 @@
   </div>
 
   <div class="modal-backdrop" id="modalSettings">
-    <div class="modal-card" style="text-align:left;">
+    <div class="modal-card modal-card-settings" style="text-align:left;">
       <h3 class="center">Pengaturan</h3>
-      <div class="settings-toggle">🔊 Musik Latar <div class="switch" id="swMusic" onclick="toggleMusic()"><div class="knob"></div></div></div>
-      <button class="ctrl-btn" style="margin-bottom:10px;" onclick="toggleFullscreen()">⛶ <span id="fsLabel">Layar Penuh</span></button>
-      <h3 class="center" style="margin-top:16px;">Aksesibilitas</h3>
-      <div class="settings-toggle">🔍 Font Besar <div class="switch" id="swBigfont" onclick="toggleMode('bigfont',this)"><div class="knob"></div></div></div>
-      <div class="settings-toggle">🎨 Kontras Tinggi <div class="switch" id="swContrast" onclick="toggleMode('contrast',this)"><div class="knob"></div></div></div>
-      <div class="settings-toggle">🔤 Font Ramah Disleksia <div class="switch" id="swDyslexia" onclick="toggleMode('dyslexia',this)"><div class="knob"></div></div></div>
-      <p style="font-size:12px;color:var(--grey);">🔊 Voice over, 📝 subtitle, ⌨ navigasi keyboard, dan 🤟 video bahasa isyarat tersedia sesuai kebutuhan (lihat blueprint Bab 12).</p>
-      <button class="btn-outline btn-block" style="margin-top:6px;" onclick="exitGame()">🚪 Keluar dari Permainan</button>
-      <button class="btn-primary btn-block" style="margin-top:8px;" onclick="closeModal('modalSettings')">Tutup</button>
+      <div class="settings-grid">
+        <div class="settings-col">
+          <div class="settings-toggle">🔊 Musik Latar <div class="switch" id="swMusic" onclick="toggleMusic()"><div class="knob"></div></div></div>
+          <button class="ctrl-btn btn-block" onclick="toggleFullscreen()">⛶ <span id="fsLabel">Layar Penuh</span></button>
+        </div>
+        <div class="settings-col settings-col-right">
+          <h3 class="center">Aksesibilitas</h3>
+          <div class="settings-toggle">🔍 Font Besar <div class="switch" id="swBigfont" onclick="toggleMode('bigfont',this)"><div class="knob"></div></div></div>
+          <div class="settings-toggle">🎨 Kontras Tinggi <div class="switch" id="swContrast" onclick="toggleMode('contrast',this)"><div class="knob"></div></div></div>
+          <div class="settings-toggle">🔤 Font Ramah Disleksia <div class="switch" id="swDyslexia" onclick="toggleMode('dyslexia',this)"><div class="knob"></div></div></div>
+        </div>
+        <p class="settings-note">🔊 Voice over, 📝 subtitle, ⌨ navigasi keyboard, dan 🤟 video bahasa isyarat tersedia sesuai kebutuhan (lihat blueprint Bab 12).</p>
+        <div class="settings-footer">
+          <button class="btn-outline btn-block" onclick="exitGame()">🚪 Keluar dari Permainan</button>
+          <button class="btn-primary btn-block" onclick="closeModal('modalSettings')">Tutup</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2004,6 +2098,7 @@ function renderPerjalanan(){
       segIdx: saved ? saved.segIdx : 0, playerX:60, dir:0, facing:1, moving:false, nearest:null,
       visited: new Set(saved ? saved.visited : []), talkingWith:null, lineIdx:0,
       raf:null, lastT:null, keyDown:null, keyUp:null,
+      locked: !STATE.tutorialJalanDone,
     };
   }
   ssEnterSegment();
@@ -2043,23 +2138,23 @@ function ssBuildDOM(){
     <div class="vn-stage ss-stage">
       <div class="ss-viewport" id="ssViewport">
         <div class="ss-layer ss-sky" id="ssSky">
-          <span class="ss-cloud" style="left:8%;top:14%;">☁️</span>
-          <span class="ss-cloud" style="left:36%;top:8%;">☁️</span>
-          <span class="ss-cloud" style="left:64%;top:20%;">☁️</span>
-          <span class="ss-cloud" style="left:88%;top:11%;">☁️</span>
-          <span class="ss-bird fly-right" style="top:16%;animation-duration:16s;animation-delay:-2s;">🐦</span>
-          <span class="ss-bird fly-right" style="top:26%;animation-duration:21s;animation-delay:-11s;">🐦</span>
-          <span class="ss-bird fly-left" style="top:10%;animation-duration:19s;animation-delay:-6s;">🐦</span>
+          <img class="ss-cloud" src="images/ss_awan.png" alt="" style="top:14%;animation-duration:54s;animation-delay:-6s;" onerror="this.style.visibility='hidden'">
+          <img class="ss-cloud" src="images/ss_awan.png" alt="" style="top:8%;animation-duration:68s;animation-delay:-27s;" onerror="this.style.visibility='hidden'">
+          <img class="ss-cloud" src="images/ss_awan.png" alt="" style="top:20%;animation-duration:46s;animation-delay:-14s;" onerror="this.style.visibility='hidden'">
+          <img class="ss-cloud" src="images/ss_awan.png" alt="" style="top:11%;animation-duration:61s;animation-delay:-42s;" onerror="this.style.visibility='hidden'">
+          <img class="ss-bird fly-right" src="images/ss_burung.png" alt="" style="top:16%;animation-duration:16s;animation-delay:-2s;" onerror="this.style.visibility='hidden'">
+          <img class="ss-bird fly-right" src="images/ss_burung.png" alt="" style="top:26%;animation-duration:21s;animation-delay:-11s;" onerror="this.style.visibility='hidden'">
+          <img class="ss-bird fly-left" src="images/ss_burung.png" alt="" style="top:10%;animation-duration:19s;animation-delay:-6s;" onerror="this.style.visibility='hidden'">
         </div>
         <div class="ss-layer ss-sea" id="ssSea"></div>
         <div class="ss-layer ss-mid" id="ssMid">${ssHouseRow(seg.width)}</div>
         <div class="ss-layer ss-grassbase"></div>
         <div class="ss-layer ss-ground" id="ssGround">
           <div class="ss-world" id="ssWorld">
-            ${seg.npcs.map(n=>`
+            ${seg.npcs.map((n,i)=>`
               <div class="ss-sprite ss-npc ${ss.visited.has(ssKey(n.id))?"visited":""}" id="ssnpc-${n.id}" style="left:${n.x}px">
-                <span class="ss-npc-badge">${ss.visited.has(ssKey(n.id))?"✓":"!"}</span>
-                <img src="${n.sprite}" alt="${n.name}" onerror="this.style.visibility='hidden'">
+                <span class="ss-npc-badge">${ss.visited.has(ssKey(n.id))?"✓":'<span class="ss-badge-dot"></span><span class="ss-badge-dot"></span><span class="ss-badge-dot"></span>'}</span>
+                <img src="${n.sprite}" alt="${n.name}" style="animation-delay:${-(i*0.6)}s" onerror="this.style.visibility='hidden'">
                 <span class="ss-npc-name">${n.name}</span>
               </div>
             `).join("")}
@@ -2080,12 +2175,42 @@ function ssBuildDOM(){
         <div style="pointer-events:none;flex:1"></div>
         <button type="button" class="ss-dpad" id="ssRight" aria-label="Jalan ke kanan">▶</button>
       </div>
+      ${ss.locked ? ssTutorialHTML() : ""}
     </div>
   `;
   ss.nearest = null;
   const promptEl = document.getElementById("ssPrompt");
   if(promptEl) promptEl.dataset.state = "";
   ssRenderCamera();
+}
+function ssTutorialHTML(){
+  return `
+    <div class="ss-tutorial" id="ssTutorial">
+      <div class="ss-tutorial-card">
+        <h3>Cara Bermain</h3>
+        <p class="ss-tutorial-sub">Sebelum jalan, yuk simak dulu caranya.</p>
+        <div class="ss-tutorial-steps">
+          <div class="ss-tutorial-step">
+            <span class="ss-tutorial-icon">🕹️</span>
+            <p><strong>Jalan:</strong> ketuk tombol ◀ ▶ di layar, atau tombol panah kiri/kanan (A/D) di keyboard.</p>
+          </div>
+          <div class="ss-tutorial-step">
+            <span class="ss-tutorial-icon">💬</span>
+            <p><strong>Ngobrol:</strong> dekati teman yang ada bubble mengambang di atas kepalanya, lalu ketuk tombol "Ngobrol" yang muncul (atau tekan Spasi/Enter).</p>
+          </div>
+        </div>
+        <button type="button" class="btn-primary btn-block" onclick="ssDismissTutorial()">Ayo, Mulai Jalan! 🚶</button>
+      </div>
+    </div>
+  `;
+}
+function ssDismissTutorial(){
+  if(!ss) return;
+  ss.locked = false;
+  STATE.tutorialJalanDone = true;
+  saveState();
+  const ov = document.getElementById("ssTutorial");
+  if(ov) ov.remove();
 }
 function ssRenderCamera(){
   const seg = ssCurrentSegment();
@@ -2122,7 +2247,7 @@ function ssSetPrompt(){
   if(el.dataset.state === key) return;
   el.dataset.state = key;
   if(ss.nearest){
-    el.innerHTML = `<div class="ss-interact"><button type="button" class="btn-gold" onclick="ssTalk('${ss.nearest.id}')">💬 Ngobrol dengan ${ss.nearest.name}</button></div>`;
+    el.innerHTML = `<div class="ss-interact"><button type="button" class="btn-chat" onclick="ssTalk('${ss.nearest.id}')"><span class="btn-chat-icon">💬</span>Ngobrol dengan ${ss.nearest.name}</button></div>`;
   } else {
     const txt = allVisited ? "Jalan terus ke kanan untuk lanjut →" : "Jalan dan ketuk teman di jalan untuk ngobrol dulu, yuk.";
     el.innerHTML = `<div class="ss-hint-banner">${txt}</div>`;
@@ -2170,6 +2295,7 @@ function ssStartLoop(){
   ss.raf = requestAnimationFrame(step);
 }
 function ssTalk(id){
+  if(!ss || ss.locked) return;
   const seg = ssCurrentSegment();
   const n = seg.npcs.find(x=>x.id===id);
   if(!n) return;
@@ -2227,7 +2353,7 @@ function ssAdvanceSegment(){
 function ssAttachInput(){
   ssDetachInput();
   const onKeyDown = (e)=>{
-    if(!ss || ss.talkingWith) return;
+    if(!ss || ss.talkingWith || ss.locked) return;
     if(e.key==="ArrowRight"||e.key==="d"||e.key==="D"){ ss.dir = 1; }
     else if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A"){ ss.dir = -1; }
     else if((e.key===" "||e.key==="Enter") && ss.nearest){ ssTalk(ss.nearest.id); }
@@ -2244,7 +2370,7 @@ function ssAttachInput(){
   const bindDpad = (elId, dir)=>{
     const el = document.getElementById(elId);
     if(!el) return;
-    const start = (e)=>{ e.preventDefault(); if(ss && !ss.talkingWith) ss.dir = dir; };
+    const start = (e)=>{ e.preventDefault(); if(ss && !ss.talkingWith && !ss.locked) ss.dir = dir; };
     const end = (e)=>{ e.preventDefault(); if(ss && ss.dir===dir) ss.dir = 0; };
     el.addEventListener("pointerdown", start);
     el.addEventListener("pointerup", end);
