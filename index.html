@@ -337,6 +337,34 @@
     background-image:url('images/ss_kilau_laut.png');background-repeat:repeat;background-size:46px 46px;
     animation:ssShimmer 5s linear infinite;}
   @keyframes ssShimmer{from{transform:translateX(0);}to{transform:translateX(180px);}}
+  /* Bayangan ikan berenang di laut — murni CSS (bukan gambar): bentuk oval gelap +
+     ekor segitiga yang goyang, dibuat blur & transparan biar keliatan kayak siluet/
+     bayangan ikan di bawah permukaan air yang berkilau, bukan ikan detail. Layer ini
+     terpisah dari .ss-sea (bukan child-nya) & dikasih z-index biar tetap keliatan DI
+     ATAS efek kilau ::after, bukan ketutup olehnya. */
+  .ss-fish-layer{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1;}
+  .ss-fish{position:absolute;left:0;width:24px;height:11px;opacity:.4;filter:blur(.3px);
+    animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
+  .ss-fish::before{content:'';position:absolute;left:6px;right:0;top:0;bottom:0;background:#052436;border-radius:50%;}
+  .ss-fish::after{content:'';position:absolute;left:0;top:50%;width:0;height:0;
+    border-style:solid;border-width:5px 7px 5px 0;border-color:transparent #052436 transparent transparent;
+    transform-origin:100% 50%;transform:translateY(-50%) rotate(-14deg);
+    animation:ssFishTailWag .5s ease-in-out infinite alternate;}
+  @keyframes ssFishTailWag{from{transform:translateY(-50%) rotate(-14deg);}to{transform:translateY(-50%) rotate(14deg);}}
+  .ss-fish.swim-right{animation-name:ssFishSwimRight;transform:translate(-8vw,0);}
+  .ss-fish.swim-left{animation-name:ssFishSwimLeft;transform:translate(112vw,0) scaleX(-1);}
+  @keyframes ssFishSwimRight{
+    0%{transform:translate(-8vw,0);}
+    30%{transform:translate(30vw,8px);}
+    60%{transform:translate(66vw,-6px);}
+    100%{transform:translate(112vw,3px);}
+  }
+  @keyframes ssFishSwimLeft{
+    0%{transform:translate(112vw,0) scaleX(-1);}
+    30%{transform:translate(78vw,-6px) scaleX(-1);}
+    60%{transform:translate(40vw,8px) scaleX(-1);}
+    100%{transform:translate(-8vw,-3px) scaleX(-1);}
+  }
   /* Ombak bergerak di garis pantai — murni CSS (bukan gambar): garis lengkung berbentuk
      kurva sinus (SVG inline) yang di-repeat horizontal & dianimasikan, jadi keliatan
      kayak buih ombak bergelombang beneran, bukan garis diagonal lurus. 3 lapis dengan
@@ -367,6 +395,41 @@
   .ss-grassbase{top:auto;bottom:0;height:16%;z-index:3;pointer-events:none;
     background-image:url('images/ss_rumput_bawah.png');
     background-repeat:repeat-x;background-position:bottom;background-size:auto 100%;}
+  /* Kupu-kupu terbang bolak-balik di atas rumput/bunga — murni CSS, bukan gambar.
+     Tiap kupu-kupu adalah 2 "sayap" yang buka-tutup (kepak), lalu seluruh badannya
+     mengikuti lintasan mengambang kecil (loop-a/b/c) biar keliatan hidup & random,
+     bukan geser lurus 1 arah kayak burung. Ditumpuk DI ATAS rumput (z-index lebih
+     tinggi) supaya kelihatan terbang melayang di depan bunga. */
+  .ss-butterflies{top:auto;bottom:2%;height:24%;z-index:4;pointer-events:none;overflow:visible;}
+  .ss-butterfly{position:absolute;width:14px;height:11px;animation-timing-function:ease-in-out;animation-iteration-count:infinite;
+    filter:drop-shadow(0 2px 2px rgba(0,0,0,.15));}
+  .ss-butterfly .wing{position:absolute;top:0;width:50%;height:100%;
+    border-radius:70% 70% 70% 10%/70% 70% 30% 30%;animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
+  .ss-butterfly .wing.l{left:0;transform-origin:100% 55%;animation-name:ssWingFlapL;}
+  .ss-butterfly .wing.r{right:0;transform-origin:0% 55%;animation-name:ssWingFlapR;}
+  @keyframes ssWingFlapL{from{transform:scaleX(1);}to{transform:scaleX(.3);}}
+  @keyframes ssWingFlapR{from{transform:scaleX(1);}to{transform:scaleX(.3);}}
+  .ss-butterfly.c-pink .wing{background:#FF8FB6;}
+  .ss-butterfly.c-orange .wing{background:#FFB648;}
+  .ss-butterfly.c-white .wing{background:#FFFFFF;}
+  .ss-butterfly.loop-a{animation-name:ssButterflyLoopA;}
+  .ss-butterfly.loop-b{animation-name:ssButterflyLoopB;}
+  .ss-butterfly.loop-c{animation-name:ssButterflyLoopC;}
+  @keyframes ssButterflyLoopA{
+    0%{transform:translate(0,0) rotate(0deg);} 20%{transform:translate(26px,-16px) rotate(6deg);}
+    45%{transform:translate(54px,4px) rotate(-4deg);} 65%{transform:translate(26px,20px) rotate(3deg);}
+    85%{transform:translate(-8px,6px) rotate(-3deg);} 100%{transform:translate(0,0) rotate(0deg);}
+  }
+  @keyframes ssButterflyLoopB{
+    0%{transform:translate(0,0) rotate(0deg);} 25%{transform:translate(-24px,-10px) rotate(-5deg);}
+    50%{transform:translate(-42px,10px) rotate(4deg);} 75%{transform:translate(-16px,20px) rotate(-3deg);}
+    100%{transform:translate(0,0) rotate(0deg);}
+  }
+  @keyframes ssButterflyLoopC{
+    0%{transform:translate(0,0) rotate(0deg);} 30%{transform:translate(16px,-20px) rotate(5deg);}
+    55%{transform:translate(38px,-2px) rotate(-4deg);} 80%{transform:translate(12px,14px) rotate(3deg);}
+    100%{transform:translate(0,0) rotate(0deg);}
+  }
   .ss-ground{top:auto;bottom:6%;height:15%;
     background-color:#2E8058;background-image:url('images/ss_jalan.png');
     background-repeat:repeat-x;background-size:auto 100%;}
@@ -2432,6 +2495,38 @@ const SS_SPEED = 230;    // kecepatan jalan, px-dunia per detik
 const SS_TALK_DIST = 78; // jarak maksimal buat mulai ngobrol
 const SS_EDGE_PAD = 40;  // jarak minimal dari tepi dunia (biar nggak keluar layar)
 
+/* Markup dekorasi ambient (ikan di laut, kupu-kupu di atas bunga) — dipakai bareng
+   di scene Perjalanan (ssBuildDOM) & lorong antar-area (corridorBuildDOM) biar
+   konsisten dan nggak dobel nulis. Posisi/kecepatan/warna sengaja divariasikan
+   supaya keliatan natural, bukan berbaris rapi. */
+function ssFishesHTML(){
+  const fishes = [
+    {top:10, dur:21, delay:-3,  dir:"right"},
+    {top:22, dur:26, delay:-14, dir:"left"},
+    {top:34, dur:18, delay:-7,  dir:"right"},
+    {top:46, dur:24, delay:-18, dir:"left"},
+    {top:58, dur:20, delay:-9,  dir:"right"},
+  ];
+  return `<div class="ss-fish-layer">${fishes.map(f=>
+    `<span class="ss-fish swim-${f.dir}" style="top:${f.top}%;animation-duration:${f.dur}s;animation-delay:${f.delay}s;"></span>`
+  ).join("")}</div>`;
+}
+function ssButterfliesHTML(){
+  const flies = [
+    {left:8,  bottom:6,  loop:"a", c:"pink",   dur:5.5, delay:-1},
+    {left:24, bottom:14, loop:"b", c:"orange", dur:6.2, delay:-3},
+    {left:47, bottom:4,  loop:"c", c:"white",  dur:5.8, delay:-2.2},
+    {left:66, bottom:12, loop:"a", c:"orange", dur:6.6, delay:-4},
+    {left:84, bottom:5,  loop:"b", c:"pink",   dur:5.9, delay:-1.6},
+  ];
+  return `<div class="ss-layer ss-butterflies">${flies.map(b=>
+    `<span class="ss-butterfly loop-${b.loop} c-${b.c}" style="left:${b.left}%;bottom:${b.bottom}%;animation-duration:${b.dur}s;animation-delay:${b.delay}s;">
+      <span class="wing l" style="animation-duration:${(0.26+Math.random()*0.08).toFixed(2)}s"></span>
+      <span class="wing r" style="animation-duration:${(0.26+Math.random()*0.08).toFixed(2)}s"></span>
+    </span>`
+  ).join("")}</div>`;
+}
+
 let ss = null; // state berjalan — dibuat sekali waktu masuk scene perjalanan
 let ssResumeRecapPending = false; // diset true di enterGameFromSavedState() kalau resume-nya mendarat di tengah scene jalan
 
@@ -2487,10 +2582,11 @@ function ssBuildDOM(){
           <span class="ss-bird fly-right" style="top:20%;animation-duration:24s;animation-delay:-17s;"><span class="wing l"></span><span class="wing r"></span></span>
           <span class="ss-bird fly-left" style="top:31%;animation-duration:17s;animation-delay:-9s;"><span class="wing l"></span><span class="wing r"></span></span>
         </div>
-        <div class="ss-layer ss-sea" id="ssSea"></div>
+        <div class="ss-layer ss-sea" id="ssSea">${ssFishesHTML()}</div>
         <div class="ss-shorewave"><span class="wv wv1"></span><span class="wv wv2"></span><span class="wv wv3"></span></div>
         <div class="ss-layer ss-mid" id="ssMid" style="width:${Math.max(seg.width, 1600)}px;left:0;right:auto;"></div>
         <div class="ss-layer ss-grassbase"></div>
+        ${ssButterfliesHTML()}
         <div class="ss-layer ss-ground" id="ssGround">
           <div class="ss-world" id="ssWorld">
             ${seg.npcs.map((n,i)=>`
@@ -2625,6 +2721,8 @@ function ssCheckTriggers(){
   const allVisited = seg.npcs.every(n=>ss.visited.has(ssKey(n.id)));
   const nearEdge = ss.playerX >= seg.width - SS_EDGE_PAD - 4;
   if(nearEdge && allVisited){ ssAdvanceSegment(); }
+  const nearLeftEdge = ss.playerX <= SS_EDGE_PAD + 4;
+  if(nearLeftEdge && ss.segIdx > 0){ ssGoToPreviousSegment(); }
 }
 function ssStartLoop(){
   if(ss.raf) cancelAnimationFrame(ss.raf);
@@ -2708,6 +2806,20 @@ function ssAdvanceSegment(){
   } else {
     ssFinish();
   }
+}
+/* Kebalikan dari ssAdvanceSegment(): dipanggil kalau player jalan sampai tepi
+   PALING KIRI dan masih ada segmen sebelumnya — jadi pemain bisa balik lagi
+   buat lihat-lihat/reka ulang segmen yang sudah dilewati, nggak cuma bisa maju
+   terus tanpa jalan pulang. Ditaruh agak menjorok dari tepi kanan segmen
+   sebelumnya (bukan pas di ujung) biar nggak langsung mantul maju lagi. */
+function ssGoToPreviousSegment(){
+  if(!ss || ss.talkingWith) return;
+  if(ss.segIdx <= 0) return;
+  ss.segIdx--;
+  ss.playerX = ssCurrentSegment().width - SS_EDGE_PAD - 24;
+  ss.dir = 0;
+  saveSsProgress();
+  ssEnterSegment();
 }
 function ssAttachInput(){
   ssDetachInput();
@@ -2968,8 +3080,9 @@ function corridorBuildDOM(){
     <div class="vn-stage ss-stage">
       <div class="ss-viewport" id="corridorViewport">
         <div class="ss-layer ss-sky"></div>
-        <div class="ss-layer ss-sea"></div>
+        <div class="ss-layer ss-sea">${ssFishesHTML()}</div>
         <div class="ss-layer ss-grassbase"></div>
+        ${ssButterfliesHTML()}
         <div class="ss-layer ss-ground">
           <div class="ss-world" id="corridorWorld" style="width:${corridor.width}px">
             <span class="ss-sprite ss-goal" style="left:${corridor.width-SS_EDGE_PAD}px">🚪</span>
