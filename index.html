@@ -232,6 +232,7 @@
 
   /* ===================== STORY / VISUAL NOVEL ===================== */
   #screen-story{padding:0;overflow:hidden;background:#101a15;}
+  #screen-corridor{padding:0;overflow:hidden;background:#101a15;}
   .vn-stage{position:absolute;inset:0;display:flex;flex-direction:column;}
   .vn-bg{
     position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;
@@ -549,24 +550,131 @@
   .choice-btn:hover{border-color:var(--green-mid);background:#dcefe4;}
   .choice-btn:active{transform:scale(.97);}
 
-  /* lobby doors */
-  .doors-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-  .door{
-    background:var(--card);border-radius:16px;padding:14px 10px;text-align:center;
-    box-shadow:var(--shadow);position:relative;cursor:pointer;
-    transition:transform .15s cubic-bezier(.2,.8,.3,1.4), box-shadow .15s ease;
+  /* lobby — versi "Peta Rumah": background ilustrasi full-screen (edge-to-edge),
+     dan semua kontrol (nama/level, koin, sidebar, tombol atur) mengambang di
+     atasnya, persis seperti mockup rumah 'Aisyiyah.
+     Path gambar yang dipakai (taruh semua di folder images/):
+       - images/bg_area1.png, bg_area2.png, bg_area3.png → background beda per area
+         (dipasang lewat JS di renderLobby, sesuai area yang lagi aktif)
+       - images/lobby_char_idle.png / _bangga.png → karakter berdiri (Kak Hana)
+       - images/door_<id>.png           → gambar pintu per topik, id sesuai ROOMS
+         (pubertas, menstruasi, consent, relasi, medsos, gizi, konseling, perpustakaan, refleksi) */
+  #screen-lobby{padding:0;overflow:hidden;}
+  .lobby-full{
+    position:relative;width:100%;height:100%;overflow:hidden;
+    background-color:#3a2818;background-size:cover;background-position:center;
+    transition:background-image .2s ease;
+    display:flex;flex-direction:column;
   }
-  .door:active{transform:scale(.95);}
-  .door.locked{opacity:.55;cursor:not-allowed;}
+  .lobby-full::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+    background:linear-gradient(180deg, rgba(15,10,5,.5) 0%, rgba(15,10,5,0) 24%, rgba(15,10,5,0) 60%, rgba(15,10,5,.5) 100%);}
+
+  .lobby-topleft{position:absolute;top:14px;left:14px;z-index:4;
+    background:rgba(20,15,8,.55);border-radius:12px;padding:6px 14px;backdrop-filter:blur(2px);
+    box-shadow:0 4px 10px rgba(0,0,0,.3);}
+  .lobby-topleft .who{font-size:13px;font-weight:700;color:#f2e9cf;}
+  .lobby-topleft .who small{display:block;font-weight:400;opacity:.85;font-size:11px;}
+  .lobby-topright{position:absolute;top:14px;right:14px;z-index:4;display:flex;align-items:center;gap:6px;}
+  .lobby-topright .coin{background:rgba(20,15,8,.55);color:#f2e9cf;border-radius:999px;
+    padding:6px 14px;font-weight:700;font-size:13px;backdrop-filter:blur(2px);
+    box-shadow:0 4px 10px rgba(0,0,0,.3);}
+  .icon-btn-float{background:rgba(20,15,8,.55);color:#fff;border-radius:10px;padding:8px 10px;
+    font-size:14px;backdrop-filter:blur(2px);box-shadow:0 4px 10px rgba(0,0,0,.3);}
+
+  .lobby-sidebar-float{position:absolute;top:68px;left:14px;z-index:4;
+    display:flex;flex-direction:column;gap:8px;width:80px;}
+  .lobby-side-btn{
+    background:rgba(20,15,8,.55);border:none;border-radius:12px;padding:10px 4px;
+    display:flex;flex-direction:column;align-items:center;gap:4px;
+    color:#f2e9cf;font-size:10.5px;font-weight:700;cursor:pointer;
+    box-shadow:0 4px 10px rgba(0,0,0,.3);transition:transform .15s;font-family:inherit;
+    backdrop-filter:blur(2px);
+  }
+  .lobby-side-btn:active{transform:scale(.94);}
   @media (hover:hover) and (pointer:fine){
-    .door:not(.locked):hover{transform:translateY(-3px);box-shadow:0 12px 22px rgba(31,94,74,.22);}
+    .lobby-side-btn:hover{transform:translateY(-2px);}
   }
-  .door .door-icon{font-size:30px;display:block;margin-bottom:6px;}
-  .door .door-name{font-weight:800;font-size:13px;color:var(--text-accent);}
-  .door .check{position:absolute;top:6px;right:8px;font-size:14px;}
-  .lobby-actions{display:flex;justify-content:space-around;margin-top:16px;}
-  .lobby-actions .a{background:none;border:none;color:var(--text-accent);font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;}
-  .lobby-actions .a span.emoji{font-size:20px;}
+  .lobby-side-btn .emoji{font-size:20px;}
+
+  .lobby-hall-center{position:relative;z-index:2;flex:none;text-align:center;
+    padding:64px 16px 0;}
+  .lobby-hall-plaque{display:inline-block;color:#f2e9cf;font-weight:800;font-size:13px;
+    letter-spacing:.05em;background:rgba(20,15,8,.5);border:1px solid rgba(212,175,90,.55);
+    padding:6px 18px;border-radius:20px;margin:0 auto 4px;
+    box-shadow:0 4px 10px rgba(0,0,0,.3);}
+  .lobby-hall-desc{font-size:11.5px;color:#f2e9cf;margin:0;text-shadow:0 1px 3px rgba(0,0,0,.6);}
+
+  .lobby-hall-floor{position:relative;z-index:2;flex:1;min-height:0;}
+  .lobby-char-wrap{position:absolute;left:138px;bottom:0;height:96%;z-index:2;
+    display:flex;align-items:flex-end;pointer-events:none;}
+  .lobby-char-standing{height:100%;width:auto;object-fit:contain;object-position:bottom;
+    filter:drop-shadow(0 8px 10px rgba(0,0,0,.5));
+    animation:charBreatheLobby 2.6s ease-in-out infinite;transform-origin:bottom center;}
+  @keyframes charBreatheLobby{
+    0%,100%{transform:translateY(0) scale(1);}
+    50%{transform:translateY(-1px) scale(1.006);}
+  }
+  .lobby-char-fallback{display:none;align-items:flex-end;justify-content:center;
+    height:55%;font-size:72px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.5));}
+  /* balon percakapan Kak Hana — nempel di dekat kepala karakter (item flex
+     kedua di dalam .lobby-char-wrap, disejajarkan ke atas lewat align-self) */
+  .lobby-char-bubble{
+    align-self:flex-start;margin:9% 0 0 -6px;position:relative;
+    max-width:172px;background:var(--card);color:var(--ink);
+    border-radius:16px;padding:9px 13px;font-size:12px;line-height:1.42;
+    box-shadow:0 6px 14px rgba(0,0,0,.35);
+  }
+  .lobby-char-bubble::after{
+    content:'';position:absolute;left:20px;bottom:-7px;
+    width:0;height:0;border:7px solid transparent;
+    border-top-color:var(--card);border-bottom:0;
+  }
+  .lobby-char-bubble b{display:block;color:var(--text-accent);font-size:10px;
+    letter-spacing:.3px;margin-bottom:2px;}
+  /* pintu — ditaruh PAS DI ATAS gambar pintu yang sudah ada di background
+     (lihat computeDoorSlots di JS untuk atur posisi %-nya per background) */
+  .lobby-doors-row{position:absolute;inset:0;z-index:3;pointer-events:none;}
+  .lobby-door-3d{
+    position:absolute;cursor:pointer;border-radius:10%/6%;
+    border:2px solid transparent;background:transparent;
+    box-shadow:0 0 0 rgba(212,175,90,0);pointer-events:auto;
+    transition:box-shadow .2s ease, border-color .2s ease, transform .15s cubic-bezier(.2,.8,.3,1.4);
+  }
+  .lobby-door-3d:active{transform:scale(.97);}
+  .lobby-door-3d.locked{cursor:not-allowed;}
+  @media (hover:hover) and (pointer:fine){
+    .lobby-door-3d:not(.locked):hover{border-color:rgba(212,175,90,.85);
+      box-shadow:0 0 18px 2px rgba(212,175,90,.55), inset 0 0 14px rgba(212,175,90,.25);}
+  }
+  .lobby-door-3d img{width:100%;height:100%;display:block;object-fit:contain;
+    filter:drop-shadow(0 4px 6px rgba(0,0,0,.35));}
+  .lobby-door-3d.locked img{filter:grayscale(.75) brightness(.55) drop-shadow(0 6px 10px rgba(0,0,0,.5));}
+  .lobby-door-3d .door-plaque{position:absolute;left:50%;bottom:-22px;transform:translateX(-50%);
+    white-space:nowrap;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:800;
+    border-radius:6px;padding:3px 8px;line-height:1.15;box-shadow:0 3px 8px rgba(0,0,0,.35);}
+  .lobby-door-3d .check{position:absolute;top:-8px;right:-8px;font-size:14px;
+    background:#fff;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,.3);z-index:1;}
+  .lobby-door-3d .lock-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.6));}
+  .lobby-progress-line{position:relative;z-index:2;flex:none;font-size:11.5px;color:#f2e9cf;
+    text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.6);margin:0 0 10px;}
+
+  /* corridor unlock — muncul sekali pas ruang saat ini baru aja kelar semua,
+     nampilin karakter "berjalan" lewat lorong sebelum ruang berikutnya kebuka */
+  .corridor-scene{
+    position:relative;height:64px;border-radius:14px;overflow:hidden;margin:14px 0 4px;
+    background:linear-gradient(90deg,#3a2c18 0%,#5a4426 50%,#3a2c18 100%);
+  }
+  .corridor-scene::before{content:'';position:absolute;inset:0;
+    background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.06) 0 2px,transparent 2px 28px);}
+  .corridor-walker{position:absolute;bottom:4px;left:-10%;font-size:30px;animation:corridorWalk 2.2s ease-in-out forwards;}
+  @keyframes corridorWalk{
+    0%{left:-10%;transform:scaleX(1);}
+    48%{transform:scaleX(1);}
+    50%{left:50%;transform:scaleX(1) translateX(-50%);}
+    52%{transform:scaleX(1) translateX(-50%);}
+    100%{left:108%;transform:scaleX(1) translateX(-50%);}
+  }
 
   /* room */
   .room-tabs{display:flex;gap:8px;margin-bottom:14px;}
@@ -875,26 +983,53 @@
     <div id="storyContent"></div>
   </section>
 
+  <!-- 5b. MOOD CHECK-IN (tiap masuk/lanjut sesi, sebelum lobby) -->
+  <section class="screen" id="screen-mood">
+    <div id="moodBody" class="grow"></div>
+  </section>
+
   <!-- 6. LOBBY -->
   <section class="screen" id="screen-lobby">
-    <div class="topbar">
-      <div class="who"><span id="lobbyName">Aisyah</span><small>Level <span id="lobbyLevel">1</span></small></div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <div class="coin">🪙 <span id="lobbyPoints">0</span></div>
-        <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
-        <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
-        <button class="icon-btn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
-        <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+    <div class="lobby-full" id="lobbyHall">
+      <div class="lobby-topleft">
+        <div class="who"><span id="lobbyName">Aisyah</span><small>Level <span id="lobbyLevel">1</span></small></div>
       </div>
+      <div class="lobby-topright">
+        <div class="coin">🪙 <span id="lobbyPoints">0</span></div>
+        <button class="icon-btn-float" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+        <button class="icon-btn-float js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
+        <button class="icon-btn-float js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
+        <button class="icon-btn-float" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+      </div>
+      <div class="lobby-sidebar-float">
+        <button class="lobby-side-btn" onclick="renderProgress();goTo('screen-progress')"><span class="emoji">📊</span>Progress</button>
+        <button class="lobby-side-btn" onclick="renderTrophy();goTo('screen-trophy')"><span class="emoji">🏆</span>Trophy</button>
+        <button class="lobby-side-btn" onclick="renderHikmah();goTo('screen-hikmah')"><span class="emoji">📖</span>Hikmah</button>
+        <button class="lobby-side-btn" onclick="openModal('modalSettings')"><span class="emoji">⚙️</span>Atur</button>
+      </div>
+      <div class="lobby-hall-center">
+        <span class="lobby-hall-plaque">PETA RUMAH</span>
+        <p class="lobby-hall-desc" id="lobbyStageDesc"></p>
+      </div>
+      <div class="lobby-doors-row" id="doorsGrid"></div>
+      <div class="lobby-hall-floor">
+        <div class="lobby-char-wrap">
+          <img class="lobby-char-standing" id="lobbyCharStanding" src="images/lobby_char_idle.png" alt="Kak Hana"
+               onerror="lobbyCharImgError(this)"
+               onload="this.style.display='block';document.getElementById('lobbyCharFallback').style.display='none';">
+          <div class="lobby-char-fallback" id="lobbyCharFallback">🧕</div>
+          <div class="lobby-char-bubble" id="lobbyCharBubble" style="display:none;">
+            <b>KAK HANA</b><span id="lobbyCharBubbleText"></span>
+          </div>
+        </div>
+      </div>
+      <p class="lobby-progress-line" id="lobbyProgressLine"></p>
     </div>
-    <p class="center" style="margin-bottom:10px;color:var(--grey);font-size:13px;">Rumah ini akan selalu terbuka untukmu. Pilih ruangan untuk mulai belajar.</p>
-    <div class="doors-grid" id="doorsGrid"></div>
-    <div class="lobby-actions">
-      <button class="a" onclick="renderProgress();goTo('screen-progress')"><span class="emoji">📊</span>Progress</button>
-      <button class="a" onclick="renderTrophy();goTo('screen-trophy')"><span class="emoji">🏆</span>Trophy</button>
-      <button class="a" onclick="renderHikmah();goTo('screen-hikmah')"><span class="emoji">📖</span>Hikmah</button>
-      <button class="a" onclick="openModal('modalSettings')"><span class="emoji">⚙️</span>Atur</button>
-    </div>
+  </section>
+
+  <!-- 6b. LORONG antar-area (side-scrolling mini) -->
+  <section class="screen" id="screen-corridor">
+    <div id="corridorContent"></div>
   </section>
 
   <!-- 7. ROOM (dynamic) -->
@@ -1209,6 +1344,13 @@ let STATE = loadState() || {
      di tempat lain, supaya akun lama (sebelum fitur ini ada) yang belum punya
      field ini tetap dianggap sudah selesai intro-nya (nggak dilempar ulang). */
   storyStep: 0, beforeIdx: 0, perjalanan: null,
+  /* Mood check-in: ditanya 1x per hari kalender (lihat goToLobbyWithMoodCheck).
+     Dipakai buat nentuin ekspresi+narasi Kak Hana di lobby (lihat MOOD_HANA),
+     dan moodHistory buat deteksi pola 3-hari-berturut (lihat computeMoodStreak).
+     moodHistory ikut ke-sync ke server lewat syncStateToSheet (STATE utuh),
+     jadi datanya sudah tersedia di sheet server meski dashboard fasilitator
+     yang menampilkannya belum dibangun (lihat catatan di loginFasilitator). */
+  mood: "", moodAt: "", moodHistory: [], moodStreak: 0,
 };
 
 function saveState(){
@@ -1430,7 +1572,7 @@ function confirmExit(){
 }
 
 /* ---------- NAVIGATION ---------- */
-const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading","screen-story"];
+const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading","screen-story","screen-corridor","screen-lobby"];
 function goTo(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -1536,10 +1678,10 @@ function startLoading(){
   let p = 0;
   const fill = document.getElementById("loadingFill");
   const iv = setInterval(()=>{
-    p += 1.3 + Math.random()*2;
-    if(p >= 100){ p = 100; clearInterval(iv); stopLoadingCharAnim(); setTimeout(()=>goTo("screen-title"), 300); }
+    p += 4 + Math.random()*5;
+    if(p >= 100){ p = 100; clearInterval(iv); stopLoadingCharAnim(); setTimeout(()=>goTo("screen-title"), 120); }
     fill.style.width = p+"%";
-  }, 140);
+  }, 90);
 }
 
 /* ---------- TITLE / CONTINUE ---------- */
@@ -1570,8 +1712,7 @@ function enterGameFromSavedState(){
     goTo("screen-story");
     renderStory();
   } else {
-    goTo("screen-lobby");
-    renderLobby();
+    goToLobbyWithMoodCheck();
   }
 }
 async function submitContinueRemote(){
@@ -1865,7 +2006,7 @@ async function renderAdminUsers(){
       <div class="admin-row-top">
         <div>
           <div class="admin-row-name">${u.nama}</div>
-          <div class="admin-row-sub">${u.points||0} poin · ${u.roomsDone||0} ruangan selesai</div>
+          <div class="admin-row-sub">${u.points||0} poin · ${u.roomsDone||0} ruangan selesai${u.mood ? " · mood terakhir: "+u.mood+(u.moodStreak>=3?" ("+u.moodStreak+" hari berturut)":"") : ""}</div>
         </div>
         <span class="status-pill ${u.fasilitator?'approved':'pending'}">${u.fasilitator ? "ADA FASILITATOR" : "BELUM ADA"}</span>
       </div>
@@ -1940,6 +2081,87 @@ function confirmCharacter(){
   logToSheet("mulai_karakter", {gender: STATE.gender, jenjang: STATE.jenjang});
   goTo("screen-story");
   renderStory();
+}
+
+/* ---------- MOOD CHECK-IN (tiap masuk/lanjut game) ----------
+   Nambah expr baru? Tinggal tambah entri di MOOD_HANA (expr harus punya
+   file gambar images/lobby_char_<expr>.png & images/hana_<expr>.png), lalu
+   tambah tombolnya di MOOD_OPTIONS. Tidak perlu ubah kode lain. */
+const MOOD_OPTIONS = [
+  {key:"senang",   label:"Senang",            emoji:"😊"},
+  {key:"semangat", label:"Semangat",          emoji:"💪"},
+  {key:"biasa",    label:"Biasa aja",         emoji:"🙂"},
+  {key:"sedih",    label:"Sedih",             emoji:"😔"},
+  {key:"berat",    label:"Lagi berat banget", emoji:"😢"},
+];
+const MOOD_HANA = {
+  senang:   {expr:"tertawa",  line:"Ikut senang dengernya! Semoga harimu makin seru."},
+  semangat: {expr:"semangat", line:"Semangat kamu nular nih. Yuk kita mulai!"},
+  biasa:    {expr:"idle",     line:"Nggak apa-apa, hari biasa juga tetep berharga kok."},
+  sedih:    {expr:"sedih",    line:"Kalau butuh cerita, aku di sini. Pelan-pelan aja."},
+  berat:    {expr:"nangis",   line:"Makasih udah jujur, ya. Kamu boleh istirahat dulu kapan pun."},
+};
+/* Kalimat khusus kalau mood yang sama muncul 3 hari kalender berturut-turut
+   (lihat computeMoodStreak). Kosongkan value-nya kalau nggak mau ada pesan
+   khusus untuk mood tsb — biasa sengaja dikosongin karena bukan sinyal apa-apa. */
+const MOOD_STREAK_LINE = {
+  senang:   "Tiga hari ini kamu senang terus — semoga terus begini, ya!",
+  semangat: "Semangatmu konsisten 3 hari ini. Keren banget!",
+  biasa:    "",
+  sedih:    "Aku notice kamu sedih beberapa hari ini. Mau cerita di Ruang Konseling?",
+  berat:    "Beberapa hari ini terasa berat banget, ya. Kamu nggak sendirian — yuk mampir ke Ruang Konseling.",
+};
+/* Hitung berapa hari kalender berturut-turut (mundur dari hari ini) mood-nya
+   sama persis dengan `mood`. history: [{date:"YYYY-MM-DD", mood}]. */
+function computeMoodStreak(history, mood){
+  const byDate = {};
+  (history||[]).forEach(h=>{ byDate[h.date] = h.mood; });
+  let streak = 0, d = new Date();
+  for(let i=0;i<365;i++){
+    const key = d.toISOString().slice(0,10);
+    if(byDate[key] === mood){ streak++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  return streak;
+}
+/* Dipanggil dari titik masuk sesi (lanjut progress / lokal / remote / baru
+   selesai intro cerita) — BUKAN dari perpindahan antar-area lewat corridor,
+   supaya nggak nanya mood berkali-kali dalam satu sesi yang sama. Kalau
+   hari ini (kalender) sudah pernah dijawab, langsung ke lobby tanpa nanya lagi. */
+function goToLobbyWithMoodCheck(){
+  const todayKey = new Date().toISOString().slice(0,10);
+  const alreadyAskedToday = STATE.moodAt && STATE.moodAt.slice(0,10) === todayKey;
+  if(alreadyAskedToday){
+    goTo("screen-lobby");
+    renderLobby();
+  } else {
+    goTo("screen-mood");
+    renderMoodCheck();
+  }
+}
+function renderMoodCheck(){
+  document.getElementById("moodBody").innerHTML = `
+    <div class="card">
+      ${hanaLine("idle", "Sebelum mulai, gimana harimu hari ini?")}
+      <div class="col">
+        ${MOOD_OPTIONS.map(m=>`<button class="choice-btn btn-block" onclick="pickMood('${m.key}')">${m.emoji} ${m.label}</button>`).join("")}
+      </div>
+    </div>
+  `;
+}
+function pickMood(key){
+  const todayKey = new Date().toISOString().slice(0,10);
+  STATE.mood = key;
+  STATE.moodAt = new Date().toISOString();
+  STATE.moodHistory = STATE.moodHistory || [];
+  const idx = STATE.moodHistory.findIndex(h=>h.date===todayKey);
+  if(idx>=0) STATE.moodHistory[idx].mood = key; else STATE.moodHistory.push({date:todayKey, mood:key});
+  if(STATE.moodHistory.length > 60) STATE.moodHistory = STATE.moodHistory.slice(-60); // batasi biar STATE gak membengkak
+  STATE.moodStreak = computeMoodStreak(STATE.moodHistory, key);
+  saveState();
+  logToSheet("mood_checkin", {mood:key, streak: STATE.moodStreak});
+  goTo("screen-lobby");
+  renderLobby();
 }
 
 /* Avatar Kak Hana dengan ekspresi berbeda-beda sesuai konteks.
@@ -2441,8 +2663,7 @@ function finishStoryIntro(){
   STATE.storyDone = true;
   STATE.perjalanan = null;
   saveState();
-  goTo("screen-lobby");
-  renderLobby();
+  goToLobbyWithMoodCheck();
 }
 
 /* ---------- ROOM DEFINITIONS ---------- */
@@ -2464,6 +2685,22 @@ const ROOMS = [
 ];
 function getRooms(){ const r = ROOMS.slice(); r[1] = menstruasiRoom(); return r; }
 
+/* Lobby dibagi 3 AREA, tiap area isi 2-3 pintu. Cuma pintu di area AKTIF yang
+   tampil. Begitu semua pintu di satu area selesai, pemain "jalan" lewat lorong
+   side-scrolling (engine yang sama kayak Menuju Rumah 'Aisyiyah) buat masuk
+   ke area berikutnya — lihat enterCorridor(). */
+const LOBBY_AREAS = [
+  {title:"Ruang Diri", desc:"Mengenal & merawat diri sendiri.", rooms:["pubertas","menstruasi"]},
+  {title:"Ruang Relasi", desc:"Menghargai batasan & orang lain.", rooms:["consent","relasi","konseling"]},
+  {title:"Ruang Digital & Sehat", desc:"Bijak bermedia, jaga kesehatan.", rooms:["medsos","gizi","perpustakaan","refleksi"]},
+];
+function areaDone(idx){ return LOBBY_AREAS[idx].rooms.every(id=>STATE.roomsDone[id]); }
+function currentAreaIndex(){
+  for(let i=0;i<LOBBY_AREAS.length;i++){ if(!areaDone(i)) return i; }
+  return LOBBY_AREAS.length-1;
+}
+
+
 const HIKMAH = {
   menstruasi: {text:"Wanita jangan berjiwa kerdil, tetapi berjiwa srikandi.", source:"Nyai Ahmad Dahlan (Siti Walidah), pendiri 'Aisyiyah"},
   consent: {text:"Wanita jangan berjiwa kerdil, tetapi berjiwa srikandi.", source:"Nyai Ahmad Dahlan (Siti Walidah), pendiri 'Aisyiyah"},
@@ -2474,20 +2711,240 @@ const HIKMAH = {
   relasi: {text:"Jangan takut salah — dari kesalahan pertama kita belajar melangkah lebih baik.", source:"Buya Hamka"},
 };
 
+/* Kak Hana berdiri di lobby: coba gambar full-body khusus (lobby_char_*.png)
+   dulu; kalau belum ada, coba pakai potret hana_*.png yang sudah diupload;
+   kalau itu juga belum ada, baru tampilkan placeholder emoji. */
+function lobbyCharImgError(img){
+  const stage = +(img.dataset.stage || 0);
+  if(stage === 0 && img.dataset.fallback){
+    img.dataset.stage = "1";
+    img.src = img.dataset.fallback;
+  } else {
+    img.style.display = "none";
+    document.getElementById("lobbyCharFallback").style.display = "flex";
+  }
+}
+
+/* Posisi pintu (dalam % dari ukuran penuh layar lobby) supaya hitbox-nya PAS
+   nempel di gambar pintu yang sudah digambar di dalam bg_area<N>.png.
+   Kalau posisi auto di bawah masih meleset dari gambar pintu aslinya, isi
+   array untuk nomor background terkait di sini — urutannya ngikutin urutan
+   rooms di LOBBY_AREAS. Satu entri: {left, top, width, height} dalam %.
+   Contoh: DOOR_POSITIONS[1] = [ {left:36,top:9,width:10,height:62}, {left:49,top:9,width:10,height:62} ];
+*/
+const DOOR_POSITIONS = {
+  // 1: [ {left:36,top:9,width:10,height:62}, {left:49,top:9,width:10,height:62} ],
+};
+function computeDoorSlots(bgAreaNum, n){
+  const manual = DOOR_POSITIONS[bgAreaNum];
+  if(manual && manual.length === n) return manual;
+  // auto: sebar rata & center secara horizontal, band vertikal standar
+  const width = Math.min(13, 60/n);
+  const gap = 3;
+  const totalW = n*width + (n-1)*gap;
+  const startLeft = 50 - totalW/2;
+  return Array.from({length:n}, (_,i)=>({
+    left: startLeft + i*(width+gap), top: 8, width, height: 64,
+  }));
+}
+
 /* ---------- LOBBY ---------- */
 function renderLobby(){
   document.getElementById("lobbyName").textContent = STATE.name || "Aisyah";
   document.getElementById("lobbyLevel").textContent = STATE.level;
   document.getElementById("lobbyPoints").textContent = STATE.points;
+
+  const areaIdx = currentAreaIndex();
+  const area = LOBBY_AREAS[areaIdx];
+  const allDone = LOBBY_AREAS.every((_,i)=>areaDone(i));
+  const activeArea = allDone ? LOBBY_AREAS[LOBBY_AREAS.length-1] : area;
+
+  document.getElementById("lobbyStageDesc").textContent = allDone
+    ? "Semua ruangan sudah kamu jelajahi. Selamat! 🎉"
+    : `Ruang ${areaIdx+1} dari ${LOBBY_AREAS.length}: ${area.title} — ${area.desc}`;
+  const moodCfg = MOOD_HANA[STATE.mood] || MOOD_HANA.biasa;
+  const lobbyExpr = allDone ? "bangga" : moodCfg.expr;
+  document.getElementById("lobbyCharStanding").src = `images/lobby_char_${lobbyExpr}.png`;
+  document.getElementById("lobbyCharStanding").dataset.fallback = `images/hana_${lobbyExpr}.png`;
+  document.getElementById("lobbyCharStanding").dataset.stage = "0";
+  const streakLine = STATE.moodStreak >= 3 ? MOOD_STREAK_LINE[STATE.mood] : "";
+  document.getElementById("lobbyCharBubbleText").textContent = allDone
+    ? "Kamu sudah menjelajahi semua ruangan. Aku bangga sama kamu!"
+    : streakLine
+      ? streakLine
+      : `${moodCfg.line} Yuk masuk ke ${area.title}.`;
+  document.getElementById("lobbyCharBubble").style.display = "block";
+  const bgAreaNum = allDone ? LOBBY_AREAS.length : areaIdx+1;
+  document.getElementById("lobbyHall").style.backgroundImage = `url('images/bg_area${bgAreaNum}.png')`;
+
+  const rooms = getRooms();
   const grid = document.getElementById("doorsGrid");
-  grid.innerHTML = getRooms().map(r=>{
-    const done = STATE.roomsDone[r.id];
-    return `<div class="door" onclick="openRoom('${r.id}')">
+  const slots = computeDoorSlots(bgAreaNum, activeArea.rooms.length);
+  grid.innerHTML = activeArea.rooms.map((id,i)=>{
+    const r = rooms.find(x=>x.id===id);
+    const done = STATE.roomsDone[id];
+    const s = slots[i];
+    return `<div class="lobby-door-3d" style="left:${s.left}%;top:${s.top}%;width:${s.width}%;height:${s.height}%;" onclick="openRoom('${r.id}')">
       ${done ? '<span class="check">✅</span>' : ''}
-      <span class="door-icon">${r.icon}</span>
-      <div class="door-name">${r.name}</div>
+      <img src="images/door_${id}.png" alt="${r.name}" onerror="this.style.display='none'">
+      <div class="door-plaque">${r.name}</div>
     </div>`;
   }).join("");
+
+  const doneCount = activeArea.rooms.filter(id=>STATE.roomsDone[id]).length;
+  document.getElementById("lobbyProgressLine").textContent = allDone
+    ? "Semua area selesai — kamu hebat!"
+    : `${doneCount} dari ${activeArea.rooms.length} pintu di area ini selesai`;
+
+  // deteksi area yang BARU SAJA selesai dibanding kunjungan lobby terakhir
+  // -> ajak pemain jalan lewat lorong menuju area berikutnya.
+  if(STATE._lastSeenArea === undefined) STATE._lastSeenArea = areaIdx;
+  const justAdvanced = areaIdx > STATE._lastSeenArea;
+  const finishedAreaIdx = STATE._lastSeenArea;
+  STATE._lastSeenArea = areaIdx;
+  saveState();
+
+  if(justAdvanced && LOBBY_AREAS[finishedAreaIdx+1]){
+    enterCorridor(finishedAreaIdx+1);
+  }
+}
+
+/* ---------- LORONG ANTAR-AREA (side-scrolling mini, engine sederhana) ---------- */
+let corridor = null;
+function enterCorridor(nextAreaIdx){
+  corridor = {width:640, playerX:SS_EDGE_PAD, dir:0, facing:1, moving:false, raf:null, lastT:null, loopToken:null, arrived:false, nextAreaIdx};
+  goTo("screen-corridor");
+  corridorBuildDOM();
+  corridorAttachInput();
+  corridorStartLoop();
+}
+function corridorBuildDOM(){
+  const el = document.getElementById("corridorContent");
+  if(!el) return;
+  const g = STATE.gender === "laki" ? "cowo" : "cewe";
+  const j = STATE.jenjang || "sma";
+  const playerSprite = `images/sprite_${g}_${j}.png`;
+  const nextArea = LOBBY_AREAS[corridor.nextAreaIdx];
+  el.innerHTML = `
+    <div class="vn-stage ss-stage">
+      <div class="ss-viewport" id="corridorViewport">
+        <div class="ss-layer ss-sky"></div>
+        <div class="ss-layer ss-sea"></div>
+        <div class="ss-layer ss-grassbase"></div>
+        <div class="ss-layer ss-ground">
+          <div class="ss-world" id="corridorWorld" style="width:${corridor.width}px">
+            <span class="ss-sprite ss-goal" style="left:${corridor.width-SS_EDGE_PAD}px">🚪</span>
+            <div class="ss-sprite ss-player facing-right" id="corridorPlayer" style="left:${corridor.playerX}px">
+              <img src="${playerSprite}" alt="" onerror="this.remove()">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ss-topbar"><span>Menuju ${nextArea.title}</span></div>
+      <div id="corridorPrompt"><div class="ss-hint-banner">Jalan terus ke kanan buat masuk ruangan berikutnya →</div></div>
+      <div class="ss-controls">
+        <button type="button" class="ss-dpad" id="corridorLeft" aria-label="Jalan ke kiri">◀</button>
+        <div style="pointer-events:none;flex:1"></div>
+        <button type="button" class="ss-dpad" id="corridorRight" aria-label="Jalan ke kanan">▶</button>
+      </div>
+    </div>
+  `;
+}
+function corridorApplyPositions(){
+  const p = document.getElementById("corridorPlayer");
+  if(!p) return;
+  p.style.left = corridor.playerX+"px";
+  p.classList.toggle("walking", corridor.moving);
+  p.classList.toggle("facing-left", corridor.facing<0);
+  p.classList.toggle("facing-right", corridor.facing>=0);
+}
+function corridorRenderCamera(){
+  const viewport = document.getElementById("corridorViewport");
+  if(!viewport) return;
+  const vw = viewport.clientWidth || 800;
+  const maxCam = Math.max(0, corridor.width - vw);
+  const camera = Math.min(maxCam, Math.max(0, corridor.playerX - vw*0.32));
+  const world = document.getElementById("corridorWorld");
+  if(world) world.style.transform = `translateX(${-camera}px)`;
+}
+function corridorCheckArrive(){
+  if(!corridor || corridor.arrived) return;
+  if(corridor.playerX >= corridor.width - SS_EDGE_PAD - 6){
+    corridor.arrived = true;
+    corridor.dir = 0;
+    const nextArea = LOBBY_AREAS[corridor.nextAreaIdx];
+    const el = document.getElementById("corridorPrompt");
+    if(el) el.innerHTML = `<div class="ss-interact"><button type="button" class="btn-chat" onclick="finishCorridor()"><span class="btn-chat-icon">🚪</span>Masuk ${nextArea.title}</button></div>`;
+  }
+}
+function corridorStartLoop(){
+  if(corridor.raf) cancelAnimationFrame(corridor.raf);
+  corridor.lastT = null;
+  const token = {};
+  corridor.loopToken = token;
+  const step = (t)=>{
+    if(!corridor || corridor.loopToken !== token) return;
+    if(corridor.lastT===null) corridor.lastT = t;
+    const dt = Math.min(0.05, (t-corridor.lastT)/1000);
+    corridor.lastT = t;
+    if(!corridor.arrived && corridor.dir !== 0){
+      const nx = corridor.playerX + corridor.dir*SS_SPEED*dt;
+      corridor.playerX = Math.max(SS_EDGE_PAD, Math.min(corridor.width-SS_EDGE_PAD, nx));
+      corridor.facing = corridor.dir;
+      corridor.moving = true;
+    } else {
+      corridor.moving = false;
+    }
+    corridorApplyPositions();
+    corridorRenderCamera();
+    corridorCheckArrive();
+    if(!corridor || corridor.loopToken !== token) return;
+    corridor.raf = requestAnimationFrame(step);
+  };
+  corridor.raf = requestAnimationFrame(step);
+}
+function corridorAttachInput(){
+  corridorDetachInput();
+  const onKeyDown = (e)=>{
+    if(!corridor || corridor.arrived) return;
+    if(e.key==="ArrowRight"||e.key==="d"||e.key==="D"){ corridor.dir = 1; }
+    else if(e.key==="ArrowLeft"||e.key==="a"||e.key==="A"){ corridor.dir = -1; }
+  };
+  const onKeyUp = (e)=>{
+    if(!corridor) return;
+    if((e.key==="ArrowRight"||e.key==="d"||e.key==="D") && corridor.dir===1) corridor.dir=0;
+    if((e.key==="ArrowLeft"||e.key==="a"||e.key==="A") && corridor.dir===-1) corridor.dir=0;
+  };
+  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keyup", onKeyUp);
+  corridor.keyDown = onKeyDown;
+  corridor.keyUp = onKeyUp;
+  const bindDpad = (elId, dir)=>{
+    const el = document.getElementById(elId);
+    if(!el) return;
+    const start = (e)=>{ e.preventDefault(); if(corridor && !corridor.arrived) corridor.dir = dir; };
+    const end = (e)=>{ e.preventDefault(); if(corridor && corridor.dir===dir) corridor.dir = 0; };
+    el.addEventListener("pointerdown", start);
+    el.addEventListener("pointerup", end);
+    el.addEventListener("pointerleave", end);
+    el.addEventListener("pointercancel", end);
+  };
+  bindDpad("corridorLeft", -1);
+  bindDpad("corridorRight", 1);
+}
+function corridorDetachInput(){
+  if(corridor && corridor.keyDown){
+    window.removeEventListener("keydown", corridor.keyDown);
+    window.removeEventListener("keyup", corridor.keyUp);
+    corridor.keyDown = null; corridor.keyUp = null;
+  }
+}
+function finishCorridor(){
+  if(corridor && corridor.raf) cancelAnimationFrame(corridor.raf);
+  corridorDetachInput();
+  corridor = null;
+  goTo("screen-lobby");
+  renderLobby();
 }
 
 /* ---------- ROOM RENDERING ---------- */
