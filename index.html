@@ -273,7 +273,9 @@
   @keyframes vnDialogueIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
   .vn-speaker{font-size:12px;font-weight:800;letter-spacing:.6px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;}
   .vn-speaker.is-player{color:#7fe0a8;}
+  .vn-speaker.is-narrator{color:rgba(255,255,255,.55);}
   .vn-text{color:#f2ede0;font-size:14.5px;line-height:1.6;margin:0;}
+  .vn-text.is-narrator{color:rgba(242,237,224,.72);font-style:italic;}
   .vn-continue{
     display:block;text-align:right;font-size:11.5px;color:rgba(255,255,255,.75);
     margin-top:8px;animation:vnPulse 1.4s ease-in-out infinite;
@@ -303,9 +305,17 @@
     50%{transform:translate(50vw,-6px);}
     100%{transform:translate(115vw,0);}
   }
-  .ss-sky .ss-bird{position:absolute;left:0;width:clamp(14px,2.4vh,22px);height:auto;opacity:.88;
-    filter:drop-shadow(0 2px 3px rgba(0,0,0,.15));animation-timing-function:linear;animation-iteration-count:infinite;
+  .ss-sky .ss-bird{position:absolute;left:0;width:clamp(16px,2.8vh,26px);height:clamp(7px,1.3vh,11px);opacity:.92;
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.25));animation-timing-function:linear;animation-iteration-count:infinite;
     transform-origin:center;}
+  /* Burung digambar pakai CSS murni (bukan gambar): siluet camar klasik — 2 garis lengkung
+     tipis (bukan blok solid) yang ngepak bolak-balik membentuk huruf "M", supaya kebaca
+     jelas sebagai burung terbang walau ukurannya kecil, bukan cuma blob putih. */
+  .ss-bird .wing{position:absolute;bottom:0;width:50%;height:100%;border-top:2px solid #fff;border-radius:100% 60% 0 0/100% 100% 0 0;}
+  .ss-bird .wing.l{left:0;transform-origin:100% 100%;animation:ssFlapL .48s ease-in-out infinite alternate;}
+  .ss-bird .wing.r{right:0;transform-origin:0% 100%;animation:ssFlapR .48s ease-in-out infinite alternate;}
+  @keyframes ssFlapL{from{transform:rotate(8deg);}to{transform:rotate(-32deg);}}
+  @keyframes ssFlapR{from{transform:rotate(-8deg);}to{transform:rotate(32deg);}}
   .ss-bird.fly-right{animation-name:ssFlyRight;}
   .ss-bird.fly-left{animation-name:ssFlyLeft;}
   @keyframes ssFlyRight{
@@ -327,8 +337,29 @@
     background-image:url('images/ss_kilau_laut.png');background-repeat:repeat;background-size:46px 46px;
     animation:ssShimmer 5s linear infinite;}
   @keyframes ssShimmer{from{transform:translateX(0);}to{transform:translateX(180px);}}
-  .ss-mid{top:auto;bottom:21%;height:26%;}
-  .ss-mid .ss-house{position:absolute;bottom:0;font-size:clamp(38px,7.5vh,66px);line-height:1;filter:drop-shadow(0 6px 6px rgba(0,0,0,.2)) brightness(.92);}
+  /* Ombak bergerak di garis pantai — murni CSS (bukan gambar): garis lengkung berbentuk
+     kurva sinus (SVG inline) yang di-repeat horizontal & dianimasikan, jadi keliatan
+     kayak buih ombak bergelombang beneran, bukan garis diagonal lurus. 3 lapis dengan
+     lengkung, ketebalan, opacity & kecepatan beda biar terasa berlapis dan hidup. */
+  .ss-shorewave{position:absolute;top:auto;left:0;right:0;bottom:44%;height:9%;min-height:22px;overflow:hidden;pointer-events:none;z-index:1;}
+  .ss-shorewave .wv{position:absolute;left:-10px;right:-160px;height:100%;
+    background-repeat:repeat-x;background-position:left center;}
+  .ss-shorewave .wv1{top:0%;height:44%;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='22' viewBox='0 0 120 22'><path d='M-6,15 Q24,4 54,15 T114,15' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' opacity='0.65'/><path d='M-6,18 Q24,10 54,18 T114,18' fill='none' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round' opacity='0.35'/></svg>");
+    background-size:120px 100%;animation:ssWaveFlow1 3.4s linear infinite;}
+  .ss-shorewave .wv2{top:30%;height:46%;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='22' viewBox='0 0 160 22'><path d='M-8,13 Q32,2 72,13 T152,13' fill='none' stroke='%23eaf8ff' stroke-width='2.6' stroke-linecap='round' opacity='0.45'/></svg>");
+    background-size:160px 100%;animation:ssWaveFlow2 4.8s linear infinite;}
+  .ss-shorewave .wv3{top:62%;height:38%;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='18' viewBox='0 0 96 18'><path d='M-5,11 Q18,4 41,11 T87,11' fill='none' stroke='%23d2eefa' stroke-width='2' stroke-linecap='round' opacity='0.4'/></svg>");
+    background-size:96px 100%;animation:ssWaveFlow3 2.6s linear infinite;}
+  @keyframes ssWaveFlow1{from{background-position-x:0;}to{background-position-x:-120px;}}
+  @keyframes ssWaveFlow2{from{background-position-x:0;}to{background-position-x:-160px;}}
+  @keyframes ssWaveFlow3{from{background-position-x:0;}to{background-position-x:-96px;}}
+  .ss-mid{top:auto;bottom:21%;height:26%;
+    background-image:url('images/bg_pemukiman_pantai.png');
+    background-repeat:repeat-x;background-position:bottom left;background-size:auto 100%;
+    filter:drop-shadow(0 6px 6px rgba(0,0,0,.15));}
   /* Strip rumput/tanah tambahan di paling bawah layar — dibikin agak besar dan
      ditumpuk DI DEPAN jalan (z-index lebih tinggi dari ss-world) supaya kelihatan
      seperti rumput ada di depan kamera, dan jalan + pemain/NPC seolah jalan di
@@ -339,12 +370,10 @@
   .ss-ground{top:auto;bottom:6%;height:15%;
     background-color:#2E8058;background-image:url('images/ss_jalan.png');
     background-repeat:repeat-x;background-size:auto 100%;}
-  /* Rumput bergerigi di tepi atas jalan, biar jalan yang bisa dilewati player
-     kelihatan seperti jalan setapak di antara rumput, bukan cuma potongan warna polos. */
-  .ss-ground::before{content:'';position:absolute;left:0;right:0;top:-9px;height:13px;z-index:1;pointer-events:none;
-    background-color:#4FA873;background-image:url('images/ss_rumput_tepi.png');
-    background-repeat:repeat-x;background-size:auto 100%;
-    filter:drop-shadow(0 2px 1px rgba(0,0,0,.18));}
+  /* Dulu ada rumput bergerigi (::before) di tepi atas jalan buat nutup celah waktu
+     layer rumah/pohon masih emoji transparan. Sekarang layer itu sudah gambar
+     pemukiman utuh yang nyambung langsung ke jalan, jadi dekorasi itu dihapus —
+     kalau dibiarkan malah jadi garis hijau aneh motong gambar pemukiman. */
   .ss-world{position:absolute;left:0;bottom:0;height:100%;z-index:2;}
   .ss-sprite{position:absolute;bottom:2px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;}
   .ss-sprite img{width:clamp(96px,17vh,160px);height:clamp(96px,17vh,160px);object-fit:contain;filter:drop-shadow(0 8px 10px rgba(0,0,0,.4));
@@ -680,7 +709,9 @@
   .room-tabs{display:flex;gap:8px;margin-bottom:14px;}
   .room-tabs button{flex:1;}
   .quiz-q{font-weight:700;margin-bottom:10px;}
-  .quiz-opt{background:var(--card);border:2px solid #e2d9bd;border-radius:12px;padding:11px 14px;margin-bottom:8px;text-align:left;font-weight:600;color:var(--ink);}
+  .quiz-opt{background:var(--card);border:2px solid #e2d9bd;border-radius:12px;padding:11px 14px;margin-bottom:8px;text-align:left;font-weight:600;color:var(--ink);transition:background .15s,border-color .15s,transform .1s;}
+  .quiz-opt:hover:not(:disabled){border-color:var(--green-mid);background:#dcefe4;}
+  .quiz-opt:active:not(:disabled){transform:scale(.98);}
   .quiz-opt.correct{border-color:var(--green-mid);background:var(--green-soft);}
   .quiz-opt.wrong{border-color:var(--danger);background:#fbeae5;}
   .quiz-opt.selected{border-color:var(--gold);background:#f7ecd9;}
@@ -1456,6 +1487,82 @@ function playClickSfx(kind){
     osc.stop(t0 + 0.19);
   }catch(e){ /* abaikan jika Web Audio tidak didukung browser */ }
 }
+/* ---------- Ambience: deru ombak di scene Perjalanan (disintesis, tanpa file audio) ----------
+   Noise band-pass (mirip desis air) + LFO pelan buat efek "swell" ombak datang-pergi.
+   Ikut preferensi musikOn yang sama; dimulai saat masuk scene pantai, dihentikan saat keluar. */
+let waveAmbience = null;
+function startWaveAmbience(){
+  if(!musicOn || waveAmbience) return;
+  try{
+    sfxCtx = sfxCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(sfxCtx.state === "suspended") sfxCtx.resume();
+    const ctx = sfxCtx;
+    const bufSize = ctx.sampleRate * 2;
+    const buffer = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for(let i=0; i<bufSize; i++){ data[i] = Math.random()*2-1; }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer; noise.loop = true;
+
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass"; filter.frequency.value = 700; filter.Q.value = 0.7;
+
+    const masterGain = ctx.createGain();
+    masterGain.gain.value = 0.05;
+
+    const lfo = ctx.createOscillator();
+    lfo.type = "sine"; lfo.frequency.value = 0.13; // ~1 siklus tiap 7-8 detik, kayak ombak datang-pergi
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 0.045;
+    lfo.connect(lfoGain).connect(masterGain.gain);
+
+    noise.connect(filter).connect(masterGain).connect(ctx.destination);
+    noise.start(); lfo.start();
+    waveAmbience = {noise, lfo, masterGain};
+  }catch(e){ /* abaikan jika Web Audio tidak didukung browser */ }
+}
+function stopWaveAmbience(){
+  if(!waveAmbience) return;
+  try{ waveAmbience.noise.stop(); waveAmbience.lfo.stop(); }catch(e){}
+  waveAmbience = null;
+}
+/* ---------- Ambience: kicau burung sesekali di scene Perjalanan (disintesis) ----------
+   Beberapa "cip" nada tinggi meluncur naik-turun cepat, dijadwalkan random tiap
+   beberapa detik supaya kesannya alami (bukan berulang teratur kayak loop). */
+let birdChirpTimer = null;
+function playBirdChirp(){
+  if(!musicOn) return;
+  try{
+    sfxCtx = sfxCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(sfxCtx.state === "suspended") sfxCtx.resume();
+    const ctx = sfxCtx;
+    const t0 = ctx.currentTime;
+    const n = 2 + Math.floor(Math.random()*2); // 2-3 "cip" beruntun = 1 kicauan
+    for(let i=0; i<n; i++){
+      const t = t0 + i*0.1;
+      const base = 2100 + Math.random()*900;
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(base, t);
+      osc.frequency.exponentialRampToValueAtTime(base*1.35, t+0.05);
+      osc.frequency.exponentialRampToValueAtTime(base*0.75, t+0.09);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.05, t+0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t+0.1);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t); osc.stop(t+0.12);
+    }
+  }catch(e){ /* abaikan jika Web Audio tidak didukung browser */ }
+}
+function scheduleBirdChirp(){
+  stopBirdChirp();
+  if(!musicOn || !ss) return;
+  const delay = 3500 + Math.random()*5500;
+  birdChirpTimer = setTimeout(()=>{ playBirdChirp(); scheduleBirdChirp(); }, delay);
+}
+function stopBirdChirp(){
+  if(birdChirpTimer){ clearTimeout(birdChirpTimer); birdChirpTimer = null; }
+}
 /* Setiap tombol/kartu yang bisa diklik: mainkan sfx + animasi "pop" singkat.
    .quiz-opt dikecualikan karena punya bunyi benar/salah sendiri (lihat answerQuiz).
    Delegasi di document supaya otomatis berlaku untuk elemen yang dirender belakangan. */
@@ -1509,6 +1616,10 @@ function toggleMusic(){
   musicOn = !musicOn;
   syncMusicSwitch();
   musicOn ? startMusic() : stopMusic();
+  if(ss){
+    musicOn ? startWaveAmbience() : stopWaveAmbience();
+    musicOn ? scheduleBirdChirp() : stopBirdChirp();
+  }
 }
 
 /* Dipanggil dari modal Pengaturan Audio saat pertama main — pilihan musik.
@@ -1709,6 +1820,10 @@ function enterGameFromSavedState(){
     storyStep = STATE.storyStep || 0;
     beforeIdx = STATE.beforeIdx || 0;
     ss = null; // renderPerjalanan akan re-init dari STATE.perjalanan kalau posisi terakhir ada di segmen jalan
+    // Kalau posisi terakhir ada di tengah scene jalan (sidescroll), tandai supaya
+    // renderPerjalanan nampilin kartu recap sekali — soalnya scene jalan nggak
+    // punya kotak narator, jadi tanpa recap pemain bisa bingung "ini lagi ngapain".
+    ssResumeRecapPending = !!(storyBeats[storyStep] && storyBeats[storyStep].text === "__PERJALANAN__" && STATE.perjalanan);
     goTo("screen-story");
     renderStory();
   } else {
@@ -2209,6 +2324,7 @@ const NARASI_CHAR = {
 const NARASI_BG = {
   refleksi: "images/bg_laut.png",
   rumah: "images/bg_titlescreen.png",
+  selebaran: "images/temu_selebaran.png",
 };
 /* Narasi ber-POV "kamu" ditampilkan pakai nama karakter pemain sendiri, bukan kata "Narator" */
 /* Render 1 karakter (di tengah) atau 2 karakter (kiri/kanan, yang lagi ngomong lebih terang) di panggung narasi */
@@ -2232,13 +2348,18 @@ function speakerLabel(beat){
   if(beat.speakerKey === "player" && beat.speaker && beat.speaker !== "Narator"){
     return {text: STATE.name || beat.speaker, cls: "is-player"};
   }
-  return {text: beat.speaker || "Narator", cls: ""};
+  if(!beat.speaker || beat.speaker === "Narator"){
+    return {text: "Narator", cls: "is-narrator"};
+  }
+  return {text: beat.speaker, cls: ""};
 }
 const storyBeats = [
   {speaker:"Narator", speakerKey:"player", chars:["player"], bg:"refleksi", text:"Akhir-akhir ini kamu merasa banyak yang berubah — pada tubuhmu, perasaanmu, dan caramu memandang teman-teman di sekitar. Rasanya membingungkan."},
   {text:"__BEFORE_QUIZ__"},
-  {speaker:"Narator", speakerKey:"player", chars:["player"], bg:"refleksi", text:"Suatu sore, kamu menemukan selebaran kecil terselip di antara buku-bukumu: \"RUMAH 'AISYIYAH — Ruang Aman untuk Remaja: Belajar, Bertanya, Bertumbuh.\""},
-  {speaker:"Amel", speakerKey:"amel", chars:["player","amel"], bg:"refleksi", text:"Aku jadi lebih percaya diri sejak sering ke sana. Kak Hana baik banget, selalu bantu dengerin cerita kita."},
+  {speaker:"Narator", speakerKey:"player", chars:[], bg:"selebaran", text:"Suatu sore, kamu menemukan selebaran kecil terselip di antara buku-bukumu: \"RUMAH 'AISYIYAH — Ruang Aman untuk Remaja: Belajar, Bertanya, Bertumbuh.\""},
+  {speaker:"Amel", speakerKey:"amel", chars:["player","amel"], bg:"refleksi", text:"Eh, itu selebaran Rumah 'Aisyiyah, kan? Dari mana kamu dapetnya? Aku kaget lihat kamu mandangin itu terus dari tadi."},
+  {speaker:"Narator", speakerKey:"player", chars:["player","amel"], bg:"refleksi", text:"Kamu jadi salah tingkah, lalu cerita ke Amel soal selebaran yang kamu temukan."},
+  {speaker:"Amel", speakerKey:"amel", chars:["player","amel"], bg:"refleksi", text:"Oh, itu tempatnya bagus, lho. Aku jadi lebih percaya diri sejak sering ke sana. Kak Hana baik banget, selalu bantu dengerin cerita kita."},
   {speaker:"Narator", speakerKey:"player", chars:["player","amel"], bg:"refleksi", text:"Kamu memutuskan untuk mencoba datang. Di jalan menuju ke sana, kamu berpapasan dengan beberapa orang."},
   {text:"__PERJALANAN__"},
   {speaker:"Narator", speakerKey:"player", chars:["player"], bg:"rumah", text:"Akhirnya kamu sampai. Rumahnya terlihat hangat — bukan seperti sekolah, bukan seperti rumah sakit."},
@@ -2264,7 +2385,7 @@ function renderStory(){
       <div class="grow"></div>
       <button type="button" class="vn-dialogue btn-block" onclick="nextStoryBeat()">
         <div class="vn-speaker ${speakerLabel(beat).cls}">${speakerLabel(beat).text}</div>
-        <p class="vn-text">${beat.text}</p>
+        <p class="vn-text ${speakerLabel(beat).cls}">${beat.text}</p>
         <span class="vn-continue">Ketuk untuk lanjut ▶</span>
       </button>
     </div>
@@ -2312,6 +2433,7 @@ const SS_TALK_DIST = 78; // jarak maksimal buat mulai ngobrol
 const SS_EDGE_PAD = 40;  // jarak minimal dari tepi dunia (biar nggak keluar layar)
 
 let ss = null; // state berjalan — dibuat sekali waktu masuk scene perjalanan
+let ssResumeRecapPending = false; // diset true di enterGameFromSavedState() kalau resume-nya mendarat di tengah scene jalan
 
 function renderPerjalanan(){
   if(!ss){
@@ -2321,7 +2443,11 @@ function renderPerjalanan(){
       visited: new Set(saved ? saved.visited : []), talkingWith:null, lineIdx:0,
       raf:null, lastT:null, keyDown:null, keyUp:null,
       locked: !STATE.tutorialJalanDone,
+      showRecap: !!(saved && ssResumeRecapPending),
     };
+    ssResumeRecapPending = false;
+    startWaveAmbience();
+    scheduleBirdChirp();
   }
   ssEnterSegment();
 }
@@ -2341,15 +2467,6 @@ function ssEnterSegment(){
   ssAttachInput();
   ssStartLoop();
 }
-function ssHouseRow(width){
-  const icons = ["🏠","🌴","🌳","🏠","🌳"];
-  let html = "", i = 0;
-  for(let x=30; x<width-30; x+=210){
-    html += `<span class="ss-house" style="left:${x}px;">${icons[i % icons.length]}</span>`;
-    i++;
-  }
-  return html;
-}
 function ssBuildDOM(){
   const c = document.getElementById("storyContent");
   const seg = ssCurrentSegment();
@@ -2364,12 +2481,15 @@ function ssBuildDOM(){
           <img class="ss-cloud" src="images/ss_awan.png" alt="" style="top:8%;animation-duration:68s;animation-delay:-27s;" onerror="this.style.visibility='hidden'">
           <img class="ss-cloud" src="images/ss_awan.png" alt="" style="top:20%;animation-duration:46s;animation-delay:-14s;" onerror="this.style.visibility='hidden'">
           <img class="ss-cloud" src="images/ss_awan.png" alt="" style="top:11%;animation-duration:61s;animation-delay:-42s;" onerror="this.style.visibility='hidden'">
-          <img class="ss-bird fly-right" src="images/ss_burung.png" alt="" style="top:16%;animation-duration:16s;animation-delay:-2s;" onerror="this.style.visibility='hidden'">
-          <img class="ss-bird fly-right" src="images/ss_burung.png" alt="" style="top:26%;animation-duration:21s;animation-delay:-11s;" onerror="this.style.visibility='hidden'">
-          <img class="ss-bird fly-left" src="images/ss_burung.png" alt="" style="top:10%;animation-duration:19s;animation-delay:-6s;" onerror="this.style.visibility='hidden'">
+          <span class="ss-bird fly-right" style="top:16%;animation-duration:16s;animation-delay:-2s;"><span class="wing l"></span><span class="wing r"></span></span>
+          <span class="ss-bird fly-right" style="top:26%;animation-duration:21s;animation-delay:-11s;"><span class="wing l"></span><span class="wing r"></span></span>
+          <span class="ss-bird fly-left" style="top:10%;animation-duration:19s;animation-delay:-6s;"><span class="wing l"></span><span class="wing r"></span></span>
+          <span class="ss-bird fly-right" style="top:20%;animation-duration:24s;animation-delay:-17s;"><span class="wing l"></span><span class="wing r"></span></span>
+          <span class="ss-bird fly-left" style="top:31%;animation-duration:17s;animation-delay:-9s;"><span class="wing l"></span><span class="wing r"></span></span>
         </div>
         <div class="ss-layer ss-sea" id="ssSea"></div>
-        <div class="ss-layer ss-mid" id="ssMid">${ssHouseRow(seg.width)}</div>
+        <div class="ss-shorewave"><span class="wv wv1"></span><span class="wv wv2"></span><span class="wv wv3"></span></div>
+        <div class="ss-layer ss-mid" id="ssMid" style="width:${Math.max(seg.width, 1600)}px;left:0;right:auto;"></div>
         <div class="ss-layer ss-grassbase"></div>
         <div class="ss-layer ss-ground" id="ssGround">
           <div class="ss-world" id="ssWorld">
@@ -2397,13 +2517,30 @@ function ssBuildDOM(){
         <div style="pointer-events:none;flex:1"></div>
         <button type="button" class="ss-dpad" id="ssRight" aria-label="Jalan ke kanan">▶</button>
       </div>
-      ${ss.locked ? ssTutorialHTML() : ""}
+      ${ss.locked ? ssTutorialHTML() : (ss.showRecap ? ssRecapHTML() : "")}
     </div>
   `;
   ss.nearest = null;
   const promptEl = document.getElementById("ssPrompt");
   if(promptEl) promptEl.dataset.state = "";
   ssRenderCamera();
+}
+function ssRecapHTML(){
+  const seg = ssCurrentSegment();
+  return `
+    <div class="ss-tutorial" id="ssRecap">
+      <div class="ss-tutorial-card">
+        <h3>Selamat datang balik!</h3>
+        <p class="ss-tutorial-sub">Sebelumnya kamu lagi dalam perjalanan menuju Rumah 'Aisyiyah, kenalan sama teman-teman baru di jalan (${seg.label}). Yuk lanjutkan dari sini.</p>
+        <button type="button" class="btn-primary btn-block" onclick="ssDismissRecap()">Lanjutkan 🚶</button>
+      </div>
+    </div>
+  `;
+}
+function ssDismissRecap(){
+  if(ss) ss.showRecap = false;
+  const el = document.getElementById("ssRecap");
+  if(el) el.remove();
 }
 function ssTutorialHTML(){
   return `
@@ -2613,6 +2750,8 @@ function ssTeardown(){
   if(ss && ss.raf) cancelAnimationFrame(ss.raf);
   ssDetachInput();
   ss = null;
+  stopWaveAmbience();
+  stopBirdChirp();
 }
 function ssFinish(){
   ssTeardown();
