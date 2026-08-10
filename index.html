@@ -232,6 +232,7 @@
 
   /* ===================== STORY / VISUAL NOVEL ===================== */
   #screen-story{padding:0;overflow:hidden;background:#101a15;}
+  #screen-mood{padding:0;overflow:hidden;background:#101a15;}
   #screen-corridor{padding:0;overflow:hidden;background:#101a15;}
   .vn-stage{position:absolute;inset:0;display:flex;flex-direction:column;}
   .vn-bg{
@@ -290,6 +291,39 @@
   }
   .vn-quiz-panel .quiz-q{color:#f2ede0;font-size:14.5px;line-height:1.5;margin-bottom:12px;}
   .vn-quiz-panel .quiz-opt{background:rgba(251,248,239,.96);}
+  /* Panel mood check-in: sengaja jadi KOLOM DI KANAN (bukan bar full-width di
+     bawah) supaya Kak Hana yang berdiri di kiri nggak ketutup panel — dia tetap
+     kelihatan utuh sepanjang pemain mikir mau pilih apa. Di layar sempit (HP
+     potret, <560px) otomatis balik ke gaya bar bawah full-width karena nggak
+     cukup ruang buat kolom di sampingnya. */
+  /* Panel mood check-in: KOLOM DI KANAN Kak Hana (bukan bar full-width di
+     bawah) supaya dia yang berdiri di kiri nggak ketutup panel. Sengaja
+     ditempel deket dia (left:36%) + dikasih "ekor" bubble chat di kotak
+     pertanyaan yang nunjuk ke arahnya, biar jelas itu dia yang lagi ngomong —
+     bukan kotak pertanyaan yang ngambang sendirian jauh di kanan layar.
+     Di layar sempit (HP potret, <560px) otomatis balik ke gaya bar bawah
+     full-width karena nggak cukup ruang buat kolom di sampingnya. */
+  .mood-panel{position:absolute;left:36%;right:4%;bottom:6%;z-index:5;
+    display:flex;flex-direction:column;gap:10px;animation:vnDialogueIn .3s ease;}
+  .mood-question{position:relative;background:linear-gradient(180deg,rgba(14,22,17,.78),rgba(10,17,13,.94));
+    border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:13px 18px;}
+  .mood-question::after{content:'';position:absolute;left:-11px;top:26px;width:0;height:0;
+    border-top:10px solid transparent;border-bottom:10px solid transparent;
+    border-right:13px solid rgba(11,18,14,.9);}
+  .mood-question b{display:block;color:var(--gold);font-size:11.5px;font-weight:800;
+    letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px;}
+  .mood-question p{margin:0;color:#f2ede0;font-size:14px;line-height:1.5;}
+  .mood-choices{display:flex;flex-direction:column;gap:8px;}
+  .mood-choice-btn{background:rgba(251,248,239,.96);border:2px solid #e2d9bd;border-radius:12px;
+    padding:11px 14px;text-align:left;font-weight:700;color:var(--ink);
+    display:flex;align-items:center;gap:10px;font-size:13.5px;
+    transition:background .15s,border-color .15s,transform .1s;}
+  .mood-choice-btn:hover:not(:disabled){border-color:var(--green-mid);background:#dcefe4;}
+  .mood-choice-btn:active:not(:disabled){transform:scale(.98);}
+  @media (max-width:560px){
+    .mood-panel{right:0;left:0;bottom:0;width:auto;margin:0 14px 16px;}
+    .mood-question::after{display:none;}
+  }
 
   /* ---- Perjalanan: side-scrolling adventure sebelum sampai Rumah 'Aisyiyah ----
      4 layer paralaks: langit (paling lambat) → laut → bangunan/pohon tepi jalan → jalan (paling cepat, tempat player+NPC berpijak).
@@ -517,9 +551,14 @@
   @media (hover:hover) and (pointer:fine){
     .btn-chat:hover{box-shadow:0 14px 26px rgba(0,0,0,.4);background:linear-gradient(180deg,#ffffff 0%,#f7ecd9 100%);}
   }
-  .ss-hint-banner{position:absolute;left:50%;bottom:25%;transform:translateX(-50%);z-index:5;
+  /* Hint banner ("Jalan dan ketuk teman...") sengaja ditaruh di ATAS, nempel di
+     bawah pil topbar & di area langit yang kosong — supaya nggak numpuk-nutupin
+     atap rumah/pohon kayak sebelumnya (dulu nongkrong di bottom:25%, pas di
+     tengah baris rumah). Beda sama .ss-interact (bubble ngobrol) yang memang
+     sengaja tetap di bottom:25% karena itu ngikutin posisi kepala karakter. */
+  .ss-hint-banner{position:absolute;left:50%;top:58px;transform:translateX(-50%);z-index:5;
     background:rgba(10,16,12,.6);color:#fff;font-size:12.5px;padding:9px 16px;border-radius:999px;
-    text-shadow:0 1px 3px rgba(0,0,0,.6);white-space:nowrap;}
+    text-shadow:0 1px 3px rgba(0,0,0,.6);white-space:nowrap;max-width:88vw;text-overflow:ellipsis;overflow:hidden;}
   .ss-controls{position:absolute;left:0;right:0;bottom:14px;z-index:6;display:flex;justify-content:space-between;align-items:flex-end;padding:0 16px;pointer-events:none;}
   .ss-dpad{pointer-events:auto;width:58px;height:58px;border-radius:50%;
     background:rgba(10,16,12,.55);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;
@@ -530,7 +569,7 @@
   .ss-tutorial{position:absolute;inset:0;z-index:30;background:rgba(10,16,12,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px;}
   .ss-tutorial-card{background:var(--card);border-radius:20px;padding:24px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.45);animation:modalPop .28s cubic-bezier(.2,.9,.3,1.2);}
   .ss-tutorial-card h3{margin:0 0 4px;}
-  .ss-tutorial-sub{font-size:12.5px;color:var(--grey);margin:0 0 16px;}
+  .ss-tutorial-sub{font-size:12.5px;color:#4A4640;margin:0 0 16px;}
   .ss-tutorial-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;text-align:left;}
   .ss-tutorial-step{display:flex;align-items:center;gap:12px;background:var(--green-soft);border-radius:14px;padding:11px 13px;}
   .ss-tutorial-step .ss-tutorial-icon{font-size:24px;flex:none;width:36px;text-align:center;}
@@ -690,6 +729,21 @@
 
   .lobby-hall-center{position:relative;z-index:2;flex:none;text-align:center;
     padding:64px 16px 0;}
+  /* Tombol panah buat geser lihat area lobby yang SUDAH terbuka (area yang lagi
+     dikerjakan + semua area sebelumnya yang sudah selesai) — jadi pintu yang
+     sudah dibuka & diselesaikan tetap bisa dikunjungi lagi kapan aja, bukan
+     cuma bisa maju terus tanpa bisa balik. Panah nonaktif otomatis kalau sudah
+     mentok di area pertama/terakhir yang terbuka. */
+  .lobby-area-nav{display:flex;align-items:center;justify-content:center;gap:10px;}
+  .lobby-area-arrow{flex:none;width:30px;height:30px;border-radius:999px;
+    background:rgba(20,15,8,.55);color:#f2e9cf;border:1px solid rgba(212,175,90,.55);
+    font-size:13px;line-height:1;box-shadow:0 4px 10px rgba(0,0,0,.3);
+    transition:transform .15s, opacity .15s;}
+  .lobby-area-arrow:active{transform:scale(.9);}
+  .lobby-area-arrow:disabled{opacity:.25;pointer-events:none;}
+  @media (hover:hover) and (pointer:fine){
+    .lobby-area-arrow:not(:disabled):hover{transform:translateY(-1px);}
+  }
   .lobby-hall-plaque{display:inline-block;color:#f2e9cf;font-weight:800;font-size:13px;
     letter-spacing:.05em;background:rgba(20,15,8,.5);border:1px solid rgba(212,175,90,.55);
     padding:6px 18px;border-radius:20px;margin:0 auto 4px;
@@ -1102,8 +1156,14 @@
         <button class="lobby-side-btn" onclick="openModal('modalSettings')"><span class="emoji">⚙️</span>Atur</button>
       </div>
       <div class="lobby-hall-center">
-        <span class="lobby-hall-plaque">PETA RUMAH</span>
-        <p class="lobby-hall-desc" id="lobbyStageDesc"></p>
+        <div class="lobby-area-nav">
+          <button type="button" class="lobby-area-arrow" id="lobbyAreaPrev" onclick="lobbyChangeArea(-1)" aria-label="Area sebelumnya">◀</button>
+          <div>
+            <span class="lobby-hall-plaque">PETA RUMAH</span>
+            <p class="lobby-hall-desc" id="lobbyStageDesc"></p>
+          </div>
+          <button type="button" class="lobby-area-arrow" id="lobbyAreaNext" onclick="lobbyChangeArea(1)" aria-label="Area berikutnya">▶</button>
+        </div>
       </div>
       <div class="lobby-doors-row" id="doorsGrid"></div>
       <div class="lobby-hall-floor">
@@ -1746,21 +1806,23 @@ function confirmExit(){
 }
 
 /* ---------- NAVIGATION ---------- */
-const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading","screen-story","screen-corridor","screen-lobby"];
+const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading","screen-story","screen-mood","screen-corridor","screen-lobby"];
 function goTo(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   window.scrollTo(0,0);
   document.getElementById("game").classList.toggle("fullbleed", FULLBLEED_SCREENS.includes(id));
-  if(id === "screen-title") startLeafRain(); else stopLeafRain();
+  if(id === "screen-title") startLeafRain("titleLeaves");
+  else if(id === "screen-mood") startLeafRain("moodLeaves");
+  else stopLeafRain();
   if(id !== "screen-loading") stopLoadingCharAnim();
 }
 
-/* ---------- TITLE SCREEN LEAF RAIN ---------- */
+/* ---------- HUJAN DAUN (dipakai di title screen & mood check-in) ---------- */
 const LEAF_IMAGES = ["images/daun_jatuh_besar.png","images/daun_jatuh_sedang.png","images/daun_jatuh_kecil.png"];
 let leafSpawnTimer = null;
-function spawnLeaf(){
-  const layer = document.getElementById("titleLeaves");
+function spawnLeaf(layerId){
+  const layer = document.getElementById(layerId);
   if(!layer) return;
   const img = document.createElement("img");
   img.src = LEAF_IMAGES[Math.floor(Math.random()*LEAF_IMAGES.length)];
@@ -1778,16 +1840,20 @@ function spawnLeaf(){
   img.addEventListener("animationend", ()=> img.remove());
   layer.appendChild(img);
 }
-function startLeafRain(){
-  if(leafSpawnTimer) return;
-  spawnLeaf(); spawnLeaf();
-  leafSpawnTimer = setInterval(spawnLeaf, 850);
+function startLeafRain(layerId){
+  // Selalu restart bersih (bukan cuma "kalau belum ada timer") — biar nggak ada
+  // kondisi timer dari layer lain (misal titleLeaves) masih nyangkut aktif dan
+  // jadi ngeblok daun di layer baru (moodLeaves) buat mulai jatuh.
+  clearInterval(leafSpawnTimer);
+  spawnLeaf(layerId); spawnLeaf(layerId);
+  leafSpawnTimer = setInterval(()=>spawnLeaf(layerId), 850);
 }
 function stopLeafRain(){
   clearInterval(leafSpawnTimer);
   leafSpawnTimer = null;
-  const layer = document.getElementById("titleLeaves");
-  if(layer) layer.innerHTML = "";
+  // bersihin daun yang lagi jatuh di SEMUA layer (title & mood), jaga-jaga ada
+  // sisa daun nyangkut pas pindah layar sebelum animasinya kelar.
+  document.querySelectorAll(".title-leaves").forEach(layer=>{ layer.innerHTML = ""; });
 }
 function openModal(id){ document.getElementById(id).classList.add("active"); if(id==="modalSettings") syncMusicSwitch(); }
 function closeModal(id){ document.getElementById(id).classList.remove("active"); }
@@ -2313,16 +2379,25 @@ function goToLobbyWithMoodCheck(){
     goTo("screen-lobby");
     renderLobby();
   } else {
-    goTo("screen-mood");
     renderMoodCheck();
+    goTo("screen-mood");
   }
 }
 function renderMoodCheck(){
+  const bgSrc = NARASI_BG.rumah; // bg_titlescreen.png — halaman depan Rumah 'Aisyiyah
   document.getElementById("moodBody").innerHTML = `
-    <div class="card">
-      ${hanaLine("idle", "Sebelum mulai, gimana harimu hari ini?")}
-      <div class="col">
-        ${MOOD_OPTIONS.map(m=>`<button class="choice-btn btn-block" onclick="pickMood('${m.key}')">${m.emoji} ${m.label}</button>`).join("")}
+    <div class="vn-stage">
+      <div class="vn-bg" style="background-image:url('${bgSrc}')"></div>
+      <div class="title-leaves" id="moodLeaves"></div>
+      <img class="vn-portrait pos-left speaking" src="images/hana_idle.png" alt="Kak Hana" onerror="this.remove()" onanimationend="this.classList.add('breathing')">
+      <div class="mood-panel">
+        <div class="mood-question">
+          <b>KAK HANA</b>
+          <p>Sebelum mulai, gimana harimu hari ini?</p>
+        </div>
+        <div class="mood-choices">
+          ${MOOD_OPTIONS.map(m=>`<button type="button" class="mood-choice-btn" onclick="pickMood('${m.key}')"><span>${m.emoji}</span>${m.label}</button>`).join("")}
+        </div>
       </div>
     </div>
   `;
@@ -2426,6 +2501,7 @@ const storyBeats = [
   {speaker:"Narator", speakerKey:"player", chars:["player","amel"], bg:"refleksi", text:"Kamu memutuskan untuk mencoba datang. Di jalan menuju ke sana, kamu berpapasan dengan beberapa orang."},
   {text:"__PERJALANAN__"},
   {speaker:"Narator", speakerKey:"player", chars:["player"], bg:"rumah", text:"Akhirnya kamu sampai. Rumahnya terlihat hangat — bukan seperti sekolah, bukan seperti rumah sakit."},
+  {speaker:"Kak Hana", speakerKey:"hana", chars:["player","hana"], bg:"rumah", text:"Assalamu'alaikum, {{NAME}}! Amel sudah cerita sedikit soal kamu — aku Kak Hana, salah satu pendamping di sini."},
   {speaker:"Kak Hana", speakerKey:"hana", chars:["player","hana"], bg:"rumah", text:"Selamat datang. Rumah ini akan selalu terbuka untukmu — kamu tidak sendiri."},
 ];
 function renderStory(){
@@ -2435,6 +2511,9 @@ function renderStory(){
   if(beat.text === "__BEFORE_QUIZ__"){ renderBeforeQuiz(); return; }
   if(beat.text === "__PERJALANAN__"){ renderPerjalanan(); return; }
   const bgSrc = NARASI_BG[beat.bg] || NARASI_BG.refleksi;
+  // {{NAME}} diganti pas render (bukan pas storyBeats didefinisikan), soalnya
+  // STATE.name baru keisi belakangan setelah pemain input nama di awal.
+  const beatText = beat.text.replace(/\{\{NAME\}\}/g, STATE.name || "kamu");
   /* Tombol LEWATI cuma berguna (dan cuma ditampilkan) kalau masih ada sesi checkpoint
      di depan (kuis / perjalanan ketemu teman) yang bisa dituju. Kalau sisa cerita cuma
      narasi pendek biasa, jangan tampilkan tombolnya — biar pemain baca sampai selesai,
@@ -2448,7 +2527,7 @@ function renderStory(){
       <div class="grow"></div>
       <button type="button" class="vn-dialogue btn-block" onclick="nextStoryBeat()">
         <div class="vn-speaker ${speakerLabel(beat).cls}">${speakerLabel(beat).text}</div>
-        <p class="vn-text ${speakerLabel(beat).cls}">${beat.text}</p>
+        <p class="vn-text ${speakerLabel(beat).cls}">${beatText}</p>
         <span class="vn-continue">Ketuk untuk lanjut ▶</span>
       </button>
     </div>
@@ -2626,8 +2705,8 @@ function ssRecapHTML(){
   return `
     <div class="ss-tutorial" id="ssRecap">
       <div class="ss-tutorial-card">
-        <h3>Selamat datang balik!</h3>
-        <p class="ss-tutorial-sub">Sebelumnya kamu lagi dalam perjalanan menuju Rumah 'Aisyiyah, kenalan sama teman-teman baru di jalan (${seg.label}). Yuk lanjutkan dari sini.</p>
+        <h3>Selamat datang kembali!</h3>
+        <p class="ss-tutorial-sub">Sebelumnya kamu sedang dalam perjalanan (${seg.label}), berkenalan dengan teman-teman baru di jalan. Yuk, lanjutkan dari sini.</p>
         <button type="button" class="btn-primary btn-block" onclick="ssDismissRecap()">Lanjutkan 🚶</button>
       </div>
     </div>
@@ -3000,19 +3079,47 @@ function computeDoorSlots(bgAreaNum, n){
 }
 
 /* ---------- LOBBY ---------- */
+/* Area yang lagi DILIHAT pemain di lobby — bisa beda dari currentAreaIndex()
+   (area yang lagi aktif/dikerjakan) kalau pemain sengaja geser panah buat lihat
+   lagi area yang sudah diselesaikan. null = belum pernah di-set, nanti default
+   ke area aktif. Sengaja bukan bagian dari STATE (nggak perlu ke-save), reset
+   ke area aktif tiap kali pemain baru masuk lobby dari luar. */
+let lobbyViewAreaIdx = null;
+function lobbyChangeArea(delta){
+  const maxUnlocked = currentAreaIndex();
+  const base = lobbyViewAreaIdx===null ? maxUnlocked : lobbyViewAreaIdx;
+  lobbyViewAreaIdx = Math.max(0, Math.min(maxUnlocked, base + delta));
+  if(typeof playClickSfx === "function") playClickSfx("tap");
+  renderLobby();
+}
 function renderLobby(){
   document.getElementById("lobbyName").textContent = STATE.name || "Aisyah";
   document.getElementById("lobbyLevel").textContent = STATE.level;
   document.getElementById("lobbyPoints").textContent = STATE.points;
 
-  const areaIdx = currentAreaIndex();
-  const area = LOBBY_AREAS[areaIdx];
+  const maxUnlockedIdx = currentAreaIndex(); // area terjauh yang sudah kebuka (currentAreaIndex sudah otomatis clamp ke area terakhir kalau semua selesai)
   const allDone = LOBBY_AREAS.every((_,i)=>areaDone(i));
-  const activeArea = allDone ? LOBBY_AREAS[LOBBY_AREAS.length-1] : area;
 
-  document.getElementById("lobbyStageDesc").textContent = allDone
-    ? "Semua ruangan sudah kamu jelajahi. Selamat! 🎉"
-    : `Ruang ${areaIdx+1} dari ${LOBBY_AREAS.length}: ${area.title} — ${area.desc}`;
+  // deteksi area yang BARU SAJA kebuka dibanding kunjungan lobby terakhir
+  // -> ajak pemain jalan lewat lorong menuju area baru itu, DAN otomatis
+  // pindahkan tampilan lobby ke sana.
+  if(STATE._lastSeenArea === undefined) STATE._lastSeenArea = maxUnlockedIdx;
+  const justAdvanced = maxUnlockedIdx > STATE._lastSeenArea;
+  const finishedAreaIdx = STATE._lastSeenArea;
+  STATE._lastSeenArea = maxUnlockedIdx;
+  saveState();
+
+  // area yang ditampilkan: default/ikut ke area aktif, KECUALI pemain lagi
+  // sengaja lihat area lain lewat panah ◀▶ — itu tetap dipertahankan.
+  if(lobbyViewAreaIdx === null || justAdvanced || lobbyViewAreaIdx > maxUnlockedIdx){
+    lobbyViewAreaIdx = maxUnlockedIdx;
+  }
+  const viewIdx = lobbyViewAreaIdx;
+  const area = LOBBY_AREAS[viewIdx];
+  const isRevisit = viewIdx < maxUnlockedIdx; // lagi lihat area lama yang udah kelar
+
+  document.getElementById("lobbyStageDesc").textContent =
+    `Ruang ${viewIdx+1} dari ${LOBBY_AREAS.length}: ${area.title} — ${area.desc}`;
   const moodCfg = MOOD_HANA[STATE.mood] || MOOD_HANA.biasa;
   const lobbyExpr = allDone ? "bangga" : moodCfg.expr;
   document.getElementById("lobbyCharStanding").src = `images/lobby_char_${lobbyExpr}.png`;
@@ -3020,18 +3127,20 @@ function renderLobby(){
   document.getElementById("lobbyCharStanding").dataset.stage = "0";
   const streakLine = STATE.moodStreak >= 3 ? MOOD_STREAK_LINE[STATE.mood] : "";
   document.getElementById("lobbyCharBubbleText").textContent = allDone
-    ? "Kamu sudah menjelajahi semua ruangan. Aku bangga sama kamu!"
+    ? "Kamu sudah menjelajahi semua ruangan. Aku bangga sama kamu! Mampir lagi aja kapan pun kamu mau."
     : streakLine
       ? streakLine
-      : `${moodCfg.line} Yuk masuk ke ${area.title}.`;
+      : isRevisit
+        ? `Ini ${area.title} yang udah kamu selesaikan — boleh banget mampir lagi kapan aja.`
+        : `${moodCfg.line} Yuk masuk ke ${area.title}.`;
   document.getElementById("lobbyCharBubble").style.display = "block";
-  const bgAreaNum = allDone ? LOBBY_AREAS.length : areaIdx+1;
+  const bgAreaNum = viewIdx+1;
   document.getElementById("lobbyHall").style.backgroundImage = `url('images/bg_area${bgAreaNum}.png')`;
 
   const rooms = getRooms();
   const grid = document.getElementById("doorsGrid");
-  const slots = computeDoorSlots(bgAreaNum, activeArea.rooms.length);
-  grid.innerHTML = activeArea.rooms.map((id,i)=>{
+  const slots = computeDoorSlots(bgAreaNum, area.rooms.length);
+  grid.innerHTML = area.rooms.map((id,i)=>{
     const r = rooms.find(x=>x.id===id);
     const done = STATE.roomsDone[id];
     const s = slots[i];
@@ -3042,18 +3151,14 @@ function renderLobby(){
     </div>`;
   }).join("");
 
-  const doneCount = activeArea.rooms.filter(id=>STATE.roomsDone[id]).length;
-  document.getElementById("lobbyProgressLine").textContent = allDone
-    ? "Semua area selesai — kamu hebat!"
-    : `${doneCount} dari ${activeArea.rooms.length} pintu di area ini selesai`;
+  const doneCount = area.rooms.filter(id=>STATE.roomsDone[id]).length;
+  document.getElementById("lobbyProgressLine").textContent =
+    `${doneCount} dari ${area.rooms.length} pintu di area ini selesai`;
 
-  // deteksi area yang BARU SAJA selesai dibanding kunjungan lobby terakhir
-  // -> ajak pemain jalan lewat lorong menuju area berikutnya.
-  if(STATE._lastSeenArea === undefined) STATE._lastSeenArea = areaIdx;
-  const justAdvanced = areaIdx > STATE._lastSeenArea;
-  const finishedAreaIdx = STATE._lastSeenArea;
-  STATE._lastSeenArea = areaIdx;
-  saveState();
+  const prevBtn = document.getElementById("lobbyAreaPrev");
+  const nextBtn = document.getElementById("lobbyAreaNext");
+  if(prevBtn) prevBtn.disabled = viewIdx <= 0;
+  if(nextBtn) nextBtn.disabled = viewIdx >= maxUnlockedIdx;
 
   if(justAdvanced && LOBBY_AREAS[finishedAreaIdx+1]){
     enterCorridor(finishedAreaIdx+1);
