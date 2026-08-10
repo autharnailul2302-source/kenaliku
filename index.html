@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>KenaliKu — Karena Setiap Remaja Berharga</title>
+<link rel="icon" type="image/png" href="images/favicon.png">
 <style>
   /* ===================== DESIGN TOKENS ===================== */
   :root{
@@ -325,7 +326,7 @@
     .mood-question::after{display:none;}
   }
 
-  /* ---- Perjalanan: side-scrolling adventure sebelum sampai Rumah 'Aisyiyah ----
+  /* ---- Perjalanan: side-scrolling adventure sebelum sampai Ruang Tumbuh ----
      4 layer paralaks: langit (paling lambat) → laut → bangunan/pohon tepi jalan → jalan (paling cepat, tempat player+NPC berpijak).
      Player digerakkan pakai tombol panah / tombol sentuh, dunia & NPC discroll relatif ke kamera. */
   .ss-stage{position:absolute;inset:0;overflow:hidden;background:#0b1c22;}
@@ -683,13 +684,14 @@
 
   /* lobby — versi "Peta Rumah": background ilustrasi full-screen (edge-to-edge),
      dan semua kontrol (nama/level, koin, sidebar, tombol atur) mengambang di
-     atasnya, persis seperti mockup rumah 'Aisyiyah.
+     atasnya, persis seperti mockup Ruang Tumbuh.
      Path gambar yang dipakai (taruh semua di folder images/):
        - images/bg_area1.png, bg_area2.png, bg_area3.png → background beda per area
          (dipasang lewat JS di renderLobby, sesuai area yang lagi aktif)
        - images/lobby_char_idle.png / _bangga.png → karakter berdiri (Kak Hana)
-       - images/door_<id>.png           → gambar pintu per topik, id sesuai ROOMS
-         (pubertas, menstruasi, consent, relasi, medsos, gizi, konseling, perpustakaan, refleksi) */
+       - images/door_<id>.png           → gambar pintu TERTUTUP per topik, id sesuai ROOMS
+         (pubertas, menstruasi, consent, relasi, medsos, gizi, konseling, perpustakaan, refleksi)
+       - images/door_<id>_open.png      → gambar pintu TERBUKA (ditampilkan saat di-hover, kalau pintunya nggak locked) */
   #screen-lobby{padding:0;overflow:hidden;}
   .lobby-full{
     position:relative;width:100%;height:100%;overflow:hidden;
@@ -751,9 +753,11 @@
   .lobby-hall-desc{font-size:11.5px;color:#f2e9cf;margin:0;text-shadow:0 1px 3px rgba(0,0,0,.6);}
 
   .lobby-hall-floor{position:relative;z-index:2;flex:1;min-height:0;}
-  .lobby-char-wrap{position:absolute;left:138px;bottom:0;height:96%;z-index:2;
-    display:flex;align-items:flex-end;pointer-events:none;}
-  .lobby-char-standing{height:100%;width:auto;object-fit:contain;object-position:bottom;
+  .lobby-char-wrap{position:absolute;left:138px;bottom:-48px;height:96%;width:46%;
+    max-width:520px;z-index:2;
+    display:flex;align-items:flex-end;justify-content:flex-start;overflow:visible;
+    pointer-events:none;}
+  .lobby-char-standing{height:100%;width:100%;object-fit:contain;object-position:bottom left;
     filter:drop-shadow(0 8px 10px rgba(0,0,0,.5));
     animation:charBreatheLobby 2.6s ease-in-out infinite;transform-origin:bottom center;}
   @keyframes charBreatheLobby{
@@ -762,14 +766,42 @@
   }
   .lobby-char-fallback{display:none;align-items:flex-end;justify-content:center;
     height:55%;font-size:72px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.5));}
-  /* balon percakapan Kak Hana — nempel di dekat kepala karakter (item flex
-     kedua di dalam .lobby-char-wrap, disejajarkan ke atas lewat align-self) */
+  /* balon percakapan Kak Hana — nempel di dekat kepala karakter. Dipisah dari
+     alur flex (position:absolute relatif ke .lobby-char-wrap) supaya nggak
+     ketarik ke ujung kanan box gambar (yang lebih lebar dari karakter aslinya
+     karena object-fit:contain). Lebar dilebarin biar teksnya nggak numpuk
+     jadi kolom sempit & lonjong ke bawah. */
   .lobby-char-bubble{
-    align-self:flex-start;margin:9% 0 0 -6px;position:relative;
-    max-width:172px;background:var(--card);color:var(--ink);
-    border-radius:16px;padding:9px 13px;font-size:12px;line-height:1.42;
+    position:absolute;left:8%;top:2%;
+    width:max-content;max-width:min(240px,52vw);background:var(--card);color:var(--ink);
+    border-radius:16px;border-left:4px solid var(--gold);padding:9px 13px 9px 11px;
+    font-size:12px;line-height:1.42;
     box-shadow:0 6px 14px rgba(0,0,0,.35);
   }
+  /* aksen warna beda-beda sesuai mood Kak Hana saat itu, biar balonnya nggak
+     keliatan itu-itu aja tiap kali masuk lobby */
+  .lobby-char-bubble.tone-senang{border-left-color:#e0a72e;}
+  .lobby-char-bubble.tone-semangat{border-left-color:#d9642c;}
+  .lobby-char-bubble.tone-biasa{border-left-color:var(--gold);}
+  .lobby-char-bubble.tone-sedih{border-left-color:#5b8ba6;}
+  .lobby-char-bubble.tone-berat{border-left-color:#6b6f9c;}
+  /* dua varian animasi "masuk" — dipilih gantian tiap render (lihat JS) biar
+     nggak monoton kalau bolak-balik ke lobby */
+  @keyframes bubblePopIn{
+    0%{opacity:0;transform:translateY(10px) scale(.9);}
+    60%{opacity:1;transform:translateY(-2px) scale(1.03);}
+    100%{opacity:1;transform:translateY(0) scale(1);}
+  }
+  @keyframes bubbleSlideIn{
+    0%{opacity:0;transform:translateX(-16px) scale(.97);}
+    100%{opacity:1;transform:translateX(0) scale(1);}
+  }
+  .lobby-char-bubble.anim-pop{animation:bubblePopIn .42s cubic-bezier(.34,1.56,.64,1);}
+  .lobby-char-bubble.anim-slide{animation:bubbleSlideIn .38s ease;}
+  /* kursor kedip di akhir teks selama efek ngetik jalan (lihat typeIntoLobbyBubble) */
+  .lobby-bubble-caret{display:inline-block;width:2px;height:.9em;background:var(--text-accent);
+    margin-left:2px;vertical-align:-1px;animation:lobbyCaretBlink .8s steps(1) infinite;}
+  @keyframes lobbyCaretBlink{50%{opacity:0;}}
   .lobby-char-bubble::after{
     content:'';position:absolute;left:20px;bottom:-7px;
     width:0;height:0;border:7px solid transparent;
@@ -792,8 +824,14 @@
     .lobby-door-3d:not(.locked):hover{border-color:rgba(212,175,90,.85);
       box-shadow:0 0 18px 2px rgba(212,175,90,.55), inset 0 0 14px rgba(212,175,90,.25);}
   }
-  .lobby-door-3d img{width:100%;height:100%;display:block;object-fit:contain;
+  .lobby-door-3d img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:contain;
     filter:drop-shadow(0 4px 6px rgba(0,0,0,.35));}
+  .lobby-door-3d .door-img-open{opacity:0;transition:opacity .2s ease;}
+  .lobby-door-3d .door-img-closed{transition:opacity .2s ease;}
+  @media (hover:hover) and (pointer:fine){
+    .lobby-door-3d:not(.locked):hover .door-img-open{opacity:1;}
+    .lobby-door-3d:not(.locked):hover .door-img-closed{opacity:0;}
+  }
   .lobby-door-3d.locked img{filter:grayscale(.75) brightness(.55) drop-shadow(0 6px 10px rgba(0,0,0,.5));}
   .lobby-door-3d .door-plaque{position:absolute;left:50%;bottom:-22px;transform:translateX(-50%);
     white-space:nowrap;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:800;
@@ -840,7 +878,7 @@
   .modal-card{background:var(--card);border-radius:18px;padding:22px;max-width:340px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.4);animation:modalPop .28s cubic-bezier(.2,.9,.3,1.2);}
   @keyframes modalPop{from{opacity:0;transform:scale(.92) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
 
-  /* themed modal (Rumah 'Aisyiyah style — gold border, leaf corners, plaque header) */
+  /* themed modal (Ruang Tumbuh style — gold border, leaf corners, plaque header) */
   .modal-card-themed{
     position:relative;
     background:linear-gradient(180deg,var(--card) 0%,#f2e9cf 100%);
@@ -1071,7 +1109,7 @@
     <div class="title-content">
       <img class="title-logo" src="images/title_game.png" alt="KenaliKu — Game Edukasi Kesehatan Reproduksi Remaja">
     </div>
-    <img class="title-char" src="images/title_char.png" alt="Karakter Rumah 'Aisyiyah">
+    <img class="title-char" src="images/title_char.png" alt="Karakter Ruang Tumbuh">
     <button class="btn-masuk" onclick="openEntryChoice()">
       <img src="images/btn_masuk.png" alt="MASUK">
     </button>
@@ -1253,7 +1291,7 @@
     <h2 class="center">Rumah ini akan selalu terbuka.</h2>
     <p class="center" style="font-style:italic;">— Kak Hana</p>
     <p class="center" style="margin-top:16px;">Di depan gerbang, kamu bertemu remaja lain yang sedang kebingungan.</p>
-    <button class="btn-gold btn-block" onclick="showEndingCredit()">❤️ Ajak ke Rumah 'Aisyiyah</button>
+    <button class="btn-gold btn-block" onclick="showEndingCredit()">❤️ Ajak ke Ruang Tumbuh</button>
     <div id="endingCredit" style="display:none;margin-top:20px;">
       <p class="center" style="font-weight:700;color:var(--text-accent);">"Setiap remaja memiliki cerita. Setiap cerita layak didengar.<br>Karena setiap remaja berharga."</p>
       <p class="center tagline">KENALIKU</p>
@@ -1482,7 +1520,7 @@
 <script>
 /* =========================================================================
    KENALIKU — single-file HTML game
-   (Lokasi dalam cerita game ini bernama "Rumah 'Aisyiyah")
+   (Lokasi dalam cerita game ini bernama "Ruang Tumbuh")
    Backend: Google Sheets via Google Apps Script (lihat Code.gs terlampir)
    Ganti GAME_API_URL di bawah dengan URL Web App Apps Script kamu.
    ========================================================================= */
@@ -2384,7 +2422,7 @@ function goToLobbyWithMoodCheck(){
   }
 }
 function renderMoodCheck(){
-  const bgSrc = NARASI_BG.rumah; // bg_titlescreen.png — halaman depan Rumah 'Aisyiyah
+  const bgSrc = NARASI_BG.rumah; // bg_titlescreen.png — halaman depan Ruang Tumbuh
   document.getElementById("moodBody").innerHTML = `
     <div class="vn-stage">
       <div class="vn-bg" style="background-image:url('${bgSrc}')"></div>
@@ -2495,7 +2533,7 @@ const storyBeats = [
   {speaker:"Narator", speakerKey:"player", chars:["player"], bg:"refleksi", text:"Akhir-akhir ini kamu merasa banyak yang berubah — pada tubuhmu, perasaanmu, dan caramu memandang teman-teman di sekitar. Rasanya membingungkan."},
   {text:"__BEFORE_QUIZ__"},
   {speaker:"Narator", speakerKey:"player", chars:[], bg:"selebaran", text:"Suatu sore, kamu menemukan selebaran kecil terselip di antara buku-bukumu: \"RUMAH 'AISYIYAH — Ruang Aman untuk Remaja: Belajar, Bertanya, Bertumbuh.\""},
-  {speaker:"Amel", speakerKey:"amel", chars:["player","amel"], bg:"refleksi", text:"Eh, itu selebaran Rumah 'Aisyiyah, kan? Dari mana kamu dapetnya? Aku kaget lihat kamu mandangin itu terus dari tadi."},
+  {speaker:"Amel", speakerKey:"amel", chars:["player","amel"], bg:"refleksi", text:"Eh, itu selebaran Ruang Tumbuh, kan? Dari mana kamu dapetnya? Aku kaget lihat kamu mandangin itu terus dari tadi."},
   {speaker:"Narator", speakerKey:"player", chars:["player","amel"], bg:"refleksi", text:"Kamu jadi salah tingkah, lalu cerita ke Amel soal selebaran yang kamu temukan."},
   {speaker:"Amel", speakerKey:"amel", chars:["player","amel"], bg:"refleksi", text:"Oh, itu tempatnya bagus, lho. Aku jadi lebih percaya diri sejak sering ke sana. Kak Hana baik banget, selalu bantu dengerin cerita kita."},
   {speaker:"Narator", speakerKey:"player", chars:["player","amel"], bg:"refleksi", text:"Kamu memutuskan untuk mencoba datang. Di jalan menuju ke sana, kamu berpapasan dengan beberapa orang."},
@@ -2547,7 +2585,7 @@ function skipStory(){
   renderStory();
 }
 
-/* ---------- PERJALANAN: side-scrolling adventure menuju Rumah 'Aisyiyah ----------
+/* ---------- PERJALANAN: side-scrolling adventure menuju Ruang Tumbuh ----------
    Dunia dibagi jadi beberapa SEGMEN (scene). Player jalan beneran pakai tombol arah
    (keyboard di desktop, dua tombol sentuh ◀▶ di HP — bisa ditahan). Kamera + 4 layer
    (langit, laut, bangunan/pohon, jalan) scroll paralaks mengikuti posisi player, jadi
@@ -2560,11 +2598,11 @@ const SS_SEGMENTS = [
   { id:"segmen1", label:"Tepi Pantai", width:1500, goal:"🌴",
     npcs:[
       {id:"aldo", name:"Aldo", x:430, sprite:"images/sprite_aldo_tunarungu.png", portrait:"images/narasi_aldo_tunarungu.png",
-       lines:["Eh, kamu mau ke Rumah 'Aisyiyah juga?", "Di sana ramah buat aku yang tunarungu — ada opsi bahasa isyarat dan subtitle di semua materinya."]},
+       lines:["Eh, kamu mau ke Ruang Tumbuh juga?", "Di sana ramah buat aku yang tunarungu — ada opsi bahasa isyarat dan subtitle di semua materinya."]},
       {id:"arka", name:"Arka", x:1080, sprite:"images/sprite_arka_kakicacat.png", portrait:"images/narasi_arka_kakicacat.png",
        lines:["Dulu aku sempat minder soal kondisi kakiku.", "Tapi di sana aku belajar, tubuh yang berbeda itu tetap berharga — nggak perlu dibanding-bandingkan sama orang lain."]},
     ]},
-  { id:"segmen2", label:"Menuju Rumah 'Aisyiyah", width:1100, goal:"🏠",
+  { id:"segmen2", label:"Menuju Ruang Tumbuh", width:1100, goal:"🏠",
     npcs:[
       {id:"vira", name:"Vira", x:580, sprite:"images/sprite_vira_disabilitas.png", portrait:"images/narasi_vira_disabilitas.png",
        lines:["Aku pernah diperlakukan nggak baik sama orang lain gara-gara kondisiku.", "Tapi Kak Hana bantu aku sadar aku berhak dihargai — dan ada tempat buat cerita kalau itu terjadi lagi. Kamu juga, ya, kalau butuh."]},
@@ -3017,7 +3055,7 @@ function getRooms(){ const r = ROOMS.slice(); r[1] = menstruasiRoom(); return r;
 
 /* Lobby dibagi 3 AREA, tiap area isi 2-3 pintu. Cuma pintu di area AKTIF yang
    tampil. Begitu semua pintu di satu area selesai, pemain "jalan" lewat lorong
-   side-scrolling (engine yang sama kayak Menuju Rumah 'Aisyiyah) buat masuk
+   side-scrolling (engine yang sama kayak Menuju Ruang Tumbuh) buat masuk
    ke area berikutnya — lihat enterCorridor(). */
 const LOBBY_AREAS = [
   {title:"Ruang Diri", desc:"Mengenal & merawat diri sendiri.", rooms:["pubertas","menstruasi"]},
@@ -3092,6 +3130,42 @@ function lobbyChangeArea(delta){
   if(typeof playClickSfx === "function") playClickSfx("tap");
   renderLobby();
 }
+/* Efek "ngetik" buat balon Kak Hana di lobby — teks muncul huruf demi huruf
+   (kayak lagi ngomong beneran), plus kursor kedip selama proses. Dipanggil
+   ulang tiap renderLobby(), jadi kalau teksnya beda dari sebelumnya, animasi
+   ngetik jalan lagi dari awal. */
+let lobbyBubbleTypeTimer = null;
+function typeIntoLobbyBubble(text){
+  const el = document.getElementById("lobbyCharBubbleText");
+  if(lobbyBubbleTypeTimer){ clearInterval(lobbyBubbleTypeTimer); lobbyBubbleTypeTimer = null; }
+  let i = 0;
+  const caret = () => `<span class="lobby-bubble-caret"></span>`;
+  el.innerHTML = caret();
+  lobbyBubbleTypeTimer = setInterval(() => {
+    i++;
+    el.innerHTML = escapeHtml(text.slice(0, i)) + (i < text.length ? caret() : "");
+    if(i >= text.length){
+      clearInterval(lobbyBubbleTypeTimer);
+      lobbyBubbleTypeTimer = null;
+    }
+  }, 20);
+}
+function escapeHtml(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+/* Ganti-gantian animasi "masuk" (pop / slide) tiap kali balon tampil, dan
+   reflow paksa (offsetWidth) supaya animasinya bisa diulang walau class-nya
+   sama kayak sebelumnya. */
+function playLobbyBubbleEnter(bubbleEl){
+  const variants = ["anim-pop", "anim-slide"];
+  bubbleEl.classList.remove("anim-pop", "anim-slide");
+  void bubbleEl.offsetWidth;
+  bubbleEl.classList.add(variants[Math.floor(Math.random() * variants.length)]);
+}
+const LOBBY_BUBBLE_TONE = {
+  senang:"tone-senang", semangat:"tone-semangat", biasa:"tone-biasa",
+  sedih:"tone-sedih", berat:"tone-berat",
+};
 function renderLobby(){
   document.getElementById("lobbyName").textContent = STATE.name || "Aisyah";
   document.getElementById("lobbyLevel").textContent = STATE.level;
@@ -3126,14 +3200,23 @@ function renderLobby(){
   document.getElementById("lobbyCharStanding").dataset.fallback = `images/hana_${lobbyExpr}.png`;
   document.getElementById("lobbyCharStanding").dataset.stage = "0";
   const streakLine = STATE.moodStreak >= 3 ? MOOD_STREAK_LINE[STATE.mood] : "";
-  document.getElementById("lobbyCharBubbleText").textContent = allDone
+  const lobbyBubbleLine = allDone
     ? "Kamu sudah menjelajahi semua ruangan. Aku bangga sama kamu! Mampir lagi aja kapan pun kamu mau."
     : streakLine
       ? streakLine
       : isRevisit
         ? `Ini ${area.title} yang udah kamu selesaikan — boleh banget mampir lagi kapan aja.`
         : `${moodCfg.line} Yuk masuk ke ${area.title}.`;
-  document.getElementById("lobbyCharBubble").style.display = "block";
+  const lobbyCharBubbleEl = document.getElementById("lobbyCharBubble");
+  // cuma mainin ulang animasi "masuk" + ngetik kalau teksnya beneran ganti
+  // (bukan tiap render tiba-tiba render ulang lobby yang sama)
+  if(lobbyCharBubbleEl.dataset.lastLine !== lobbyBubbleLine){
+    lobbyCharBubbleEl.dataset.lastLine = lobbyBubbleLine;
+    lobbyCharBubbleEl.className = "lobby-char-bubble " + (LOBBY_BUBBLE_TONE[allDone ? "senang" : (STATE.mood || "biasa")] || "tone-biasa");
+    playLobbyBubbleEnter(lobbyCharBubbleEl);
+    typeIntoLobbyBubble(lobbyBubbleLine);
+  }
+  lobbyCharBubbleEl.style.display = "block";
   const bgAreaNum = viewIdx+1;
   document.getElementById("lobbyHall").style.backgroundImage = `url('images/bg_area${bgAreaNum}.png')`;
 
@@ -3146,7 +3229,8 @@ function renderLobby(){
     const s = slots[i];
     return `<div class="lobby-door-3d" style="left:${s.left}%;top:${s.top}%;width:${s.width}%;height:${s.height}%;" onclick="openRoom('${r.id}')">
       ${done ? '<span class="check">✅</span>' : ''}
-      <img src="images/door_${id}.png" alt="${r.name}" onerror="this.style.display='none'">
+      <img class="door-img-closed" src="images/door_${id}.png" alt="${r.name}" onerror="this.style.display='none'">
+      <img class="door-img-open" src="images/door_${id}_open.png" alt="" aria-hidden="true" onerror="this.style.display='none'">
       <div class="door-plaque">${r.name}</div>
     </div>`;
   }).join("");
@@ -3356,7 +3440,7 @@ const MATERI_TEXT = {
   gizi:"Remaja butuh gizi seimbang untuk mendukung pertumbuhan fisik dan konsentrasi belajar sehari-hari.",
   konseling:"Ruang ini tanpa skor — tempat kamu boleh bercerita apa pun yang kamu rasakan, tanpa dihakimi.",
   perpustakaan:"Kumpulan bacaan & tontonan ringan seputar kesehatan reproduksi remaja.",
-  refleksi:"Saatnya melihat kembali apa yang sudah kamu pelajari selama menjelajah Rumah 'Aisyiyah.",
+  refleksi:"Saatnya melihat kembali apa yang sudah kamu pelajari selama menjelajah Ruang Tumbuh.",
 };
 const TARGET_TEXT = {
   pubertas:"Memahami perubahan fisik & emosi pubertas secara akurat dan tidak menghakimi diri sendiri.",
@@ -3524,7 +3608,7 @@ function showBantuanNyata(){
 /* ---------- PERPUSTAKAAN ---------- */
 function renderPerpustakaan(){
   document.getElementById("roomBody").innerHTML = `
-    <div class="card">📖 Komik: "Cerita dari Rumah 'Aisyiyah" — segera hadir</div>
+    <div class="card">📖 Komik: "Cerita dari Ruang Tumbuh" — segera hadir</div>
     <div class="card">🎬 Video: "Mengenal Tubuhku" — segera hadir</div>
     <div class="card">🖼️ Infografis: "Mitos vs Fakta Pubertas" — segera hadir</div>
     <p style="font-size:12px;color:var(--grey);">Koleksi terbuka setelah kamu menyelesaikan ruangan terkait.</p>
