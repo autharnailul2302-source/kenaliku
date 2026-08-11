@@ -713,7 +713,10 @@
        - images/lobby_char_idle.png / _bangga.png → karakter berdiri (Kak Hana)
        - images/door_<id>.png           → gambar pintu TERTUTUP per topik, id sesuai ROOMS
          (pubertas, menstruasi, consent, relasi, medsos, gizi, konseling, perpustakaan, refleksi)
-       - images/door_<id>_open.png      → gambar pintu TERBUKA (ditampilkan saat di-hover, kalau pintunya nggak locked) */
+         KECUALI menstruasi: pakai gambar beda per gender lewat field doorImg
+         → images/door_menstruasi_cewe.png (menstruasi) & images/door_menstruasi_cowo.png (mimpi basah)
+       - images/door_<id>_open.png      → gambar pintu TERBUKA (ditampilkan saat di-hover, kalau pintunya nggak locked)
+         (untuk menstruasi: door_menstruasi_cewe_open.png / door_menstruasi_cowo_open.png) */
   #screen-lobby{padding:0;overflow:hidden;}
   .lobby-full{
     position:relative;width:100%;height:100%;overflow:hidden;
@@ -3171,8 +3174,8 @@ function finishStoryIntro(){
 /* ---------- ROOM DEFINITIONS ---------- */
 function menstruasiRoom(){
   return STATE.gender === "laki"
-    ? {id:"menstruasi", name:"Mimpi Basah", icon:"🌙", tema:"Siap Bertumbuh", badge:"🌙", badgeLabel:"Siap Bertumbuh", kunci:"Merawat Diri"}
-    : {id:"menstruasi", name:"Menstruasi", icon:"🌸", tema:"Aku Siap", badge:"🌸", badgeLabel:"Peduli Diri", kunci:"Merawat Diri"};
+    ? {id:"menstruasi", doorImg:"menstruasi_cowo", name:"Mimpi Basah", icon:"🌙", tema:"Siap Bertumbuh", badge:"🌙", badgeLabel:"Siap Bertumbuh", kunci:"Merawat Diri"}
+    : {id:"menstruasi", doorImg:"menstruasi_cewe", name:"Menstruasi", icon:"🌸", tema:"Aku Siap", badge:"🌸", badgeLabel:"Peduli Diri", kunci:"Merawat Diri"};
 }
 const ROOMS = [
   {id:"pubertas", name:"Pubertas", icon:"🧑", tema:"Mengenal Tubuhku", badge:"⭐", badgeLabel:"Percaya Diri", kunci:"Mengenal Diri"},
@@ -3323,9 +3326,10 @@ let lobbyViewAreaIdx = null;
 function lobbyChangeArea(delta){
   const maxUnlocked = currentAreaIndex();
   const base = lobbyViewAreaIdx===null ? maxUnlocked : lobbyViewAreaIdx;
-  lobbyViewAreaIdx = Math.max(0, Math.min(maxUnlocked, base + delta));
+  const target = Math.max(0, Math.min(maxUnlocked, base + delta));
+  if(target === base) return; // udah mentok, tombolnya harusnya disabled tapi jaga-jaga aja
   if(typeof playClickSfx === "function") playClickSfx("tap");
-  renderLobby();
+  enterCorridor(target, base); // pindah area SELALU lewat lorong (stage jalan), bukan loncat instan
 }
 /* Efek "ngetik" buat balon Kak Hana di lobby — teks muncul huruf demi huruf
    (kayak lagi ngomong beneran), plus kursor kedip selama proses. Dipanggil
@@ -3429,10 +3433,11 @@ function renderLobby(){
     const r = rooms.find(x=>x.id===id);
     const done = STATE.roomsDone[id];
     const s = slots[i];
+    const doorImgId = r.doorImg || id; // pakai gambar pintu khusus (mis. beda per gender) kalau room-nya set doorImg, kalau nggak ya pakai id biasa
     return `<div class="lobby-door-3d" style="left:${s.left}%;top:${s.top}%;width:${s.width}%;${s.height!=null?`height:${s.height}%;`:''}" onclick="openRoom('${r.id}')">
       ${done ? '<span class="check">✅</span>' : ''}
-      <img class="door-img-closed" src="images/door_${id}.png" alt="${r.name}" onerror="this.style.display='none'">
-      <img class="door-img-open" src="images/door_${id}_open.png" alt="" aria-hidden="true" onerror="this.style.display='none'">
+      <img class="door-img-closed" src="images/door_${doorImgId}.png" alt="${r.name}" onerror="this.style.display='none'">
+      <img class="door-img-open" src="images/door_${doorImgId}_open.png" alt="" aria-hidden="true" onerror="this.style.display='none'">
       <div class="door-plaque">${r.name}</div>
     </div>`;
   }).join("");
@@ -3447,14 +3452,26 @@ function renderLobby(){
   if(nextBtn) nextBtn.disabled = viewIdx >= maxUnlockedIdx;
 
   if(justAdvanced && LOBBY_AREAS[finishedAreaIdx+1]){
-    enterCorridor(finishedAreaIdx+1);
+    enterCorridor(finishedAreaIdx+1, finishedAreaIdx);
   }
 }
 
-/* ---------- LORONG ANTAR-AREA (side-scrolling mini, engine sederhana) ---------- */
+/* ---------- LORONG ANTAR-AREA (side-scrolling mini, engine sederhana) ----------
+   Lorong ini SEKARANG jadi stage permanen buat pindah antar-area — bukan cuma
+   animasi one-time pas baru unlock area baru. Setiap kali pemain geser panah
+   ◀▶ di "PETA RUMAH" (lobbyChangeArea), pemain bakal jalan dulu lewat lorong
+   ini (dua arah: maju ATAU mundur) baru nyampe ke area tujuan. targetAreaIdx =
+   area yang dituju, originAreaIdx = area asal (buat label & tombol kembali). */
 let corridor = null;
-function enterCorridor(nextAreaIdx){
-  corridor = {width:640, playerX:SS_EDGE_PAD, dir:0, facing:1, moving:false, raf:null, lastT:null, loopToken:null, arrived:false, nextAreaIdx};
+function enterCorridor(targetAreaIdx, originAreaIdx){
+  const forward = targetAreaIdx > originAreaIdx;
+  const width = 640;
+  const startX = forward ? SS_EDGE_PAD : width-SS_EDGE_PAD;
+  corridor = {
+    width, playerX:startX, dir:0, facing:forward?1:-1, moving:false,
+    raf:null, lastT:null, loopToken:null, arrived:false,
+    targetAreaIdx, originAreaIdx, forward,
+  };
   goTo("screen-corridor");
   corridorBuildDOM();
   corridorAttachInput();
@@ -3466,8 +3483,9 @@ function corridorBuildDOM(){
   const g = STATE.gender === "laki" ? "cowo" : "cewe";
   const j = STATE.jenjang || "sma";
   const playerSprite = `images/sprite_${g}_${j}.png`;
-  const nextArea = LOBBY_AREAS[corridor.nextAreaIdx];
-  const prevArea = LOBBY_AREAS[corridor.nextAreaIdx-1];
+  const nextArea = LOBBY_AREAS[corridor.targetAreaIdx];
+  const originArea = LOBBY_AREAS[corridor.originAreaIdx];
+  const goalX = corridor.forward ? corridor.width - SS_EDGE_PAD : SS_EDGE_PAD;
   const chevronLeft = `<svg viewBox="0 0 24 24" fill="none"><path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const chevronRight = `<svg viewBox="0 0 24 24" fill="none"><path d="M9 5L16 12L9 19" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   el.innerHTML = `
@@ -3479,16 +3497,16 @@ function corridorBuildDOM(){
         ${ssButterfliesHTML()}
         <div class="ss-layer ss-ground">
           <div class="ss-world" id="corridorWorld" style="width:${corridor.width}px">
-            <span class="ss-sprite ss-goal" style="left:${corridor.width-SS_EDGE_PAD}px">🚪</span>
-            <div class="ss-sprite ss-player facing-right" id="corridorPlayer" style="left:${corridor.playerX}px">
+            <span class="ss-sprite ss-goal" style="left:${goalX}px">🚪</span>
+            <div class="ss-sprite ss-player ${corridor.forward?'facing-right':'facing-left'}" id="corridorPlayer" style="left:${corridor.playerX}px">
               <img src="${playerSprite}" alt="" onerror="this.remove()">
             </div>
           </div>
         </div>
       </div>
-      ${prevArea ? `<button type="button" class="ss-back-btn" onclick="finishCorridor()" aria-label="Kembali ke ${prevArea.title}">${chevronLeft}</button>` : ``}
-      <div class="ss-topbar"><span>${prevArea ? `${prevArea.title} → ` : ``}${nextArea.title}</span></div>
-      <div id="corridorPrompt"><div class="ss-hint-banner">Jalan terus ke kanan buat masuk ruangan berikutnya →</div></div>
+      <button type="button" class="ss-back-btn" onclick="corridorGoBack()" aria-label="Kembali ke ${originArea.title}">${chevronLeft}</button>
+      <div class="ss-topbar"><span>${originArea.title} → ${nextArea.title}</span></div>
+      <div id="corridorPrompt"><div class="ss-hint-banner">Jalan terus ke ${corridor.forward?'kanan':'kiri'} buat masuk ruangan berikutnya ${corridor.forward?'→':'←'}</div></div>
       <div class="ss-controls">
         <button type="button" class="ss-dpad" id="corridorLeft" aria-label="Jalan ke kiri">${chevronLeft}</button>
         <div style="pointer-events:none;flex:1"></div>
@@ -3516,10 +3534,13 @@ function corridorRenderCamera(){
 }
 function corridorCheckArrive(){
   if(!corridor || corridor.arrived) return;
-  if(corridor.playerX >= corridor.width - SS_EDGE_PAD - 6){
+  const nearGoal = corridor.forward
+    ? corridor.playerX >= corridor.width - SS_EDGE_PAD - 6
+    : corridor.playerX <= SS_EDGE_PAD + 6;
+  if(nearGoal){
     corridor.arrived = true;
     corridor.dir = 0;
-    const nextArea = LOBBY_AREAS[corridor.nextAreaIdx];
+    const nextArea = LOBBY_AREAS[corridor.targetAreaIdx];
     const el = document.getElementById("corridorPrompt");
     if(el) el.innerHTML = `<div class="ss-interact"><button type="button" class="btn-chat" onclick="finishCorridor()"><span class="btn-chat-icon">🚪</span>Masuk ${nextArea.title}</button></div>`;
   }
@@ -3586,10 +3607,22 @@ function corridorDetachInput(){
     corridor.keyDown = null; corridor.keyUp = null;
   }
 }
-function finishCorridor(){
+function corridorCleanup(){
   if(corridor && corridor.raf) cancelAnimationFrame(corridor.raf);
   corridorDetachInput();
   corridor = null;
+}
+function finishCorridor(){
+  const targetAreaIdx = corridor ? corridor.targetAreaIdx : null;
+  corridorCleanup();
+  if(targetAreaIdx !== null) lobbyViewAreaIdx = targetAreaIdx;
+  goTo("screen-lobby");
+  renderLobby();
+}
+function corridorGoBack(){
+  const originAreaIdx = corridor ? corridor.originAreaIdx : null;
+  corridorCleanup();
+  if(originAreaIdx !== null) lobbyViewAreaIdx = originAreaIdx;
   goTo("screen-lobby");
   renderLobby();
 }
