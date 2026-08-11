@@ -561,10 +561,32 @@
     background:rgba(10,16,12,.6);color:#fff;font-size:12.5px;padding:9px 16px;border-radius:999px;
     text-shadow:0 1px 3px rgba(0,0,0,.6);white-space:nowrap;max-width:88vw;text-overflow:ellipsis;overflow:hidden;}
   .ss-controls{position:absolute;left:0;right:0;bottom:14px;z-index:6;display:flex;justify-content:space-between;align-items:flex-end;padding:0 16px;pointer-events:none;}
-  .ss-dpad{pointer-events:auto;width:58px;height:58px;border-radius:50%;
-    background:rgba(10,16,12,.55);color:#fff;font-size:22px;display:flex;align-items:center;justify-content:center;
-    border:2px solid rgba(255,255,255,.35);box-shadow:0 8px 16px rgba(0,0,0,.35);touch-action:none;-webkit-user-select:none;user-select:none;}
-  .ss-dpad:active{background:rgba(31,94,74,.9);transform:scale(.94);}
+  .ss-dpad{pointer-events:auto;width:60px;height:60px;border-radius:50%;position:relative;
+    background:radial-gradient(circle at 32% 28%,#3E8E6E 0%,#1F5E4A 62%,#12352A 100%);
+    color:#fff;display:flex;align-items:center;justify-content:center;
+    border:2px solid rgba(255,209,110,.55);
+    box-shadow:0 8px 18px rgba(0,0,0,.4),inset 0 1px 2px rgba(255,255,255,.35),0 0 0 4px rgba(192,138,46,.14);
+    touch-action:none;-webkit-user-select:none;user-select:none;transition:transform .12s,box-shadow .12s;}
+  .ss-dpad svg{width:22px;height:22px;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4));position:relative;z-index:1;}
+  .ss-dpad::after{content:'';position:absolute;inset:0;border-radius:50%;
+    background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0) 45%);pointer-events:none;}
+  .ss-dpad:active{transform:scale(.92);box-shadow:0 4px 10px rgba(0,0,0,.4),inset 0 1px 2px rgba(255,255,255,.25),0 0 0 5px rgba(255,209,110,.28);
+    background:radial-gradient(circle at 32% 28%,#4CA684 0%,#256B54 62%,#12352A 100%);}
+  @media (hover:hover) and (pointer:fine){
+    .ss-dpad:hover{border-color:rgba(255,209,110,.85);box-shadow:0 10px 20px rgba(0,0,0,.45),inset 0 1px 2px rgba(255,255,255,.35),0 0 0 4px rgba(192,138,46,.22);}
+  }
+  .ss-back-btn{position:absolute;top:12px;left:12px;z-index:7;pointer-events:auto;
+    width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 32% 28%,#3E8E6E 0%,#1F5E4A 62%,#12352A 100%);color:#fff;
+    border:2px solid rgba(255,209,110,.55);
+    box-shadow:0 6px 14px rgba(0,0,0,.35),inset 0 1px 2px rgba(255,255,255,.3);
+    cursor:pointer;font-family:inherit;-webkit-user-select:none;user-select:none;
+    transition:transform .12s,box-shadow .12s;}
+  .ss-back-btn svg{width:17px;height:17px;flex:none;filter:drop-shadow(0 1px 1px rgba(0,0,0,.4));}
+  .ss-back-btn:active{transform:scale(.9);box-shadow:0 3px 8px rgba(0,0,0,.4),inset 0 1px 2px rgba(255,255,255,.2);}
+  @media (hover:hover) and (pointer:fine){
+    .ss-back-btn:hover{border-color:rgba(255,209,110,.9);box-shadow:0 8px 16px rgba(0,0,0,.4),inset 0 1px 2px rgba(255,255,255,.3);}
+  }
   .ss-dialogue{position:absolute;left:14px;right:14px;bottom:16px;z-index:6;margin:0;width:auto;}
   /* tutorial jalan & ngobrol — muncul sekali di awal sebelum pemain bisa gerak */
   .ss-tutorial{position:absolute;inset:0;z-index:30;background:rgba(10,16,12,.6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px;}
@@ -702,9 +724,27 @@
   .lobby-full::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
     background:linear-gradient(180deg, rgba(15,10,5,.5) 0%, rgba(15,10,5,0) 24%, rgba(15,10,5,0) 60%, rgba(15,10,5,.5) 100%);}
 
-  .lobby-topleft{position:absolute;top:14px;left:14px;z-index:4;
-    background:rgba(20,15,8,.55);border-radius:12px;padding:6px 14px;backdrop-filter:blur(2px);
-    box-shadow:0 4px 10px rgba(0,0,0,.3);}
+  .lobby-topleft{position:absolute;top:14px;left:14px;z-index:4;cursor:pointer;
+    display:flex;align-items:center;gap:9px;
+    background:rgba(20,15,8,.55);border-radius:999px;padding:5px 16px 5px 5px;backdrop-filter:blur(2px);
+    box-shadow:0 4px 10px rgba(0,0,0,.3);transition:transform .15s, background .15s;}
+  .lobby-topleft:active{transform:scale(.96);}
+  @media (hover:hover) and (pointer:fine){
+    .lobby-topleft:hover{background:rgba(35,25,14,.7);transform:translateY(-1px);}
+    /* avatar-nya sendiri dikasih feedback beda (border nyala + sedikit membesar)
+       biar kelihatan jelas dia itu bagian yang "bisa diklik", bukan cuma pill-nya */
+    .lobby-topleft:hover .lobby-avatar-circle{
+      border-color:#ffd76a;transform:scale(1.08);
+      box-shadow:0 0 0 3px rgba(212,175,90,.4), 0 2px 8px rgba(0,0,0,.45);
+    }
+  }
+  .lobby-avatar-circle{width:38px;height:38px;border-radius:50%;flex:none;overflow:hidden;
+    border:2px solid var(--gold);background:#2a1d10;box-shadow:0 2px 6px rgba(0,0,0,.4);
+    transition:transform .15s ease, border-color .15s ease, box-shadow .15s ease;}
+  .lobby-avatar-circle img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;}
+  .profile-avatar-lg{width:64px;height:64px;border-radius:50%;flex:none;overflow:hidden;
+    border:3px solid var(--gold);box-shadow:0 3px 8px rgba(0,0,0,.25);background:var(--card);}
+  .profile-avatar-lg img{width:100%;height:100%;object-fit:cover;object-position:top center;display:block;}
   .lobby-topleft .who{font-size:13px;font-weight:700;color:#f2e9cf;}
   .lobby-topleft .who small{display:block;font-weight:400;opacity:.85;font-size:11px;}
   .lobby-topright{position:absolute;top:14px;right:14px;z-index:4;display:flex;align-items:center;gap:6px;}
@@ -753,8 +793,8 @@
   .lobby-hall-desc{font-size:11.5px;color:#f2e9cf;margin:0;text-shadow:0 1px 3px rgba(0,0,0,.6);}
 
   .lobby-hall-floor{position:relative;z-index:2;flex:1;min-height:0;}
-  .lobby-char-wrap{position:absolute;left:138px;bottom:-48px;height:96%;width:46%;
-    max-width:520px;z-index:2;
+  .lobby-char-wrap{position:absolute;left:100px;bottom:-48px;height:96%;width:40%;
+    max-width:440px;z-index:2;
     display:flex;align-items:flex-end;justify-content:flex-start;overflow:visible;
     pointer-events:none;}
   .lobby-char-standing{height:100%;width:100%;object-fit:contain;object-position:bottom left;
@@ -810,12 +850,16 @@
   .lobby-char-bubble b{display:block;color:var(--text-accent);font-size:10px;
     letter-spacing:.3px;margin-bottom:2px;}
   /* pintu — ditaruh PAS DI ATAS gambar pintu yang sudah ada di background
-     (lihat computeDoorSlots di JS untuk atur posisi %-nya per background) */
-  .lobby-doors-row{position:absolute;inset:0;z-index:3;pointer-events:none;}
+     (lihat computeDoorSlots di JS untuk atur posisi %-nya per background).
+     Band-nya dikasih jarak top/bottom biar nggak numpuk sama plakat "PETA
+     RUMAH" di atas maupun garis progress di bawah — persen di computeDoorSlots
+     dihitung relatif ke band INI, bukan ke seluruh layar lagi. */
+  .lobby-doors-row{position:absolute;left:0;right:0;top:132px;bottom:44px;z-index:3;pointer-events:none;}
   .lobby-door-3d{
     position:absolute;cursor:pointer;border-radius:10%/6%;
     border:2px solid transparent;background:transparent;
     box-shadow:0 0 0 rgba(212,175,90,0);pointer-events:auto;
+    aspect-ratio:800/1400;
     transition:box-shadow .2s ease, border-color .2s ease, transform .15s cubic-bezier(.2,.8,.3,1.4);
   }
   .lobby-door-3d:active{transform:scale(.97);}
@@ -833,11 +877,14 @@
     .lobby-door-3d:not(.locked):hover .door-img-closed{opacity:0;}
   }
   .lobby-door-3d.locked img{filter:grayscale(.75) brightness(.55) drop-shadow(0 6px 10px rgba(0,0,0,.5));}
-  .lobby-door-3d .door-plaque{position:absolute;left:50%;bottom:-22px;transform:translateX(-50%);
-    white-space:nowrap;background:rgba(0,0,0,.6);color:#fff;font-size:10px;font-weight:800;
-    border-radius:6px;padding:3px 8px;line-height:1.15;box-shadow:0 3px 8px rgba(0,0,0,.35);}
-  .lobby-door-3d .check{position:absolute;top:-8px;right:-8px;font-size:14px;
-    background:#fff;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,.3);z-index:1;}
+  .lobby-door-3d .door-plaque{position:absolute;left:50%;bottom:-24px;transform:translateX(-50%);
+    white-space:nowrap;background:rgba(20,15,8,.72);color:#f2e9cf;font-size:10.5px;font-weight:800;
+    letter-spacing:.02em;border:1px solid rgba(212,175,90,.65);border-radius:999px;
+    padding:4px 13px;line-height:1.15;box-shadow:0 3px 8px rgba(0,0,0,.35);}
+  .lobby-door-3d .check{position:absolute;top:6%;right:5%;
+    width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+    font-size:14px;background:radial-gradient(circle at 32% 30%, #fbe7a8, #c9932e 72%);
+    border:2px solid #fff8e6;border-radius:50%;box-shadow:0 3px 8px rgba(0,0,0,.45);z-index:2;}
   .lobby-door-3d .lock-badge{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;
     filter:drop-shadow(0 2px 3px rgba(0,0,0,.6));}
   .lobby-progress-line{position:relative;z-index:2;flex:none;font-size:11.5px;color:#f2e9cf;
@@ -873,9 +920,16 @@
   .quiz-opt:disabled{opacity:.75;}
   .feedback{font-size:13px;padding:10px 12px;border-radius:10px;background:var(--green-soft);color:var(--text-accent);margin-top:8px;}
 
-  .modal-backdrop{position:absolute;inset:0;background:rgba(20,20,15,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:20;display:none;align-items:center;justify-content:center;padding:24px;}
+  .modal-backdrop{position:absolute;inset:0;background:rgba(20,20,15,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:20;display:none;align-items:center;justify-content:center;padding:24px;overflow-y:auto;}
   .modal-backdrop.active{display:flex;}
-  .modal-card{background:var(--card);border-radius:18px;padding:22px;max-width:340px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.4);animation:modalPop .28s cubic-bezier(.2,.9,.3,1.2);}
+  .modal-card{background:var(--card);border-radius:18px;padding:22px;max-width:340px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.4);animation:modalPop .28s cubic-bezier(.2,.9,.3,1.2);
+    max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow-y:auto;overflow-x:hidden;margin:auto;}
+  /* landscape HP: layar pendek banget — modal jangan kepotong, kecilin jarak &
+     bikin scroll internal kalau kontennya tetap kepanjangan buat muat */
+  @media (max-height:480px){
+    .modal-backdrop{padding:12px;}
+    .modal-card{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);padding:16px;}
+  }
   @keyframes modalPop{from{opacity:0;transform:scale(.92) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
 
   /* themed modal (Ruang Tumbuh style — gold border, leaf corners, plaque header) */
@@ -1028,7 +1082,7 @@
   .switch .knob{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .15s;}
   .switch.on .knob{left:20px;}
   /* settings modal — landscape layout: two columns side-by-side so it stays short on wide/short (landscape) screens */
-  .modal-card-settings{max-width:600px;max-height:90vh;overflow-y:auto;}
+  .modal-card-settings{max-width:600px;max-height:90vh;overflow-y:auto;overflow-x:hidden;}
   .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px;align-items:start;}
   .settings-col-right{border-left:1px dashed #d8cba0;padding-left:22px;}
   .settings-col h3{margin-top:0;}
@@ -1177,7 +1231,9 @@
   <!-- 6. LOBBY -->
   <section class="screen" id="screen-lobby">
     <div class="lobby-full" id="lobbyHall">
-      <div class="lobby-topleft">
+      <div class="lobby-topleft" id="lobbyPlayerProfile" role="button" tabindex="0" aria-label="Buka profil pemain"
+           onclick="openProfileModal()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProfileModal();}">
+        <div class="lobby-avatar-circle"><img id="lobbyAvatarImg" alt=""></div>
         <div class="who"><span id="lobbyName">Aisyah</span><small>Level <span id="lobbyLevel">1</span></small></div>
       </div>
       <div class="lobby-topright">
@@ -1347,6 +1403,55 @@
           <button class="btn-primary btn-block" onclick="closeModal('modalSettings')">Tutup</button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Profil Pemain — dibuka lewat avatar di pojok kiri atas lobby. Sengaja
+       CUMA nampung nama (rename), pilihan karakter, dan pintasan ke bantuan/
+       pengaturan — TIDAK ada field nomor HP/email/data sekolah tambahan,
+       karena ini game client-side buat remaja dan nggak ada alasan kuat buat
+       nyimpen data kontak pribadi semacam itu. -->
+  <div class="modal-backdrop" id="modalProfile">
+    <div class="modal-card" style="text-align:left;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+        <div class="profile-avatar-lg"><img id="profileAvatarImg" alt=""></div>
+        <div>
+          <h3 style="margin:0;">Profil Pemain</h3>
+          <p style="margin:2px 0 0;font-size:12.5px;color:var(--grey);">Level <span id="profileLevel">1</span> · <span id="profilePoints">0</span> Poin</p>
+        </div>
+      </div>
+
+      <label style="font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.4px;">Nama</label>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <input type="text" id="profileNameInput" maxlength="30" style="flex:1;">
+        <button class="btn-primary" style="white-space:nowrap;padding:0 16px;" onclick="saveProfileName()">Simpan</button>
+      </div>
+      <p id="profileNameNote" style="font-size:11px;color:var(--grey);margin:5px 0 0;">Nama & PIN dipakai buat nyambungin progres kamu — kalau diganti, inget nama barunya ya biar tetap bisa lanjut dari perangkat lain.</p>
+
+      <label style="display:block;margin-top:16px;font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.4px;">Ganti Karakter</label>
+      <div class="char-card-grid" id="profileCharGrid" style="max-width:320px;margin:6px 0 0;"></div>
+
+      <div class="settings-footer" style="margin-top:16px;">
+        <button class="btn-outline btn-block" onclick="closeModal('modalProfile');openModal('modalBantuan');">💬 Butuh Bantuan Cepat?</button>
+        <button class="btn-outline btn-block" style="margin-top:8px;" onclick="closeModal('modalProfile');openModal('modalSettings');">⚙ Pengaturan Game</button>
+        <button class="btn-primary btn-block" style="margin-top:8px;" onclick="closeModal('modalProfile')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bantuan Cepat — sengaja SELALU bisa diakses dari mana aja (lewat modal
+       Profil), nggak digembok di balik progres Ruang Konseling, karena akses
+       ke bantuan darurat nggak boleh nunggu pemain nyelesain level dulu. -->
+  <div class="modal-backdrop" id="modalBantuan">
+    <div class="modal-card" style="text-align:left;">
+      <h3 class="center">Butuh Bantuan?</h3>
+      <p style="font-size:12.5px;text-align:center;color:var(--grey);margin-bottom:10px;">Kalau kamu atau temanmu ngalamin situasi yang berat, ini beberapa pihak yang bisa dihubungi.</p>
+      <div class="contact-card"><b>Guru BK / Wali Kelas</b><br>Konseling langsung di sekolah — rahasia &amp; tanpa dihakimi.</div>
+      <div class="contact-card"><b>LBH 'Aisyiyah</b><br>Layanan bantuan hukum &amp; pendampingan resmi 'Aisyiyah.</div>
+      <div class="contact-card"><b>SAPA 129</b><br>Layanan Sahabat Perempuan dan Anak — hotline nasional.</div>
+      <div class="contact-card"><b>Jakarta Siaga 112</b><br>Khusus untuk wilayah Jakarta.</div>
+      <p style="font-size:12px;color:var(--grey);">Kamu tidak sendiri. Menghubungi bantuan ini bukan tanda lemah.</p>
+      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="closeModal('modalBantuan')">Tutup</button>
     </div>
   </div>
 
@@ -1555,20 +1660,24 @@ function resetGame(){ localStorage.removeItem("rumah_aisyiyah_state"); location.
 // Kirim salinan STATE lengkap ke Google Sheets (sheet "State"), supaya bisa
 // ditarik lagi lewat "Lanjutkan dari perangkat lain". localStorage tetap
 // sumber utama; ini cuma cadangan lintas device, fire-and-forget.
-function syncStateToSheet(){
+function syncStateToSheet(oldNama){
   if(!GAME_API_URL || !STATE.name || !STATE.pin) return;
   try{
+    const body = {
+      action: "save_state",
+      nama: STATE.name,
+      pin: STATE.pin,
+      state: STATE,
+      waktu: new Date().toISOString(),
+    };
+    // dikirim cuma sekali pas abis ganti nama, biar Code.gs update baris
+    // progres yang LAMA jadi nama baru (bukan bikin baris baru di sheet)
+    if(oldNama && oldNama !== STATE.name) body.oldNama = oldNama;
     fetch(GAME_API_URL, {
       method: "POST",
       mode: "no-cors",
       headers: {"Content-Type":"text/plain;charset=utf-8"},
-      body: JSON.stringify({
-        action: "save_state",
-        nama: STATE.name,
-        pin: STATE.pin,
-        state: STATE,
-        waktu: new Date().toISOString(),
-      }),
+      body: JSON.stringify(body),
     }).catch(()=>{});
   }catch(e){ /* silent fail: localStorage tetap jadi sumber utama progres */ }
 }
@@ -2492,6 +2601,31 @@ function playerPortraitSrc(){
   const j = STATE.jenjang || "sma";
   return `images/narasi_${g}_${j}.png`;
 }
+/* Avatar bulat (lobby + modal Profil) pakai potret narasi (playerPortraitSrc)
+   sebagai pilihan utama. Kalau file narasi_<gender>_<jenjang>.png belum ada
+   di folder images/, ini otomatis nyoba gambar char-select (cowo/cewe_smp/
+   sma.png — yang sudah pasti ada dari layar pilih karakter) sebagai cadangan,
+   biar avatar-nya nggak kosong blas. Baru disembunyikan kalau dua-duanya gagal. */
+function avatarImgFallback(imgEl){
+  const g = STATE.gender === "laki" ? "cowo" : "cewe";
+  const j = STATE.jenjang || "sma";
+  if(imgEl.dataset.fallbackTried){ imgEl.style.visibility = "hidden"; return; }
+  imgEl.dataset.fallbackTried = "1";
+  imgEl.style.visibility = "visible";
+  imgEl.src = `images/${g}_${j}.png`;
+}
+/* Set src avatar via JS (bukan atribut onerror inline di HTML) supaya
+   handler error-nya baru "disambung" SETELAH script ini pasti sudah jalan —
+   kalau dipasang inline di HTML, gambar yang 404 super cepat (apalagi
+   dibuka lewat file:// lokal) bisa keburu error duluan sebelum browser
+   sempat menjalankan <script> yang isi fungsi avatarImgFallback, jadinya
+   "avatarImgFallback is not defined". */
+function setAvatarSrc(imgEl, src){
+  imgEl.onerror = function(){ avatarImgFallback(this); };
+  delete imgEl.dataset.fallbackTried;
+  imgEl.style.visibility = "visible";
+  imgEl.src = src;
+}
 const NARASI_CHAR = {
   player: playerPortraitSrc,
   hana: ()=>"images/hana_semangat.png",
@@ -2726,9 +2860,9 @@ function ssBuildDOM(){
       </div>
       <div id="ssPrompt"></div>
       <div class="ss-controls">
-        <button type="button" class="ss-dpad" id="ssLeft" aria-label="Jalan ke kiri">◀</button>
+        <button type="button" class="ss-dpad" id="ssLeft" aria-label="Jalan ke kiri"><svg viewBox="0 0 24 24" fill="none"><path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div style="pointer-events:none;flex:1"></div>
-        <button type="button" class="ss-dpad" id="ssRight" aria-label="Jalan ke kanan">▶</button>
+        <button type="button" class="ss-dpad" id="ssRight" aria-label="Jalan ke kanan"><svg viewBox="0 0 24 24" fill="none"><path d="M9 5L16 12L9 19" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       </div>
       ${ss.locked ? ssTutorialHTML() : (ss.showRecap ? ssRecapHTML() : "")}
     </div>
@@ -3095,25 +3229,88 @@ function lobbyCharImgError(img){
 
 /* Posisi pintu (dalam % dari ukuran penuh layar lobby) supaya hitbox-nya PAS
    nempel di gambar pintu yang sudah digambar di dalam bg_area<N>.png.
+   Ukuran ASLI gambar pintu (door_<id>.png / door_<id>_open.png) dipatok
+   800×1400px (lebar×tinggi, rasio 4:7) — tingginya otomatis ngikutin lebar
+   lewat CSS aspect-ratio (lihat .lobby-door-3d), jadi field "height" di bawah
+   ini nggak dipakai lagi kecuali mau override manual per pintu.
    Kalau posisi auto di bawah masih meleset dari gambar pintu aslinya, isi
    array untuk nomor background terkait di sini — urutannya ngikutin urutan
-   rooms di LOBBY_AREAS. Satu entri: {left, top, width, height} dalam %.
-   Contoh: DOOR_POSITIONS[1] = [ {left:36,top:9,width:10,height:62}, {left:49,top:9,width:10,height:62} ];
+   rooms di LOBBY_AREAS. Satu entri: {left, top, width} dalam % (height
+   opsional, kalau diisi bakal override aspect-ratio default).
+   Contoh: DOOR_POSITIONS[1] = [ {left:36,top:9,width:10}, {left:49,top:9,width:10} ];
 */
 const DOOR_POSITIONS = {
-  // 1: [ {left:36,top:9,width:10,height:62}, {left:49,top:9,width:10,height:62} ],
+  // 1: [ {left:36,top:9,width:10}, {left:49,top:9,width:10} ],
 };
 function computeDoorSlots(bgAreaNum, n){
   const manual = DOOR_POSITIONS[bgAreaNum];
   if(manual && manual.length === n) return manual;
-  // auto: sebar rata & center secara horizontal, band vertikal standar
+  // auto: sebar rata, digeser ke kanan (bukan pas center) biar nyisain ruang
+  // di kiri buat Kak Hana berdiri tanpa numpuk sama pintu. Tinggi dibiarin
+  // auto (aspect-ratio 800:1400 di CSS yang ngatur).
   const width = Math.min(13, 60/n);
   const gap = 3;
   const totalW = n*width + (n-1)*gap;
-  const startLeft = 50 - totalW/2;
+  const rightBias = 9; // makin besar → pintu makin ke kanan
+  const startLeft = Math.min(100 - totalW - 4, 50 - totalW/2 + rightBias);
   return Array.from({length:n}, (_,i)=>({
-    left: startLeft + i*(width+gap), top: 8, width, height: 64,
+    left: startLeft + i*(width+gap), top: 4, width,
   }));
+}
+
+/* ---------- PROFIL PEMAIN (modal, dibuka dari avatar di lobby) ---------- */
+const PROFILE_CHAR_OPTIONS = [
+  {gender:"laki", jenjang:"smp", img:"images/cowo_smp.png", label:"Cowok SMP"},
+  {gender:"laki", jenjang:"sma", img:"images/cowo_sma.png", label:"Cowok SMA"},
+  {gender:"perempuan", jenjang:"smp", img:"images/cewe_smp.png", label:"Cewek SMP"},
+  {gender:"perempuan", jenjang:"sma", img:"images/cewe_sma.png", label:"Cewek SMA"},
+];
+function renderProfileCharGrid(){
+  const grid = document.getElementById("profileCharGrid");
+  const jenjang = STATE.jenjang || "sma";
+  grid.innerHTML = PROFILE_CHAR_OPTIONS.map(opt=>{
+    const active = STATE.gender === opt.gender && jenjang === opt.jenjang;
+    return `<div class="char-card${active ? ' selected' : ''}" onclick="setProfileCharacter('${opt.gender}','${opt.jenjang}')">
+      <img src="${opt.img}" alt="${opt.label}" onerror="this.style.display='none'">
+    </div>`;
+  }).join("");
+}
+function setProfileCharacter(gender, jenjang){
+  STATE.gender = gender;
+  STATE.jenjang = jenjang;
+  saveState();
+  if(typeof syncStateToSheet === "function") syncStateToSheet();
+  const src = playerPortraitSrc();
+  setAvatarSrc(document.getElementById("profileAvatarImg"), src);
+  setAvatarSrc(document.getElementById("lobbyAvatarImg"), src);
+  renderProfileCharGrid();
+}
+function openProfileModal(){
+  setAvatarSrc(document.getElementById("profileAvatarImg"), playerPortraitSrc());
+  document.getElementById("profileLevel").textContent = STATE.level;
+  document.getElementById("profilePoints").textContent = STATE.points;
+  document.getElementById("profileNameInput").value = STATE.name || "";
+  document.getElementById("profileNameNote").textContent =
+    "Nama & PIN dipakai buat nyambungin progres kamu — kalau diganti, inget nama barunya ya biar tetap bisa lanjut dari perangkat lain.";
+  renderProfileCharGrid();
+  openModal("modalProfile");
+}
+function saveProfileName(){
+  const input = document.getElementById("profileNameInput");
+  const val = input.value.trim();
+  const note = document.getElementById("profileNameNote");
+  if(!val){
+    note.textContent = "Nama nggak boleh kosong ya.";
+    note.style.color = "#c0392b";
+    return;
+  }
+  const oldNama = STATE.name || "";
+  STATE.name = val;
+  saveState();
+  if(typeof syncStateToSheet === "function") syncStateToSheet(oldNama);
+  document.getElementById("lobbyName").textContent = STATE.name;
+  note.style.color = "";
+  note.textContent = "Tersimpan! Inget nama & PIN ini ya buat lanjutin progres nanti.";
 }
 
 /* ---------- LOBBY ---------- */
@@ -3169,6 +3366,11 @@ const LOBBY_BUBBLE_TONE = {
 function renderLobby(){
   document.getElementById("lobbyName").textContent = STATE.name || "Aisyah";
   document.getElementById("lobbyLevel").textContent = STATE.level;
+  // avatar bulat di pojok kiri atas — pakai potret narasi (sama kayak yang muncul
+  // di dialog cerita), bukan gambar char-select, biar lebih "wajah" dan konsisten.
+  // setAvatarSrc nge-reset status fallback tiap render biar retry gambar narasi
+  // lagi (misal filenya baru ditambahin belakangan setelah sempat gagal load).
+  setAvatarSrc(document.getElementById("lobbyAvatarImg"), playerPortraitSrc());
   document.getElementById("lobbyPoints").textContent = STATE.points;
 
   const maxUnlockedIdx = currentAreaIndex(); // area terjauh yang sudah kebuka (currentAreaIndex sudah otomatis clamp ke area terakhir kalau semua selesai)
@@ -3227,7 +3429,7 @@ function renderLobby(){
     const r = rooms.find(x=>x.id===id);
     const done = STATE.roomsDone[id];
     const s = slots[i];
-    return `<div class="lobby-door-3d" style="left:${s.left}%;top:${s.top}%;width:${s.width}%;height:${s.height}%;" onclick="openRoom('${r.id}')">
+    return `<div class="lobby-door-3d" style="left:${s.left}%;top:${s.top}%;width:${s.width}%;${s.height!=null?`height:${s.height}%;`:''}" onclick="openRoom('${r.id}')">
       ${done ? '<span class="check">✅</span>' : ''}
       <img class="door-img-closed" src="images/door_${id}.png" alt="${r.name}" onerror="this.style.display='none'">
       <img class="door-img-open" src="images/door_${id}_open.png" alt="" aria-hidden="true" onerror="this.style.display='none'">
@@ -3265,6 +3467,9 @@ function corridorBuildDOM(){
   const j = STATE.jenjang || "sma";
   const playerSprite = `images/sprite_${g}_${j}.png`;
   const nextArea = LOBBY_AREAS[corridor.nextAreaIdx];
+  const prevArea = LOBBY_AREAS[corridor.nextAreaIdx-1];
+  const chevronLeft = `<svg viewBox="0 0 24 24" fill="none"><path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const chevronRight = `<svg viewBox="0 0 24 24" fill="none"><path d="M9 5L16 12L9 19" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   el.innerHTML = `
     <div class="vn-stage ss-stage">
       <div class="ss-viewport" id="corridorViewport">
@@ -3281,12 +3486,13 @@ function corridorBuildDOM(){
           </div>
         </div>
       </div>
-      <div class="ss-topbar"><span>Menuju ${nextArea.title}</span></div>
+      ${prevArea ? `<button type="button" class="ss-back-btn" onclick="finishCorridor()" aria-label="Kembali ke ${prevArea.title}">${chevronLeft}</button>` : ``}
+      <div class="ss-topbar"><span>${prevArea ? `${prevArea.title} → ` : ``}${nextArea.title}</span></div>
       <div id="corridorPrompt"><div class="ss-hint-banner">Jalan terus ke kanan buat masuk ruangan berikutnya →</div></div>
       <div class="ss-controls">
-        <button type="button" class="ss-dpad" id="corridorLeft" aria-label="Jalan ke kiri">◀</button>
+        <button type="button" class="ss-dpad" id="corridorLeft" aria-label="Jalan ke kiri">${chevronLeft}</button>
         <div style="pointer-events:none;flex:1"></div>
-        <button type="button" class="ss-dpad" id="corridorRight" aria-label="Jalan ke kanan">▶</button>
+        <button type="button" class="ss-dpad" id="corridorRight" aria-label="Jalan ke kanan">${chevronRight}</button>
       </div>
     </div>
   `;
