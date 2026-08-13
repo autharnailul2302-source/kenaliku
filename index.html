@@ -6,6 +6,14 @@
 <title>KenaliKu — Karena Setiap Remaja Berharga</title>
 <link rel="icon" type="image/png" href="images/favicon.png">
 <style>
+<style>
+  /* Deterrent ringan: bukan proteksi beneran (lihat catatan di JS bawah),
+     cuma biar orang awam nggak iseng klik-kanan save gambar / select teks.
+     Dikecualikan buat input/textarea/[contenteditable] biar nggak ganggu
+     yang emang perlu ngetik/isi form. */
+  #game{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+  #game input, #game textarea, #game [contenteditable]{-webkit-user-select:text;user-select:text;}
+  #game img{-webkit-user-drag:none;user-drag:none;}
   /* ===================== DESIGN TOKENS ===================== */
   :root{
     --cream:#F4EEDD;
@@ -518,6 +526,22 @@
   @keyframes ssBob{0%,100%{transform:translateY(0) scaleX(var(--ssfx,1));}50%{transform:translateY(-5px) scaleX(var(--ssfx,1));}}
   .ss-player.facing-left{--ssfx:-1;}
   .ss-player.facing-right{--ssfx:1;}
+  /* Layer tengah (rumah/pemukiman) di lorong antar-area (screen-corridor)
+     pakai gambar SENDIRI, beda dari scene Perjalanan (yang pakai
+     bg_pemukiman_pantai.png) — supaya lorong antar-ruangan bisa punya nuansa
+     beda. Posisi/ukuran/repeat-nya ngikutin .ss-mid biasa, cuma gambarnya
+     ditimpa. Ganti file images/bg_lorong_mid.png buat pasang art sendiri —
+     nggak perlu ubah kode lain. Disaranin PNG panjang/lebar (di-tile
+     horizontal, jadi ujung kiri & kanannya harus nyambung mulus), tinggi
+     tetap, transparan di bagian langit di atasnya. */
+  #screen-corridor .ss-mid{background-image:url('images/bg_lorong_mid.png');}
+  /* Sama kayak .ss-mid di atas — laut, rumput, & jalan di lorong SEKARANG
+     pakai file art sendiri (nggak lagi pinjem punya scene Perjalanan), biar
+     kamu bisa upload set gambar baru khusus buat lorong ini. Posisi/ukuran/
+     repeat-nya tetap ngikutin versi biasa, cuma sumber gambarnya ditimpa. */
+  #screen-corridor .ss-sea::after{background-image:url('images/lorong_laut.png');}
+  #screen-corridor .ss-grassbase{background-image:url('images/lorong_rumput.png');}
+  #screen-corridor .ss-ground{background-image:url('images/lorong_jalan.png');background-position:bottom;background-size:auto 140%;bottom:0;}
   .ss-topbar{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:6;
     background:rgba(10,16,12,.55);color:#fff;border:1px solid rgba(255,255,255,.35);
     border-radius:999px;padding:8px 18px;font-size:12px;font-weight:800;letter-spacing:.3px;
@@ -561,6 +585,22 @@
     background:rgba(10,16,12,.6);color:#fff;font-size:12.5px;padding:9px 16px;border-radius:999px;
     text-shadow:0 1px 3px rgba(0,0,0,.6);white-space:nowrap;max-width:88vw;text-overflow:ellipsis;overflow:hidden;}
   .ss-controls{position:absolute;left:0;right:0;bottom:14px;z-index:6;display:flex;justify-content:space-between;align-items:flex-end;padding:0 16px;pointer-events:none;}
+  /* Papan penunjuk arah di lorong antar-area — nempel tetap di tepi kiri/kanan
+     LAYAR (bukan ikut geser sama dunia/world), nunjukin ruangan apa yang ada
+     di arah itu. Yang jadi tujuan (is-target) dikasih aksen emas biar beda
+     dari yang cuma "asal" (dari mana pemain berangkat). */
+  .corridor-signpost{position:absolute;top:50%;transform:translateY(-50%);z-index:6;
+    display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none;}
+  .corridor-signpost-left{left:10px;}
+  .corridor-signpost-right{right:10px;}
+  .corridor-signpost .board{background:rgba(10,16,12,.62);border:1px solid rgba(255,255,255,.32);
+    border-radius:12px;padding:9px 8px;color:#fff;font-size:10.5px;font-weight:800;text-align:center;
+    max-width:76px;line-height:1.25;text-shadow:0 1px 3px rgba(0,0,0,.6);
+    box-shadow:0 6px 14px rgba(0,0,0,.3);backdrop-filter:blur(2px);}
+  .corridor-signpost.is-target .board{border-color:var(--gold);background:rgba(31,94,74,.72);}
+  .corridor-signpost .board svg{width:14px;height:14px;display:inline-block;vertical-align:middle;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.4));}
+  body.mode-bigfont .corridor-signpost .board{font-size:12.5px;max-width:88px;}
   .ss-dpad{pointer-events:auto;width:60px;height:60px;border-radius:50%;position:relative;
     background:radial-gradient(circle at 32% 28%,#3E8E6E 0%,#1F5E4A 62%,#12352A 100%);
     color:#fff;display:flex;align-items:center;justify-content:center;
@@ -712,11 +752,12 @@
          (dipasang lewat JS di renderLobby, sesuai area yang lagi aktif)
        - images/lobby_char_idle.png / _bangga.png → karakter berdiri (Kak Hana)
        - images/door_<id>.png           → gambar pintu TERTUTUP per topik, id sesuai ROOMS
-         (pubertas, menstruasi, consent, relasi, medsos, gizi, konseling, perpustakaan, refleksi)
-         KECUALI menstruasi: pakai gambar beda per gender lewat field doorImg
-         → images/door_menstruasi_cewe.png (menstruasi) & images/door_menstruasi_cowo.png (mimpi basah)
+         (pubertas, menstruasi, mimpibasah, consent, relasi, medsos, gizi, konseling, perpustakaan, refleksi)
+         KECUALI menstruasi & mimpibasah: pakai nama file lewat field doorImg (bukan gender-based lagi,
+         dua-duanya pintu terpisah yang selalu tampil bareng)
+         → images/door_menstruasi_cewe.png (pintu Menstruasi) & images/door_menstruasi_cowo.png (pintu Mimpi Basah)
        - images/door_<id>_open.png      → gambar pintu TERBUKA (ditampilkan saat di-hover, kalau pintunya nggak locked)
-         (untuk menstruasi: door_menstruasi_cewe_open.png / door_menstruasi_cowo_open.png) */
+         (untuk menstruasi/mimpibasah: door_menstruasi_cewe_open.png / door_menstruasi_cowo_open.png, sesuai doorImg) */
   #screen-lobby{padding:0;overflow:hidden;}
   .lobby-full{
     position:relative;width:100%;height:100%;overflow:hidden;
@@ -726,6 +767,39 @@
   }
   .lobby-full::before{content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
     background:linear-gradient(180deg, rgba(15,10,5,.5) 0%, rgba(15,10,5,0) 24%, rgba(15,10,5,0) 60%, rgba(15,10,5,.5) 100%);}
+
+  /* Partikel ambient di lobby (debu keemasan / kunang-kunang) supaya
+     rumahnya kerasa "hidup" — bukan cuma latar diam. Tipe digilir acak
+     tiap ~20 detik lewat startLobbyAmbientCycle() di JS; class type-<x>
+     di container cuma buat penanda, tampilan tiap partikel ditentukan
+     class mote-<x> di masing-masing <span>. Murni dekoratif,
+     pointer-events:none biar nggak ganggu klik pintu/karakter. */
+  .lobby-ambient{position:absolute;inset:0;z-index:2;pointer-events:none;overflow:hidden;}
+  .lobby-ambient .mote{position:absolute;border-radius:50%;will-change:transform,opacity;}
+  .mote-dust{background:radial-gradient(circle,#fff6d8 0%,#e0a72e 60%,transparent 76%);
+    box-shadow:0 0 6px 1px rgba(224,167,46,.5);
+    animation-name:moteDustFloat;animation-timing-function:ease-in-out;animation-iteration-count:infinite;}
+  @keyframes moteDustFloat{
+    0%{transform:translate(0,0) scale(.6);opacity:0;}
+    12%{opacity:.8;}
+    50%{transform:translate(var(--drift),-55vh) scale(1);opacity:.65;}
+    88%{opacity:.25;}
+    100%{transform:translate(var(--drift),-92vh) scale(.5);opacity:0;}
+  }
+  .mote-firefly{background:#eaff8f;box-shadow:0 0 8px 3px rgba(210,255,140,.75);
+    animation-name:moteFireflyFloat,moteFireflyBlink;
+    animation-timing-function:ease-in-out,ease-in-out;animation-iteration-count:infinite,infinite;}
+  @keyframes moteFireflyFloat{
+    0%{transform:translate(0,0);}
+    25%{transform:translate(calc(var(--drift) * .5),-14px);}
+    50%{transform:translate(var(--drift),-26px);}
+    75%{transform:translate(calc(var(--drift) * .25),-10px);}
+    100%{transform:translate(0,0);}
+  }
+  @keyframes moteFireflyBlink{
+    0%,100%{opacity:.12;}
+    50%{opacity:.95;}
+  }
 
   .lobby-topleft{position:absolute;top:14px;left:14px;z-index:4;cursor:pointer;
     display:flex;align-items:center;gap:9px;
@@ -752,6 +826,7 @@
   .lobby-topleft .who small{display:block;font-weight:400;opacity:.85;font-size:11px;}
   .lobby-topright{position:absolute;top:14px;right:14px;z-index:4;display:flex;align-items:center;gap:6px;}
   .lobby-topright .coin{background:rgba(20,15,8,.55);color:#f2e9cf;border-radius:999px;
+    cursor:pointer;
     padding:6px 14px;font-weight:700;font-size:13px;backdrop-filter:blur(2px);
     box-shadow:0 4px 10px rgba(0,0,0,.3);}
   .icon-btn-float{background:rgba(20,15,8,.55);color:#fff;border-radius:10px;padding:8px 10px;
@@ -779,21 +854,22 @@
      sudah dibuka & diselesaikan tetap bisa dikunjungi lagi kapan aja, bukan
      cuma bisa maju terus tanpa bisa balik. Panah nonaktif otomatis kalau sudah
      mentok di area pertama/terakhir yang terbuka. */
-  .lobby-area-nav{display:flex;align-items:center;justify-content:center;gap:10px;}
-  .lobby-area-arrow{flex:none;width:30px;height:30px;border-radius:999px;
-    background:rgba(20,15,8,.55);color:#f2e9cf;border:1px solid rgba(212,175,90,.55);
-    font-size:13px;line-height:1;box-shadow:0 4px 10px rgba(0,0,0,.3);
-    transition:transform .15s, opacity .15s;}
+  .lobby-area-nav{display:inline-flex;align-items:center;justify-content:center;gap:2px;
+    background:rgba(20,15,8,.5);border:1px solid rgba(212,175,90,.55);
+    padding:4px 6px;border-radius:20px;margin:0 auto 4px;
+    box-shadow:0 4px 10px rgba(0,0,0,.3);}
+  .lobby-area-arrow{flex:none;width:24px;height:24px;border-radius:999px;
+    background:transparent;color:#f2e9cf;border:none;
+    font-size:12px;line-height:1;
+    transition:transform .15s, opacity .15s, background-color .15s;}
   .lobby-area-arrow:active{transform:scale(.9);}
   .lobby-area-arrow:disabled{opacity:.25;pointer-events:none;}
   @media (hover:hover) and (pointer:fine){
-    .lobby-area-arrow:not(:disabled):hover{transform:translateY(-1px);}
+    .lobby-area-arrow:not(:disabled):hover{background:rgba(255,255,255,.14);}
   }
   .lobby-hall-plaque{display:inline-block;color:#f2e9cf;font-weight:800;font-size:13px;
-    letter-spacing:.05em;background:rgba(20,15,8,.5);border:1px solid rgba(212,175,90,.55);
-    padding:6px 18px;border-radius:20px;margin:0 auto 4px;
-    box-shadow:0 4px 10px rgba(0,0,0,.3);}
-  .lobby-hall-desc{font-size:11.5px;color:#f2e9cf;margin:0;text-shadow:0 1px 3px rgba(0,0,0,.6);}
+    letter-spacing:.05em;padding:0 6px;margin:0;white-space:nowrap;}
+  .lobby-hall-desc{font-size:11.5px;color:#f2e9cf;margin:6px 0 0;text-shadow:0 1px 3px rgba(0,0,0,.6);}
 
   .lobby-hall-floor{position:relative;z-index:2;flex:1;min-height:0;}
   .lobby-char-wrap{position:absolute;left:100px;bottom:-48px;height:96%;width:40%;
@@ -802,7 +878,9 @@
     pointer-events:none;}
   .lobby-char-standing{height:100%;width:100%;object-fit:contain;object-position:bottom left;
     filter:drop-shadow(0 8px 10px rgba(0,0,0,.5));
-    animation:charBreatheLobby 2.6s ease-in-out infinite;transform-origin:bottom center;}
+    animation:charBreatheLobby 2.6s ease-in-out infinite;transform-origin:bottom center;
+    pointer-events:auto;cursor:pointer;}
+  .lobby-char-standing:active{transform:scale(.97);}
   @keyframes charBreatheLobby{
     0%,100%{transform:translateY(0) scale(1);}
     50%{transform:translateY(-1px) scale(1.006);}
@@ -820,7 +898,9 @@
     border-radius:16px;border-left:4px solid var(--gold);padding:9px 13px 9px 11px;
     font-size:12px;line-height:1.42;
     box-shadow:0 6px 14px rgba(0,0,0,.35);
+    pointer-events:auto;cursor:pointer;
   }
+  .lobby-char-bubble:active{transform:scale(.98);}
   /* aksen warna beda-beda sesuai mood Kak Hana saat itu, biar balonnya nggak
      keliatan itu-itu aja tiap kali masuk lobby */
   .lobby-char-bubble.tone-senang{border-left-color:#e0a72e;}
@@ -879,6 +959,10 @@
     .lobby-door-3d:not(.locked):hover .door-img-open{opacity:1;}
     .lobby-door-3d:not(.locked):hover .door-img-closed{opacity:0;}
   }
+  .lobby-door-3d.opening{border-color:rgba(212,175,90,.85);
+    box-shadow:0 0 18px 2px rgba(212,175,90,.55), inset 0 0 14px rgba(212,175,90,.25);}
+  .lobby-door-3d.opening .door-img-open{opacity:1;}
+  .lobby-door-3d.opening .door-img-closed{opacity:0;}
   .lobby-door-3d.locked img{filter:grayscale(.75) brightness(.55) drop-shadow(0 6px 10px rgba(0,0,0,.5));}
   .lobby-door-3d .door-plaque{position:absolute;left:50%;bottom:-24px;transform:translateX(-50%);
     white-space:nowrap;background:rgba(20,15,8,.72);color:#f2e9cf;font-size:10.5px;font-weight:800;
@@ -892,6 +976,38 @@
     filter:drop-shadow(0 2px 3px rgba(0,0,0,.6));}
   .lobby-progress-line{position:relative;z-index:2;flex:none;font-size:11.5px;color:#f2e9cf;
     text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.6);margin:0 0 10px;}
+
+  /* ---------- COACHMARK PANDUAN LOBBY ----------
+     Nunjuk LANGSUNG ke elemen aslinya (bukan modal list statis): posisi
+     .lobby-coach-spot & .lobby-coach-bubble dihitung di JS lewat
+     getBoundingClientRect() target-nya, jadi .lobby-coach sendiri
+     position:fixed;inset:0 (samain koordinat sama viewport, langsung
+     cocok tanpa hitung offset tambahan). Efek "sorot" pakai box-shadow
+     raksasa di .lobby-coach-spot yang nge-gelapin semua KECUALI area
+     kotak itu sendiri. */
+  .lobby-coach{position:fixed;inset:0;z-index:50;}
+  .lobby-coach-spot{position:absolute;border-radius:14px;pointer-events:none;
+    box-shadow:0 0 0 9999px rgba(10,8,4,.7);
+    outline:3px solid var(--gold);outline-offset:2px;
+    transition:left .35s cubic-bezier(.4,0,.2,1), top .35s cubic-bezier(.4,0,.2,1),
+      width .35s cubic-bezier(.4,0,.2,1), height .35s cubic-bezier(.4,0,.2,1), opacity .2s;}
+  .lobby-coach-bubble{position:absolute;width:min(260px,72vw);background:var(--card);color:var(--ink);
+    border-radius:16px;padding:14px 16px;box-shadow:0 14px 34px rgba(0,0,0,.45);
+    transition:left .35s cubic-bezier(.4,0,.2,1), top .35s cubic-bezier(.4,0,.2,1);}
+  .lobby-coach-count{font-size:10.5px;font-weight:700;letter-spacing:.5px;color:var(--gold);
+    margin-bottom:3px;text-transform:uppercase;}
+  .lobby-coach-bubble h4{margin:0 0 5px;font-family:'Georgia','Iowan Old Style',serif;
+    color:var(--text-accent);font-size:14.5px;}
+  .lobby-coach-bubble p{margin:0 0 12px;font-size:12.5px;line-height:1.45;color:var(--ink);}
+  .lobby-coach-actions{display:flex;justify-content:space-between;gap:8px;}
+  .lobby-coach-actions button{flex:1;padding:8px 10px;font-size:12px;border-radius:10px;
+    font-weight:700;cursor:pointer;font-family:inherit;}
+  .lobby-coach-actions .btn-outline{background:var(--card);color:var(--text-accent);border:2px solid var(--green-mid);}
+  .lobby-coach-actions .btn-primary{background:var(--green-deep);color:#fff;border:none;
+    box-shadow:0 6px 14px rgba(31,94,74,.35);}
+  @media (max-width:520px){
+    .lobby-coach-bubble{width:min(230px,78vw);padding:12px 14px;}
+  }
 
   /* corridor unlock — muncul sekali pas ruang saat ini baru aja kelar semua,
      nampilin karakter "berjalan" lewat lorong sebelum ruang berikutnya kebuka */
@@ -1112,10 +1228,57 @@
   body.mode-bigfont .ss-topbar{font-size:13.5px;}
   body.mode-bigfont .hana-line .bubble{font-size:15.5px;}
   body.mode-bigfont .vn-quiz-panel .quiz-q{font-size:16.5px;}
+  body.mode-bigfont .lobby-topleft .who{font-size:16px;}
+  body.mode-bigfont .lobby-topleft .who small{font-size:13.5px;}
+  body.mode-bigfont .lobby-topright .coin{font-size:16px;}
+  body.mode-bigfont .icon-btn-float{font-size:17px;}
+  body.mode-bigfont .lobby-side-btn{font-size:12.5px;}
+  body.mode-bigfont .lobby-side-btn .emoji{font-size:23px;}
+  body.mode-bigfont .lobby-hall-plaque{font-size:15.5px;}
+  body.mode-bigfont .lobby-hall-desc{font-size:14px;}
+  body.mode-bigfont .lobby-progress-line{font-size:14px;}
+  body.mode-bigfont .lobby-door-3d .door-plaque{font-size:12.5px;}
+  body.mode-bigfont .lobby-char-bubble{font-size:14.5px;}
+  body.mode-bigfont .lobby-char-bubble b{font-size:12px;}
   body.mode-dyslexia #game{font-family:'Comic Sans MS','Comic Sans', 'Verdana', sans-serif;letter-spacing:.3px;}
 </style>
 </head>
 <body>
+<script>
+/* Definisi mini & sementara — DUPLIKAT dari lobbyCharImgError yang "asli" di
+   script utama (di bawah, dekat akhir dokumen). Kenapa didobel di sini:
+   <img onerror="lobbyCharImgError(this)"> ada JAUH sebelum script utama
+   sempat jalan, dan kalau gambarnya gagal load super cepat (mis. folder
+   images/ belum ada / 404 instan), errornya bisa kepicu SEBELUM script
+   utama selesai diparse browser -> "lobbyCharImgError is not defined".
+   Taruh versi kecil ini di paling atas body supaya SELALU sudah ada saat
+   dibutuhkan. Script utama nanti bakal declare ulang fungsi yang sama
+   persis (harmless, browser cuma pakai definisi terakhir) — jangan dihapus
+   dari sana, ini di sini cuma jaring pengaman buat celah waktu di awal. */
+function lobbyCharImgError(img){
+  const stage = +(img.dataset.stage || 0);
+  if(stage === 0 && img.dataset.fallback){
+    img.dataset.stage = "1";
+    img.src = img.dataset.fallback;
+  } else {
+    img.style.display = "none";
+    const fb = document.getElementById("lobbyCharFallback");
+    if(fb) fb.style.display = "flex";
+  }
+}
+/* Daftarin service worker (sw.js) buat cache gambar & audio game — biar
+   pemain yang udah pernah buka game-nya loadingnya jauh lebih cepat pas
+   balik lagi (asset diambil dari storage HP/browser, bukan download ulang).
+   sw.js harus ada di folder yang SAMA dengan index.html ini pas di-upload
+   ke hosting. Kalau register-nya gagal (misal dibuka lewat file:// lokal,
+   atau browsernya nggak dukung), game tetap jalan normal seperti biasa —
+   ini cuma optimisasi loading, bukan hal yang wajib buat game-nya jalan. */
+if("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
 <div id="rotateOverlay">
   <div class="rotate-icon">📱</div>
   <p>Putar perangkatmu ke posisi <b>landscape (mendatar)</b><br>untuk pengalaman bermain terbaik.</p>
@@ -1123,6 +1286,7 @@
 <div id="game" class="fullbleed">
   <audio id="bgmAudio" src="audio/ost.mp3" loop preload="auto"></audio>
   <div class="roofline"></div>
+
 
   <!-- 1. SPLASH -->
   <section class="screen active" id="screen-splash">
@@ -1234,42 +1398,44 @@
   <!-- 6. LOBBY -->
   <section class="screen" id="screen-lobby">
     <div class="lobby-full" id="lobbyHall">
+      <div class="lobby-ambient" id="lobbyAmbient" aria-hidden="true"></div>
       <div class="lobby-topleft" id="lobbyPlayerProfile" role="button" tabindex="0" aria-label="Buka profil pemain"
            onclick="openProfileModal()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openProfileModal();}">
         <div class="lobby-avatar-circle"><img id="lobbyAvatarImg" alt=""></div>
         <div class="who"><span id="lobbyName">Aisyah</span><small>Level <span id="lobbyLevel">1</span></small></div>
       </div>
       <div class="lobby-topright">
-        <div class="coin">🪙 <span id="lobbyPoints">0</span></div>
-        <button class="icon-btn-float" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
-        <button class="icon-btn-float js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
-        <button class="icon-btn-float js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
-        <button class="icon-btn-float" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+        <div class="coin" id="lobbyCoinBadge" role="button" tabindex="0" aria-label="Apa itu poin?" onclick="openModal('modalPoin')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal('modalPoin');}">🪙 <span id="lobbyPoints">0</span></div>
+        <button class="icon-btn-float" id="lobbyGuideBtn" onclick="startLobbyCoach()" aria-label="Panduan">❓</button>
+        <button class="icon-btn-float" id="lobbySettingsBtn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
+        <button class="icon-btn-float js-fs-btn" id="lobbyFsBtn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
+        <button class="icon-btn-float js-music-btn" id="lobbyMusicBtn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
+        <button class="icon-btn-float" id="lobbyHomeBtn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
       </div>
       <div class="lobby-sidebar-float">
-        <button class="lobby-side-btn" onclick="renderProgress();goTo('screen-progress')"><span class="emoji">📊</span>Progress</button>
-        <button class="lobby-side-btn" onclick="renderTrophy();goTo('screen-trophy')"><span class="emoji">🏆</span>Trophy</button>
-        <button class="lobby-side-btn" onclick="renderHikmah();goTo('screen-hikmah')"><span class="emoji">📖</span>Hikmah</button>
-        <button class="lobby-side-btn" onclick="openModal('modalSettings')"><span class="emoji">⚙️</span>Atur</button>
+        <button class="lobby-side-btn" id="lobbySideProgress" onclick="renderProgress();goTo('screen-progress')"><span class="emoji">📊</span>Progress</button>
+        <button class="lobby-side-btn" id="lobbySideTrophy" onclick="renderTrophy();goTo('screen-trophy')"><span class="emoji">🏆</span>Trophy</button>
+        <button class="lobby-side-btn" id="lobbySideHikmah" onclick="renderHikmah();goTo('screen-hikmah')"><span class="emoji">📖</span>Hikmah</button>
+        <button class="lobby-side-btn" id="lobbySideAtur" onclick="openModal('modalSettings')"><span class="emoji">⚙️</span>Atur</button>
       </div>
       <div class="lobby-hall-center">
         <div class="lobby-area-nav">
           <button type="button" class="lobby-area-arrow" id="lobbyAreaPrev" onclick="lobbyChangeArea(-1)" aria-label="Area sebelumnya">◀</button>
-          <div>
-            <span class="lobby-hall-plaque">PETA RUMAH</span>
-            <p class="lobby-hall-desc" id="lobbyStageDesc"></p>
-          </div>
+          <span class="lobby-hall-plaque">PETA RUMAH</span>
           <button type="button" class="lobby-area-arrow" id="lobbyAreaNext" onclick="lobbyChangeArea(1)" aria-label="Area berikutnya">▶</button>
         </div>
+        <p class="lobby-hall-desc" id="lobbyStageDesc"></p>
       </div>
       <div class="lobby-doors-row" id="doorsGrid"></div>
       <div class="lobby-hall-floor">
         <div class="lobby-char-wrap">
           <img class="lobby-char-standing" id="lobbyCharStanding" src="images/lobby_char_idle.png" alt="Kak Hana"
+               title="Ketuk Kak Hana buat semangat hari ini"
+               onclick="tapLobbyHana()"
                onerror="lobbyCharImgError(this)"
-               onload="this.style.display='block';document.getElementById('lobbyCharFallback').style.display='none';">
+               onload="this.style.display='block';document.getElementById('lobbyCharFallback').style.display='none';positionLobbyCharBubble();">
           <div class="lobby-char-fallback" id="lobbyCharFallback">🧕</div>
-          <div class="lobby-char-bubble" id="lobbyCharBubble" style="display:none;">
+          <div class="lobby-char-bubble" id="lobbyCharBubble" style="display:none;" onclick="tapLobbyHana()">
             <b>KAK HANA</b><span id="lobbyCharBubbleText"></span>
           </div>
         </div>
@@ -1382,7 +1548,44 @@
       <div style="font-size:34px;">📖</div>
       <p class="hikmah-quote" id="hikmahModalText">"..."</p>
       <p class="hikmah-source" id="hikmahModalSource">—</p>
+      <div id="hikmahModalExtra"></div>
       <button class="btn-primary btn-block" onclick="closeModal('modalHikmah')">Simpan ke Koleksi</button>
+    </div>
+  </div>
+
+  <!-- Penjelasan poin — dibuka dari badge koin di lobby. Poin di sini murni
+       penanda progres/pencapaian (didapat tiap selesai ruangan/aktivitas),
+       BUKAN mata uang yang dibelanjakan — makanya modalnya jujur bilang gitu
+       daripada bikin ekspektasi ada "toko". -->
+  <div class="modal-backdrop" id="modalPoin">
+    <div class="modal-card" style="text-align:left;">
+      <div class="center" style="font-size:34px;">🪙</div>
+      <h3 class="center" style="margin-top:6px;">Poin Kamu</h3>
+      <p style="font-size:13.5px;line-height:1.5;">Poin ini nunjukin seberapa jauh kamu udah menjelajah &amp; belajar di rumah ini — nambah tiap kamu menyelesaikan sebuah ruangan atau aktivitas refleksi.</p>
+      <p style="font-size:13.5px;line-height:1.5;">Poin bukan buat dibelanjakan — anggap aja ini catatan perjalananmu, sama kayak lencana di Trophy.</p>
+      <button class="btn-primary btn-block" onclick="closeModal('modalPoin')">Oke, ngerti</button>
+    </div>
+  </div>
+
+  <!-- Panduan lobby (coachmark) — bukan lagi modal list statis, tapi nunjuk
+       LANGSUNG ke posisi asli tiap tombol/elemen (pakai getBoundingClientRect
+       di JS, lihat startLobbyCoach() dkk). Satu langkah tampil sekaligus:
+       area di sekitar target jadi terang (lewat "lubang" di lobbyCoachSpot),
+       sisanya digelapin, dan balon penjelasan nempel di sebelahnya. Posisinya
+       dihitung ulang tiap ganti step & tiap resize, jadi tetap presisi di
+       ukuran layar apa pun (HP, tablet, landscape/portrait). Muncul otomatis
+       sekali di kunjungan pertama pemain ke lobby (lihat maybeShowLobbyGuide),
+       dan bisa dipanggil ulang kapan pun lewat tombol ❓. -->
+  <div class="lobby-coach" id="lobbyCoach" style="display:none;">
+    <div class="lobby-coach-spot" id="lobbyCoachSpot"></div>
+    <div class="lobby-coach-bubble" id="lobbyCoachBubble">
+      <div class="lobby-coach-count" id="lobbyCoachCount">1/7</div>
+      <h4 id="lobbyCoachTitle"></h4>
+      <p id="lobbyCoachText"></p>
+      <div class="lobby-coach-actions">
+        <button type="button" class="btn-outline" onclick="skipLobbyCoach()">Lewati</button>
+        <button type="button" class="btn-primary" id="lobbyCoachNextBtn" onclick="nextLobbyCoach()">Lanjut</button>
+      </div>
     </div>
   </div>
 
@@ -1513,7 +1716,7 @@
   <!-- Modal pilihan saat klik MASUK -->
   <div class="modal-backdrop" id="modalEntryChoice">
     <div class="modal-card modal-card-themed modal-card-wide">
-      <span class="modal-plaque">MASUK KE RUMAH 'AISYIYAH</span>
+      <span class="modal-plaque">MASUK KE RUANG TUMBUH</span>
       <p class="center" style="font-size:13px;margin-bottom:16px;color:var(--ink);">Pilih salah satu untuk melanjutkan:</p>
       <button class="btn-modal-choice primary" id="btnLanjutkanProgress" style="margin-bottom:10px;" onclick="entryContinueProgress()">LANJUTKAN PROGRESS</button>
       <div class="entry-grid">
@@ -1637,7 +1840,7 @@ const GAME_API_URL = "https://script.google.com/macros/s/AKfycbzRQ7HJK6dK_Ac5L1l
 /* ---------- STATE ---------- */
 let STATE = loadState() || {
   name: "", pin: "", gender: "perempuan", jenjang: "sma", points: 0, level: 1,
-  badges: {}, kunciNilai: {}, hikmah: {}, roomsDone: {},
+  badges: {}, kunciNilai: {}, hikmah: {}, infoNetral: {}, roomsDone: {},
   before: {}, after: {}, journal: "", charChosen: false, fasilitator: "",
   /* Progres intro cerita (narasi + kuis pemahaman awal + perjalanan ketemu teman).
      storyDone sengaja TIDAK diisi default false di sini — dicek pakai "!== false"
@@ -1741,6 +1944,30 @@ function playClickSfx(kind){
       gain.gain.exponentialRampToValueAtTime(0.0001, t0+0.26);
       osc.connect(gain).connect(sfxCtx.destination);
       osc.start(t0); osc.stop(t0+0.28);
+      return;
+    }
+
+    // Pintu ruangan dibuka: thud kayu rendah + creak pendek (2 osilator)
+    if(kind === "door"){
+      const thud = sfxCtx.createOscillator(), thudGain = sfxCtx.createGain();
+      thud.type = "sine";
+      thud.frequency.setValueAtTime(160, t0);
+      thud.frequency.exponentialRampToValueAtTime(85, t0+0.2);
+      thudGain.gain.setValueAtTime(0.0001, t0);
+      thudGain.gain.exponentialRampToValueAtTime(0.22, t0+0.02);
+      thudGain.gain.exponentialRampToValueAtTime(0.0001, t0+0.24);
+      thud.connect(thudGain).connect(sfxCtx.destination);
+      thud.start(t0); thud.stop(t0+0.26);
+
+      const creak = sfxCtx.createOscillator(), creakGain = sfxCtx.createGain();
+      creak.type = "sawtooth";
+      creak.frequency.setValueAtTime(300, t0+0.03);
+      creak.frequency.exponentialRampToValueAtTime(480, t0+0.16);
+      creakGain.gain.setValueAtTime(0.0001, t0+0.03);
+      creakGain.gain.exponentialRampToValueAtTime(0.05, t0+0.05);
+      creakGain.gain.exponentialRampToValueAtTime(0.0001, t0+0.2);
+      creak.connect(creakGain).connect(sfxCtx.destination);
+      creak.start(t0+0.03); creak.stop(t0+0.22);
       return;
     }
 
@@ -1939,6 +2166,17 @@ function toggleFullscreen(){
     document.exitFullscreen && document.exitFullscreen();
   }
 }
+/* Deterrent klik-kanan/inspect — SENGAJA cuma level "biar nggak iseng",
+   BUKAN proteksi beneran. DevTools tetap bisa dibuka lewat F12/menu browser,
+   dan semua aset tetap harus dikirim ke browser buat game-nya jalan, jadi
+   tetap kebaca lewat tab Network dsb kalau ada yang niat. Ini cuma nutup
+   jalan klik-kanan "Save image as" / drag gambar keluar buat pengguna awam. */
+document.getElementById("game").addEventListener("contextmenu", (e)=>{
+  e.preventDefault();
+});
+document.getElementById("game").addEventListener("dragstart", (e)=>{
+  if(e.target.tagName === "IMG") e.preventDefault();
+});
 document.addEventListener("fullscreenchange", ()=>{
   const isFull = !!document.fullscreenElement;
   const label = document.getElementById("fsLabel");
@@ -2160,7 +2398,7 @@ function confirmNewAccountProceed(){
   proceedNewAccount();
 }
 function proceedNewAccount(){
-  STATE = { name:"", pin:"", gender:"perempuan", jenjang:"sma", points:0, level:1, badges:{}, kunciNilai:{}, hikmah:{}, roomsDone:{}, before:{}, after:{}, journal:"", charChosen:false, fasilitator:"" };
+  STATE = { name:"", pin:"", gender:"perempuan", jenjang:"sma", points:0, level:1, badges:{}, kunciNilai:{}, hikmah:{}, infoNetral:{}, roomsDone:{}, before:{}, after:{}, journal:"", charChosen:false, fasilitator:"" };
   saveState();
   closeModal("modalEntryChoice");
   openChooseFasilitator();
@@ -2669,7 +2907,7 @@ function speakerLabel(beat){
 const storyBeats = [
   {speaker:"Narator", speakerKey:"player", chars:["player"], bg:"refleksi", text:"Akhir-akhir ini kamu merasa banyak yang berubah — pada tubuhmu, perasaanmu, dan caramu memandang teman-teman di sekitar. Rasanya membingungkan."},
   {text:"__BEFORE_QUIZ__"},
-  {speaker:"Narator", speakerKey:"player", chars:[], bg:"selebaran", text:"Suatu sore, kamu menemukan selebaran kecil terselip di antara buku-bukumu: \"RUMAH 'AISYIYAH — Ruang Aman untuk Remaja: Belajar, Bertanya, Bertumbuh.\""},
+  {speaker:"Narator", speakerKey:"player", chars:[], bg:"selebaran", text:"Suatu sore, kamu menemukan selebaran kecil terselip di antara buku-bukumu: \"RUANG TUMBUH — Ruang Aman untuk Remaja: Belajar, Bertanya, Bertumbuh.\""},
   {speaker:"Amel", speakerKey:"amel", chars:["player","amel"], bg:"refleksi", text:"Eh, itu selebaran Ruang Tumbuh, kan? Dari mana kamu dapetnya? Aku kaget lihat kamu mandangin itu terus dari tadi."},
   {speaker:"Narator", speakerKey:"player", chars:["player","amel"], bg:"refleksi", text:"Kamu jadi salah tingkah, lalu cerita ke Amel soal selebaran yang kamu temukan."},
   {speaker:"Amel", speakerKey:"amel", chars:["player","amel"], bg:"refleksi", text:"Oh, itu tempatnya bagus, lho. Aku jadi lebih percaya diri sejak sering ke sana. Kak Hana baik banget, selalu bantu dengerin cerita kita."},
@@ -3171,15 +3409,14 @@ function finishStoryIntro(){
   goToLobbyWithMoodCheck();
 }
 
-/* ---------- ROOM DEFINITIONS ---------- */
-function menstruasiRoom(){
-  return STATE.gender === "laki"
-    ? {id:"menstruasi", doorImg:"menstruasi_cowo", name:"Mimpi Basah", icon:"🌙", tema:"Siap Bertumbuh", badge:"🌙", badgeLabel:"Siap Bertumbuh", kunci:"Merawat Diri"}
-    : {id:"menstruasi", doorImg:"menstruasi_cewe", name:"Menstruasi", icon:"🌸", tema:"Aku Siap", badge:"🌸", badgeLabel:"Peduli Diri", kunci:"Merawat Diri"};
-}
+/* ---------- ROOM DEFINITIONS ----------
+   Menstruasi & Mimpi Basah sekarang DUA PINTU TERPISAH, tampil buat semua
+   pemain apapun gendernya (bukan lagi 1 slot yang gambarnya ganti-ganti
+   sesuai STATE.gender). Isi tiap pintu FIXED sesuai namanya. */
 const ROOMS = [
   {id:"pubertas", name:"Pubertas", icon:"🧑", tema:"Mengenal Tubuhku", badge:"⭐", badgeLabel:"Percaya Diri", kunci:"Mengenal Diri"},
-  null, // placeholder untuk menstruasi/mimpi basah (gender-based, diisi runtime)
+  {id:"menstruasi", doorImg:"menstruasi_cewe", name:"Menstruasi", icon:"🌸", tema:"Aku Siap", badge:"🌸", badgeLabel:"Peduli Diri", kunci:"Merawat Diri"},
+  {id:"mimpibasah", doorImg:"menstruasi_cowo", name:"Mimpi Basah", icon:"🌙", tema:"Siap Bertumbuh", badge:"🌙", badgeLabel:"Siap Bertumbuh", kunci:"Merawat Diri"},
   {id:"consent", name:"Consent", icon:"🛡️", tema:"Menghargai Batasan", badge:"🛡️", badgeLabel:"Respect", kunci:"Menghargai Batasan"},
   {id:"relasi", name:"Relasi Sehat", icon:"🤝", tema:"Healthy Relationship", badge:"🤝", badgeLabel:"Relasi Sehat", kunci:"Menghargai Orang Lain"},
   {id:"medsos", name:"Media Sosial", icon:"📱", tema:"KBGO", badge:"📱", badgeLabel:"Digital Hero", kunci:"Bijak Bermedia"},
@@ -3188,14 +3425,14 @@ const ROOMS = [
   {id:"perpustakaan", name:"Perpustakaan", icon:"📚", tema:"Koleksi Terbuka", badge:null, kunci:null},
   {id:"refleksi", name:"Refleksi", icon:"🪞", tema:"Ruang Terakhir", badge:null, kunci:null},
 ];
-function getRooms(){ const r = ROOMS.slice(); r[1] = menstruasiRoom(); return r; }
+function getRooms(){ return ROOMS.slice(); }
 
 /* Lobby dibagi 3 AREA, tiap area isi 2-3 pintu. Cuma pintu di area AKTIF yang
    tampil. Begitu semua pintu di satu area selesai, pemain "jalan" lewat lorong
    side-scrolling (engine yang sama kayak Menuju Ruang Tumbuh) buat masuk
    ke area berikutnya — lihat enterCorridor(). */
 const LOBBY_AREAS = [
-  {title:"Ruang Diri", desc:"Mengenal & merawat diri sendiri.", rooms:["pubertas","menstruasi"]},
+  {title:"Ruang Diri", desc:"Mengenal & merawat diri sendiri.", rooms:["pubertas","menstruasi","mimpibasah"]},
   {title:"Ruang Relasi", desc:"Menghargai batasan & orang lain.", rooms:["consent","relasi","konseling"]},
   {title:"Ruang Digital & Sehat", desc:"Bijak bermedia, jaga kesehatan.", rooms:["medsos","gizi","perpustakaan","refleksi"]},
 ];
@@ -3206,14 +3443,54 @@ function currentAreaIndex(){
 }
 
 
+/* Info netral (bukan soal, gak berskor) — muncul sekali di ruang menstruasi
+   (Level 2, setelah bagian mitos/fakta soal kebersihan haid), khusus gender
+   perempuan, ditampilkan sebagai obrolan biasa dari Kak Hana lewat hanaLine(),
+   bukan pertanyaan pilihan ganda. Materi fikih ttg boleh/nggaknya masuk masjid
+   & baca Qur'an saat haid sengaja disajikan netral (khilafiyah), gak didebat /
+   gak dites benar-salahnya — dan diarahkan ke guru PAI/ortu kalau mau tahu
+   lebih detail (sesuai catatan blueprint: "sajikan sebagai fakta netral,
+   jangan diperdebatkan"). Dipicu dari LEVEL_CONTENT.menstruasi_cewek[2].infoNetral. */
+const INFO_NETRAL = {
+  menstruasi_cewek: "Satu hal lagi soal haid: ada juga aturan-aturan fikih, misalnya soal boleh/nggaknya masuk masjid atau baca Qur'an saat haid. Ini termasuk hal yang pendapat ulama beragam (khilafiyah) — jadi bukan sesuatu yang ada satu jawaban \u201Cbenar-salah\u201D tunggal. Kalau kamu penasaran mau pegang pendapat yang mana, paling pas tanya langsung ke guru agama atau orang tua di rumah ya.",
+};
+
+/* Tiap ruangan sekarang punya 2 hikmah: [0] tokoh Islam, [1] tokoh umum.
+   Field `translation` dipakai kalau quote aslinya bahasa Inggris, biar
+   remaja yang belum lancar Inggris tetap paham artinya. */
 const HIKMAH = {
-  menstruasi: {text:"Wanita jangan berjiwa kerdil, tetapi berjiwa srikandi.", source:"Nyai Ahmad Dahlan (Siti Walidah), pendiri 'Aisyiyah"},
-  consent: {text:"Wanita jangan berjiwa kerdil, tetapi berjiwa srikandi.", source:"Nyai Ahmad Dahlan (Siti Walidah), pendiri 'Aisyiyah"},
-  konseling: {text:"Hadapi masalah tanpa wajah berkerut, agar hati tetap tenang.", source:"Buya Hamka"},
-  refleksi: {text:"Memaafkan diri sendiri menumbuhkan kedamaian dan kesehatan jiwa.", source:"Buya Hamka"},
-  pubertas: {text:"Pendidikan sejati membentuk generasi yang cerdas sekaligus berakhlak.", source:"K.H. Ahmad Dahlan"},
-  gizi: {text:"Pendidikan sejati membentuk generasi yang cerdas sekaligus berakhlak.", source:"K.H. Ahmad Dahlan"},
-  relasi: {text:"Jangan takut salah — dari kesalahan pertama kita belajar melangkah lebih baik.", source:"Buya Hamka"},
+  pubertas: [
+    {text:"Sesungguhnya tubuhmu punya hak atas dirimu.", source:"HR. Bukhari & Muslim"},
+    {text:"You alone are enough. You have nothing to prove to anybody.", translation:"Kamu saja sudah cukup. Kamu tidak perlu membuktikan apa pun ke siapa pun.", source:"Maya Angelou"},
+  ],
+  menstruasi: [
+    {text:"Wanita jangan berjiwa kerdil, tetapi berjiwa srikandi.", source:"Nyai Ahmad Dahlan (Siti Walidah), pendiri 'Aisyiyah"},
+    {text:"Habis gelap terbitlah terang.", source:"R.A. Kartini"},
+  ],
+  mimpibasah: [
+    {text:"Setiap kalian adalah pemimpin, dan akan diminta pertanggungjawaban atas kepemimpinannya.", source:"HR. Bukhari & Muslim"},
+    {text:"The price of greatness is responsibility.", translation:"Harga dari sebuah kebesaran adalah tanggung jawab.", source:"Winston Churchill"},
+  ],
+  consent: [
+    {text:"Wahai orang-orang beriman, janganlah kamu memasuki rumah yang bukan rumahmu sebelum meminta izin dan memberi salam kepada penghuninya.", source:"QS. An-Nur (24): 27"},
+    {text:"Daring to set boundaries is about having the courage to love ourselves, even when we risk disappointing others.", translation:"Berani membuat batasan adalah soal punya keberanian mencintai diri sendiri, meski itu berisiko mengecewakan orang lain.", source:"Brené Brown"},
+  ],
+  relasi: [
+    {text:"Jangan takut salah — dari kesalahan pertama kita belajar melangkah lebih baik.", source:"Buya Hamka"},
+    {text:"People will forget what you said, but they will never forget how you made them feel.", translation:"Orang bisa lupa apa yang kamu katakan, tapi mereka tidak akan pernah lupa bagaimana perasaan mereka saat bersamamu.", source:"Maya Angelou"},
+  ],
+  gizi: [
+    {text:"Mukmin yang kuat lebih baik dan lebih dicintai Allah daripada mukmin yang lemah.", source:"HR. Muslim"},
+    {text:"Take care of your body. It's the only place you have to live.", translation:"Jaga tubuhmu. Itu satu-satunya tempat yang kamu punya untuk menjalani hidup.", source:"Jim Rohn"},
+  ],
+  konseling: [
+    {text:"Hadapi masalah tanpa wajah berkerut, agar hati tetap tenang.", source:"Buya Hamka"},
+    {text:"You don't have to see the whole staircase, just take the first step.", translation:"Kamu tidak perlu melihat seluruh anak tangga, cukup melangkah satu langkah dulu.", source:"Martin Luther King Jr."},
+  ],
+  refleksi: [
+    {text:"Memaafkan diri sendiri menumbuhkan kedamaian dan kesehatan jiwa.", source:"Buya Hamka"},
+    {text:"The unexamined life is not worth living.", translation:"Hidup yang tidak pernah direnungkan tidak layak dijalani.", source:"Socrates"},
+  ],
 };
 
 /* Kak Hana berdiri di lobby: coba gambar full-body khusus (lobby_char_*.png)
@@ -3229,6 +3506,49 @@ function lobbyCharImgError(img){
     document.getElementById("lobbyCharFallback").style.display = "flex";
   }
 }
+/* Balon Kak Hana di-posisikan dari BATAS ASLI gambar (hasil object-fit:contain),
+   bukan dari kotak .lobby-char-wrap. Kenapa: kotak itu lebih besar dari gambar
+   karakternya sendiri (contain nyisain ruang kosong di sisi kanan dan/atau
+   atas tergantung rasio kotak), dan rasio kotak itu IKUT BERUBAH tiap kali
+   layar berubah (keluar/masuk fullscreen, resize) karena tingginya persentase
+   dari tinggi panggung. Kalau balon dipatok pakai %, dia nempel ke kotak yang
+   goyang itu — bukan ke kepala karakter yang sebenarnya diam di sudut
+   kiri-bawah (object-position:bottom left). Makanya balon bisa nutupin muka
+   pas rasio kotak berubah. Fix: hitung sendiri batas render gambar tiap kali
+   ukuran berubah, taruh balon relatif ke batas ITU. */
+function positionLobbyCharBubble(){
+  const wrap = document.querySelector(".lobby-char-wrap");
+  const img = document.getElementById("lobbyCharStanding");
+  const bubble = document.getElementById("lobbyCharBubble");
+  if(!wrap || !img || !bubble) return;
+  if(!img.naturalWidth || !img.naturalHeight) return; // gambar belum termuat, coba lagi nanti (dipanggil ulang di onload)
+  const boxW = wrap.clientWidth, boxH = wrap.clientHeight;
+  if(!boxW || !boxH) return;
+  const imgRatio = img.naturalWidth / img.naturalHeight;
+  const boxRatio = boxW / boxH;
+  let renderW, renderH;
+  if(imgRatio > boxRatio){ renderW = boxW; renderH = boxW / imgRatio; }
+  else { renderH = boxH; renderW = boxH * imgRatio; }
+  const renderTop = boxH - renderH; // object-position:bottom -> ruang kosong (kalau ada) selalu di ATAS
+  // balon ditaruh dikit di kanan bahu, DI DALAM batas render gambar (bukan
+  // batas kotak) -> selalu ikut kepala kemanapun kotak berubah bentuk.
+  // Dipatok dari BAWAH (bottom = pas di atas kepala) bukan dari atas, supaya
+  // kalau tinggi balon nambah (mode font besar / teks panjang) dia melebar
+  // ke ATAS, bukan turun nutupin muka.
+  const headTop = Math.max(0, renderTop) + renderH * 0.03;
+  bubble.style.left = Math.round(renderW * 0.30) + "px";
+  bubble.style.top = "auto";
+  bubble.style.bottom = Math.round(boxH - headTop) + "px";
+}
+let lobbyBubbleResizeQueued = false;
+function queueLobbyBubbleReposition(){
+  if(lobbyBubbleResizeQueued) return;
+  lobbyBubbleResizeQueued = true;
+  requestAnimationFrame(()=>{ lobbyBubbleResizeQueued = false; positionLobbyCharBubble(); });
+}
+window.addEventListener("resize", queueLobbyBubbleReposition);
+window.addEventListener("orientationchange", queueLobbyBubbleReposition);
+document.addEventListener("fullscreenchange", queueLobbyBubbleReposition);
 
 /* Posisi pintu (dalam % dari ukuran penuh layar lobby) supaya hitbox-nya PAS
    nempel di gambar pintu yang sudah digambar di dalam bg_area<N>.png.
@@ -3363,11 +3683,209 @@ function playLobbyBubbleEnter(bubbleEl){
   void bubbleEl.offsetWidth;
   bubbleEl.classList.add(variants[Math.floor(Math.random() * variants.length)]);
 }
+/* ---------- PARTIKEL AMBIENT LOBBY ----------
+   Biar rumah nggak kerasa "mati", ada partikel dekoratif yang digilir acak:
+   debu keemasan melayang atau kunang-kunang kecil. (Kelopak bunga jatuh
+   sengaja nggak dipakai — udah ada elemen daun jatuh lain di dalam rumah,
+   jadi bakal keliatan repetitif.) Tipe baru dipilih tiap ~20 detik (nggak
+   boleh sama 2x berturut-turut), dan partikelnya di-generate ulang tiap
+   ganti tipe. Murni visual, nggak nyimpen state apa pun. */
+const LOBBY_AMBIENT_TYPES = ["dust", "firefly"];
+let lobbyAmbientTimer = null;
+let lobbyAmbientLastType = null;
+function pickLobbyAmbientType(){
+  let t;
+  do { t = LOBBY_AMBIENT_TYPES[Math.floor(Math.random() * LOBBY_AMBIENT_TYPES.length)]; }
+  while (t === lobbyAmbientLastType && LOBBY_AMBIENT_TYPES.length > 1);
+  lobbyAmbientLastType = t;
+  return t;
+}
+function renderLobbyAmbientParticles(type){
+  const container = document.getElementById("lobbyAmbient");
+  if(!container) return;
+  const counts = {dust:13, firefly:9};
+  const n = counts[type] || 10;
+  let html = "";
+  for(let i=0;i<n;i++){
+    const left = Math.round(Math.random()*94)+2;
+    const drift = Math.round(Math.random()*70-35);
+    let size, dur, posStyle;
+    if(type === "firefly"){
+      size = 4+Math.random()*3;
+      dur = 3.5+Math.random()*2.5;
+      posStyle = `bottom:${Math.round(Math.random()*40)+6}%;`;
+    } else { // dust
+      size = 3+Math.random()*3;
+      dur = 10+Math.random()*8;
+      posStyle = "bottom:-10px;";
+    }
+    const delay = -(Math.random()*dur); // negatif -> tiap partikel mulai di titik acak dalam siklusnya, nggak nunggu bareng
+    html += `<span class="mote mote-${type}" style="left:${left}%;${posStyle}width:${size}px;height:${size}px;animation-duration:${dur}s;animation-delay:${delay}s;--drift:${drift}px"></span>`;
+  }
+  container.className = "lobby-ambient type-" + type;
+  container.innerHTML = html;
+}
+function startLobbyAmbientCycle(){
+  if(lobbyAmbientTimer) return; // udah jalan, nggak perlu restart tiap renderLobby()
+  renderLobbyAmbientParticles(pickLobbyAmbientType());
+  lobbyAmbientTimer = setInterval(() => {
+    renderLobbyAmbientParticles(pickLobbyAmbientType());
+  }, 20000);
+}
+
+/* Panduan lobby otomatis (coachmark) — muncul SEKALI aja di kunjungan
+   pertama pemain ke lobby (ditandai STATE.lobbyGuideSeen), telat dikit
+   (700ms) supaya nggak numpuk bareng animasi masuk layar/balon Kak Hana.
+   STATE.lobbyGuideSeen ditandai selesai di finishLobbyCoach() (dipanggil
+   pas coachmark ditutup/dilewatin), BUKAN di sini — supaya kalau pemain
+   nutup tab persis pas coachmark lagi jalan, dia tetap ketawarin lagi di
+   kunjungan berikutnya, bukan keanggep udah "selesai lihat" padahal belum.
+   Sesudah kunjungan pertama, pemain masih bisa manggil coachmark yang
+   sama lagi kapan pun lewat tombol ❓ (langsung manggil startLobbyCoach()). */
+function maybeShowLobbyGuide(){
+  if(STATE.lobbyGuideSeen) return;
+  setTimeout(() => startLobbyCoach(), 700);
+}
+
 const LOBBY_BUBBLE_TONE = {
   senang:"tone-senang", semangat:"tone-semangat", biasa:"tone-biasa",
   sedih:"tone-sedih", berat:"tone-berat",
 };
+
+/* ---------- COACHMARK PANDUAN LOBBY ----------
+   Nunjuk langsung ke posisi ASLI tiap elemen (bukan modal list statis).
+   Tiap step: {selector, title, text}. Cuma step yang target-nya beneran
+   ada di DOM saat itu yang dipakai (LOBBY_COACH_STEPS difilter jadi
+   lobbyCoachActiveSteps pas startLobbyCoach dipanggil) — misal kalau
+   suatu saat #doorsGrid lagi kosong, step itu otomatis dilewatin, bukan
+   nge-freeze nunjuk ke kotak kosong. */
+const LOBBY_COACH_STEPS = [
+  {selector:"#lobbyPlayerProfile", title:"Profil Kamu",
+    text:"Nama, level, dan foto profil kamu. Ketuk buat buka & ganti profil kapan aja."},
+  {selector:".lobby-area-nav", title:"Peta Rumah",
+    text:"Nama area yang lagi kamu jelajahi. Ketuk ◀ ▶ buat pindah ke area lain di rumah ini."},
+  {selector:"#doorsGrid .lobby-door-3d", title:"Pintu-Pintu Ruangan",
+    text:"Tiap pintu itu satu topik belajar — ketuk buat masuk."},
+  {selector:"#lobbyCoinBadge", title:"Poin",
+    text:"Nambah tiap kamu selesai satu ruangan — penanda progres, bukan buat dibelanjakan."},
+  {selector:".lobby-topright", title:"Akses Cepat",
+    text:"Di pojok kanan atas ada akses cepat: layar penuh, musik, pengaturan, dan tombol pulang ke menu utama."},
+  {selector:"#lobbySideProgress", title:"Progress",
+    text:"Lihat sejauh mana kamu udah menjelajah tiap ruangan."},
+  {selector:"#lobbySideTrophy", title:"Trophy",
+    text:"Nyimpen lencana yang kamu kumpulin dari ruangan-ruangan yang udah selesai."},
+  {selector:"#lobbySideHikmah", title:"Hikmah",
+    text:"Nyimpen kata-kata bijak yang kamu kumpulin sepanjang perjalanan."},
+  {selector:"#lobbySideAtur", title:"Atur",
+    text:"Musik, layar penuh, sampai font besar & kontras tinggi ada di sini."},
+  {selector:"#lobbyCharStanding", title:"Kak Hana",
+    text:"Bisa diketuk kapan pun buat dapet semangat dari dia."},
+];
+let lobbyCoachActiveSteps = [];
+let lobbyCoachIndex = 0;
+let lobbyCoachRepositionQueued = false;
+
+function startLobbyCoach(){
+  lobbyCoachActiveSteps = LOBBY_COACH_STEPS.filter(s => document.querySelector(s.selector));
+  if(!lobbyCoachActiveSteps.length) return;
+  lobbyCoachIndex = 0;
+  document.getElementById("lobbyCoach").style.display = "block";
+  renderLobbyCoachStep();
+  window.addEventListener("resize", queueLobbyCoachReposition);
+  window.addEventListener("orientationchange", queueLobbyCoachReposition);
+}
+function nextLobbyCoach(){
+  lobbyCoachIndex++;
+  if(lobbyCoachIndex >= lobbyCoachActiveSteps.length){ finishLobbyCoach(); return; }
+  renderLobbyCoachStep();
+}
+function skipLobbyCoach(){ finishLobbyCoach(); }
+function finishLobbyCoach(){
+  const coachEl = document.getElementById("lobbyCoach");
+  if(coachEl) coachEl.style.display = "none";
+  window.removeEventListener("resize", queueLobbyCoachReposition);
+  window.removeEventListener("orientationchange", queueLobbyCoachReposition);
+  if(!STATE.lobbyGuideSeen){ STATE.lobbyGuideSeen = true; saveState(); }
+}
+function renderLobbyCoachStep(){
+  const step = lobbyCoachActiveSteps[lobbyCoachIndex];
+  if(!step){ finishLobbyCoach(); return; }
+  document.getElementById("lobbyCoachCount").textContent = (lobbyCoachIndex+1) + "/" + lobbyCoachActiveSteps.length;
+  document.getElementById("lobbyCoachTitle").textContent = step.title;
+  document.getElementById("lobbyCoachText").textContent = step.text;
+  document.getElementById("lobbyCoachNextBtn").textContent =
+    (lobbyCoachIndex === lobbyCoachActiveSteps.length - 1) ? "Oke, Siap Jelajah!" : "Lanjut";
+  positionLobbyCoach();
+}
+function queueLobbyCoachReposition(){
+  if(lobbyCoachRepositionQueued) return;
+  lobbyCoachRepositionQueued = true;
+  requestAnimationFrame(() => { lobbyCoachRepositionQueued = false; positionLobbyCoach(); });
+}
+/* Hitung ulang posisi spotlight & balon berdasarkan getBoundingClientRect
+   target ASLI-nya tiap kali dipanggil — jadi selalu presisi di ukuran
+   layar apa pun (termasuk pas orientasi diputer landscape<->portrait),
+   nggak pernah ketinggalan/geser kayak versi modal list sebelumnya. */
+function positionLobbyCoach(){
+  const coachEl = document.getElementById("lobbyCoach");
+  if(!coachEl || coachEl.style.display === "none") return;
+  const step = lobbyCoachActiveSteps[lobbyCoachIndex];
+  if(!step) return;
+  const targetEl = document.querySelector(step.selector);
+  if(!targetEl){ nextLobbyCoach(); return; } // target ilang di tengah jalan -> lewatin ke step berikutnya
+  const spot = document.getElementById("lobbyCoachSpot");
+  const bubble = document.getElementById("lobbyCoachBubble");
+  const r = targetEl.getBoundingClientRect();
+  const pad = 8;
+  spot.style.left = (r.left - pad) + "px";
+  spot.style.top = (r.top - pad) + "px";
+  spot.style.width = (r.width + pad*2) + "px";
+  spot.style.height = (r.height + pad*2) + "px";
+
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const bw = bubble.offsetWidth || 260, bh = bubble.offsetHeight || 140;
+  let top = (r.top < vh/2) ? (r.bottom + pad + 10) : (r.top - pad - 10 - bh);
+  let left = (r.left < vw/2) ? r.left : (r.right - bw);
+  top = Math.min(Math.max(top, 10), vh - bh - 10);
+  left = Math.min(Math.max(left, 10), vw - bw - 10);
+  bubble.style.top = top + "px";
+  bubble.style.left = left + "px";
+}
+/* Kalau Kak Hana (badan/balon) DIKETUK di lobby, dia ganti jadi kalimat
+   & ekspresi penyemangat — supaya nggak "nyangkut" di kalimat mood
+   check-in tadi (apalagi yang sedih/nangis) tiap kali pemain lihat dia.
+   Ekspresi & kalimat digilir satu-satu tiap ketuk (bukan acak) biar kerasa
+   ada variasi, bukan cuma satu kalimat itu-itu terus. Nambah baris baru?
+   Tinggal tambah objek {expr, line} di array ini. */
+const HANA_TAP_LINES = [
+  {expr:"semangat", line:"Semangat terus hari ini, ya! Aku selalu di sini kalau kamu butuh."},
+  {expr:"tertawa",  line:"Kamu udah hebat sampai sejauh ini. Lanjutkan, yuk!"},
+  {expr:"bangga",   line:"Aku bangga sama usaha kamu — pelan-pelan juga nggak apa-apa."},
+  {expr:"semangat", line:"Apapun mood kamu hari ini, kamu tetap berharga, kok."},
+  {expr:"tertawa",  line:"Yuk, tarik napas sebentar — habis itu kita lanjut jelajah bareng!"},
+];
+let hanaTapIndex = -1;
+function tapLobbyHana(){
+  if(typeof playClickSfx === "function") playClickSfx("tap");
+  hanaTapIndex = (hanaTapIndex + 1) % HANA_TAP_LINES.length;
+  const pick = HANA_TAP_LINES[hanaTapIndex];
+
+  const imgEl = document.getElementById("lobbyCharStanding");
+  imgEl.dataset.stage = "0";
+  imgEl.dataset.fallback = `images/hana_${pick.expr}.png`;
+  imgEl.src = `images/lobby_char_${pick.expr}.png`;
+
+  const bubbleEl = document.getElementById("lobbyCharBubble");
+  bubbleEl.dataset.lastLine = pick.line; // biar renderLobby berikutnya nggak nimpa balik tanpa alasan kalau kalimat mood-nya sama
+  bubbleEl.className = "lobby-char-bubble tone-semangat";
+  bubbleEl.style.display = "block";
+  playLobbyBubbleEnter(bubbleEl);
+  typeIntoLobbyBubble(pick.line);
+  requestAnimationFrame(positionLobbyCharBubble);
+}
 function renderLobby(){
+  startLobbyAmbientCycle();
+  maybeShowLobbyGuide();
   document.getElementById("lobbyName").textContent = STATE.name || "Aisyah";
   document.getElementById("lobbyLevel").textContent = STATE.level;
   // avatar bulat di pojok kiri atas — pakai potret narasi (sama kayak yang muncul
@@ -3423,6 +3941,7 @@ function renderLobby(){
     typeIntoLobbyBubble(lobbyBubbleLine);
   }
   lobbyCharBubbleEl.style.display = "block";
+  positionLobbyCharBubble();
   const bgAreaNum = viewIdx+1;
   document.getElementById("lobbyHall").style.backgroundImage = `url('images/bg_area${bgAreaNum}.png')`;
 
@@ -3434,7 +3953,7 @@ function renderLobby(){
     const done = STATE.roomsDone[id];
     const s = slots[i];
     const doorImgId = r.doorImg || id; // pakai gambar pintu khusus (mis. beda per gender) kalau room-nya set doorImg, kalau nggak ya pakai id biasa
-    return `<div class="lobby-door-3d" style="left:${s.left}%;top:${s.top}%;width:${s.width}%;${s.height!=null?`height:${s.height}%;`:''}" onclick="openRoom('${r.id}')">
+    return `<div class="lobby-door-3d" style="left:${s.left}%;top:${s.top}%;width:${s.width}%;${s.height!=null?`height:${s.height}%;`:''}" onclick="openRoom('${r.id}', this)">
       ${done ? '<span class="check">✅</span>' : ''}
       <img class="door-img-closed" src="images/door_${doorImgId}.png" alt="${r.name}" onerror="this.style.display='none'">
       <img class="door-img-open" src="images/door_${doorImgId}_open.png" alt="" aria-hidden="true" onerror="this.style.display='none'">
@@ -3465,7 +3984,14 @@ function renderLobby(){
 let corridor = null;
 function enterCorridor(targetAreaIdx, originAreaIdx){
   const forward = targetAreaIdx > originAreaIdx;
-  const width = 640;
+  // Lebar dunia lorong DULU dipatok 640px tetap — di layar lebar (desktop/
+  // tablet), 640px itu jauh lebih sempit dari viewport, jadi pemain "spawn"
+  // di tepi DUNIA yang 640px itu, bukan di tepi LAYAR (numpuk ke tengah-kanan
+  // layar, bukan bener-bener di pojok). Sekarang lebar dunia ngikutin lebar
+  // viewport + sedikit jarak jalan, supaya titik SS_EDGE_PAD di kiri/kanan
+  // selalu jatuh dekat tepi layar beneran, di ukuran layar berapa pun.
+  const vw = Math.max(window.innerWidth || 0, document.documentElement.clientWidth || 0, 320);
+  const width = Math.max(640, vw + 260);
   const startX = forward ? SS_EDGE_PAD : width-SS_EDGE_PAD;
   corridor = {
     width, playerX:startX, dir:0, facing:forward?1:-1, moving:false,
@@ -3488,11 +4014,18 @@ function corridorBuildDOM(){
   const goalX = corridor.forward ? corridor.width - SS_EDGE_PAD : SS_EDGE_PAD;
   const chevronLeft = `<svg viewBox="0 0 24 24" fill="none"><path d="M15 5L8 12L15 19" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const chevronRight = `<svg viewBox="0 0 24 24" fill="none"><path d="M9 5L16 12L9 19" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  // Papan kiri/kanan: yang di arah JALAN (target) dikasih tanda is-target
+  // (aksen emas) + panah ke arah situ; yang di belakang (asal) polos aja.
+  const leftArea = corridor.forward ? originArea : nextArea;
+  const rightArea = corridor.forward ? nextArea : originArea;
+  const leftIsTarget = !corridor.forward;
+  const rightIsTarget = corridor.forward;
   el.innerHTML = `
     <div class="vn-stage ss-stage">
       <div class="ss-viewport" id="corridorViewport">
         <div class="ss-layer ss-sky"></div>
         <div class="ss-layer ss-sea">${ssFishesHTML()}</div>
+        <div class="ss-layer ss-mid" id="corridorMid" style="width:${Math.max(corridor.width, 1600)}px;left:0;right:auto;"></div>
         <div class="ss-layer ss-grassbase"></div>
         ${ssButterfliesHTML()}
         <div class="ss-layer ss-ground">
@@ -3507,6 +4040,12 @@ function corridorBuildDOM(){
       <button type="button" class="ss-back-btn" onclick="corridorGoBack()" aria-label="Kembali ke ${originArea.title}">${chevronLeft}</button>
       <div class="ss-topbar"><span>${originArea.title} → ${nextArea.title}</span></div>
       <div id="corridorPrompt"><div class="ss-hint-banner">Jalan terus ke ${corridor.forward?'kanan':'kiri'} buat masuk ruangan berikutnya ${corridor.forward?'→':'←'}</div></div>
+      <div class="corridor-signpost corridor-signpost-left ${leftIsTarget?'is-target':''}">
+        <div class="board">${chevronLeft}<br>${leftArea.title}</div>
+      </div>
+      <div class="corridor-signpost corridor-signpost-right ${rightIsTarget?'is-target':''}">
+        <div class="board">${rightArea.title}<br>${chevronRight}</div>
+      </div>
       <div class="ss-controls">
         <button type="button" class="ss-dpad" id="corridorLeft" aria-label="Jalan ke kiri">${chevronLeft}</button>
         <div style="pointer-events:none;flex:1"></div>
@@ -3648,11 +4187,24 @@ function temanCard(roomId){
     <div class="bubble"><b>KATA ${t.name.toUpperCase()}</b>${t.text}</div>
   </div>`;
 }
-function openRoom(id){
+function openRoom(id, doorEl){
+  if(typeof playClickSfx === "function") playClickSfx("door");
   currentRoom = getRooms().find(r=>r.id===id);
   document.getElementById("roomTitleTop").textContent = currentRoom.name;
-  goTo("screen-room");
-  renderRoomHome();
+  const proceed = ()=>{
+    goTo("screen-room");
+    renderRoomHome();
+  };
+  if(doorEl){
+    // Kasih waktu sekelebat biar animasi "pintu kebuka" (CSS .opening, sudah
+    // jalan di SEMUA device — nggak digantung ke :hover lagi) sempat keliatan
+    // & nyambung sama SFX creak di atas, sebelum layar potong ke ruangan.
+    doorEl.classList.add("opening");
+    doorEl.style.pointerEvents = "none";
+    setTimeout(proceed, 320);
+  } else {
+    proceed();
+  }
 }
 function renderRoomHome(){
   const c = document.getElementById("roomContent");
@@ -3672,7 +4224,8 @@ function renderRoomHome(){
 }
 const MATERI_TEXT = {
   pubertas:"Pubertas adalah masa perubahan fisik & emosi yang wajar dialami setiap remaja, waktunya berbeda-beda pada tiap orang.",
-  menstruasi:"Menstruasi/mimpi basah adalah proses biologis normal tanda tubuh mulai matang — bukan sesuatu yang perlu ditakuti atau disembunyikan.",
+  menstruasi:"Menstruasi adalah proses biologis normal tanda tubuh mulai matang — bukan sesuatu yang perlu ditakuti atau disembunyikan.",
+  mimpibasah:"Mimpi basah adalah proses biologis normal tanda tubuh mulai matang — bukan sesuatu yang perlu ditakuti atau disembunyikan.",
   consent:"Consent berarti persetujuan yang diberikan dengan sadar, tanpa paksaan. Kamu berhak menolak hal yang membuatmu tidak nyaman.",
   relasi:"Relasi yang sehat dibangun atas rasa saling menghargai, tanpa paksaan maupun kontrol berlebihan dari salah satu pihak.",
   medsos:"KBGO (Kekerasan Berbasis Gender Online) bisa berupa penyebaran foto tanpa izin, ancaman, atau akun palsu. Kenali dan laporkan.",
@@ -3683,7 +4236,8 @@ const MATERI_TEXT = {
 };
 const TARGET_TEXT = {
   pubertas:"Memahami perubahan fisik & emosi pubertas secara akurat dan tidak menghakimi diri sendiri.",
-  menstruasi:"Mampu mengelola perubahan tubuh (menstruasi/mimpi basah) dengan tenang dan penuh perawatan diri.",
+  menstruasi:"Mampu mengelola perubahan tubuh (menstruasi) dengan tenang dan penuh perawatan diri.",
+  mimpibasah:"Mampu mengelola perubahan tubuh (mimpi basah) dengan tenang dan penuh perawatan diri.",
   consent:"Mampu mengenali dan menghormati batasan diri sendiri maupun orang lain.",
   relasi:"Mampu mengenali ciri relasi sehat vs relasi yang mengontrol/memaksa.",
   medsos:"Mampu mengenali dan melaporkan potensi KBGO di ruang digital.",
@@ -3701,16 +4255,8 @@ function showTarget(){
 
 /* ---------- MINI-GAME DATA ---------- */
 const QUIZBANK = {
-  pubertas:[
-    {q:"Tumbuhnya jerawat saat pubertas adalah...", opts:["Tanda tubuh sedang sakit","Hal wajar akibat perubahan hormon","Hukuman karena jarang cuci muka"], correct:1},
-    {q:"Suara yang berubah (\"pecah\") pada remaja laki-laki adalah...", opts:["Gejala penyakit","Bagian normal dari pubertas","Tanda kurang gizi"], correct:1},
-    {q:"Setiap remaja mengalami pubertas di waktu yang...", opts:["Sama persis semua orang","Berbeda-beda, dan itu normal","Bisa dipercepat dengan obat"], correct:1},
-  ],
-  menstruasi:[
-    {q:"Siklus menstruasi normalnya berlangsung sekitar...", opts:["21–35 hari, bervariasi tiap orang","Selalu tepat 28 hari untuk semua orang","1 hari saja"], correct:0},
-    {q:"Saat nyeri haid mengganggu, sebaiknya kamu...", opts:["Menahan diri tanpa bercerita","Boleh istirahat & bercerita ke orang tua/guru terpercaya","Melewatkan sekolah tanpa alasan jelas"], correct:1},
-    {q:"Mimpi basah pada remaja laki-laki adalah tanda...", opts:["Tubuh mulai matang secara reproduksi","Ada yang salah dengan tubuh","Harus dirahasiakan seumur hidup"], correct:0},
-  ],
+  /* Ruang pubertas & menstruasi/mimpi basah sekarang pakai struktur 3-level
+     (LEVEL_CONTENT, lihat di bawah), bukan bank soal flat lagi. */
   consent:[
     {q:"Temanmu berkata: \"Boleh pinjam HP-mu buka galeri fotomu?\" Kamu merasa tidak nyaman. Kamu...", opts:["Berhak menolak dengan sopan","Harus mengizinkan agar tidak dibilang pelit","Diam saja walau tidak nyaman"], correct:0},
     {q:"Consent (persetujuan) yang sehat itu diberikan...", opts:["Karena terpaksa/takut","Dengan sadar & tanpa paksaan","Hanya sekali untuk selamanya, tidak bisa berubah"], correct:1},
@@ -3739,6 +4285,7 @@ function startMechanic(roomId){
   if(roomId === "konseling"){ renderKonseling(); return; }
   if(roomId === "perpustakaan"){ renderPerpustakaan(); return; }
   if(roomId === "refleksi"){ renderRefleksi(); return; }
+  if(roomId === "menstruasi" || roomId === "mimpibasah" || roomId === "pubertas"){ startLevelRoom(roomId); return; }
   quizIdx = 0; quizScore = 0;
   renderQuiz(roomId);
 }
@@ -3769,6 +4316,444 @@ function answerQuiz(roomId, chosen, correct){
     hanaLine(chosen===correct ? "bangga" : "semangat", chosen===correct ? "Pilihan yang lebih sehat! Kamu memahaminya dengan baik." : "Tidak apa — yuk lihat pilihan yang lebih sehat, dan ingat ini untuk ke depannya.") +
     `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="quizIdx++;renderQuiz('${roomId}')">Lanjut →</button>`;
 }
+/* ---------- RUANG MENSTRUASI & RUANG MIMPI BASAH: STRUKTUR 3-LEVEL ----------
+   Sumber: Kenaliku_Materi_Detail_per_Ruangan (Ruang 3 & 4). Sekarang DUA
+   pintu terpisah ("menstruasi" & "mimpibasah"), fixed isinya (bukan lagi
+   ikut STATE.gender) — dipilih lewat getLevelKey() berdasarkan roomId itu
+   sendiri. Struktur tiap level bisa campuran: kartu mitos/fakta, mini-game
+   (packing tas, kalkulator siklus, urutkan langkah), lalu ditutup kuis
+   skenario/pertanyaan biasa. Semua fase jalan berurutan dalam satu sesi
+   (levelExtraDone direset tiap ganti level), lalu completeRoom() dipanggil
+   setelah Level 3 kelar — badge/hikmah/progress masing-masing pakai key
+   roomId-nya sendiri ("menstruasi" / "mimpibasah"). */
+/* ---------- RUANG PUBERTAS: STRUKTUR 3-LEVEL ----------
+   Sumber: Kenaliku_Materi_Detail_per_Ruangan (Ruang 2). Dipakai lewat engine
+   LEVEL_CONTENT yang sama kayak Menstruasi/Mimpi Basah — cuma nambah 1 fase
+   baru: `kategori` (Puzzle Perubahan Tubuh, sortir label ke kategori yang
+   benar). "Timeline Pubertas" pakai ulang mekanik `stepOrder` yang udah ada
+   (urutkan kartu satu-satu). Boss "Menenangkan Teman Panik" dimodelkan
+   sebagai item terakhir di `quiz` Level 3 (framing dialog NPC panik). */
+const LEVEL_CONTENT_PUBERTAS = {
+  1:{
+    title:"Level 1 — Tubuhku Berubah",
+    mitos:[
+      {q:"Pubertas adalah masa transisi dari anak-anak menuju dewasa yang dipicu perubahan hormon.", answer:true, explain:"Fakta — semua orang mengalaminya, dipicu perubahan hormon dalam tubuh."},
+      {q:"Semua anak mengalami pubertas di usia yang sama persis.", answer:false, explain:"Mitos — kecepatan pubertas beda-beda tiap orang, dan itu normal."},
+      {q:"Kalau pubertasmu lebih lambat atau lebih cepat dari teman-teman, berarti ada yang 'salah' dengan tubuhmu.", answer:false, explain:"Mitos — nggak ada yang 'terlambat' atau 'aneh', tiap tubuh punya waktunya sendiri."},
+      {q:"Tinggi badan bertambah cepat, keringat & bau badan berubah, dan muncul jerawat itu perubahan umum yang dialami semua remaja, nggak spesifik gender.", answer:true, explain:"Fakta — baru yang spesifik (suara/kumis pada laki-laki, payudara/pinggul pada perempuan) yang beda per gender."},
+    ],
+    kategori:{
+      prompt:"Masukkan tiap perubahan ke kategori yang benar:",
+      categories:["Dialami Semua (Umum)","Spesifik Laki-laki","Spesifik Perempuan"],
+      items:[
+        {label:"Tinggi badan bertambah cepat", category:"Dialami Semua (Umum)"},
+        {label:"Muncul jerawat", category:"Dialami Semua (Umum)"},
+        {label:"Keringat & bau badan berubah", category:"Dialami Semua (Umum)"},
+        {label:"Tumbuh rambut di ketiak", category:"Dialami Semua (Umum)"},
+        {label:"Suara memberat", category:"Spesifik Laki-laki"},
+        {label:"Tumbuh kumis/jambang halus", category:"Spesifik Laki-laki"},
+        {label:"Payudara mulai berkembang", category:"Spesifik Perempuan"},
+        {label:"Pinggul melebar", category:"Spesifik Perempuan"},
+      ],
+    },
+    stepOrder:{
+      prompt:"Timeline Pubertas — urutkan yang biasanya duluan muncul (perkiraan umum, bukan patokan mutlak buat semua orang):",
+      steps:["Tinggi badan mulai bertambah cepat","Tumbuh rambut di ketiak & area kelamin","Suara/payudara mulai berubah & berkembang","Emosi & pencarian jati diri makin terasa"],
+    },
+  },
+  2:{
+    title:"Level 2 — Emosi & Kebiasaan Baru",
+    mitos:[
+      {q:"Suasana hati yang naik-turun (mood swing) saat pubertas itu tanda kamu 'baperan' atau salah.", answer:false, explain:"Mitos — itu wajar, dipengaruhi perubahan hormon, bukan tanda kamu salah."},
+      {q:"Tinggi badan langsung berhenti tumbuh begitu suara berubah.", answer:false, explain:"Mitos — pertumbuhan tinggi badan biasanya masih berlanjut setelahnya."},
+      {q:"Jerawat muncul semata-mata karena jarang cuci muka.", answer:false, explain:"Mitos sebagian — jerawat pubertas lebih banyak dipengaruhi perubahan hormon, bukan cuma soal cuci muka."},
+      {q:"Anak laki-laki nggak boleh menangis karena itu tanda lemah.", answer:false, explain:"Mitos — semua orang boleh punya & mengekspresikan perasaan, termasuk laki-laki."},
+    ],
+    kategori:{
+      prompt:"Masukkan tiap hal ke kategori yang benar:",
+      categories:["Fisik","Emosi","Kebiasaan Baru"],
+      items:[
+        {label:"Muncul jerawat", category:"Fisik"},
+        {label:"Suara/payudara berubah", category:"Fisik"},
+        {label:"Gampang baper, mood naik-turun", category:"Emosi"},
+        {label:"Pengen lebih diakui teman sebaya", category:"Emosi"},
+        {label:"Mulai suka sama lawan jenis", category:"Emosi"},
+        {label:"Insecure liat body 'ideal' di medsos", category:"Emosi"},
+        {label:"Mandi lebih teratur", category:"Kebiasaan Baru"},
+        {label:"Ganti pakaian dalam tiap hari", category:"Kebiasaan Baru"},
+        {label:"Rawat wajah tanpa memencet jerawat sembarangan", category:"Kebiasaan Baru"},
+        {label:"Mencukur rambut ketiak/area kelamin", category:"Kebiasaan Baru"},
+      ],
+    },
+    quiz:[
+      {q:"Kamu ngerasa mood naik-turun akhir-akhir ini padahal nggak ada masalah besar. Ini karena...", opts:["Kamu emang orangnya lebay","Perubahan hormon pubertas yang wajar","Kurang piknik doang"], correct:1},
+      {q:"Ngeliat tubuh 'ideal' di media sosial bikin kamu insecure. Sikap yang lebih sehat...", opts:["Terus-terusan membandingkan biar termotivasi","Sadar itu sering diedit/nggak realistis, fokus ke kesehatan tubuhmu sendiri","Berhenti makan biar mirip kayak gitu"], correct:1},
+    ],
+  },
+  3:{
+    title:"Level 3 — Menerima Diri",
+    kategori:{
+      prompt:"Mana yang perubahan pubertas wajar, mana yang cuma mitos keliru? Sortir kartu ini:",
+      categories:["Perubahan Pubertas Wajar","Mitos/Keliru"],
+      items:[
+        {label:"Jerawat & perubahan suara", category:"Perubahan Pubertas Wajar"},
+        {label:"Emosi naik-turun sesekali", category:"Perubahan Pubertas Wajar"},
+        {label:"Makin pengen mandiri & diakui teman", category:"Perubahan Pubertas Wajar"},
+        {label:"Tinggi & berat badan berubah", category:"Perubahan Pubertas Wajar"},
+        {label:"Tinggi berhenti tumbuh begitu suara berubah", category:"Mitos/Keliru"},
+        {label:"Harus selalu kuat, nggak boleh nangis", category:"Mitos/Keliru"},
+        {label:"Pubertas telat = ada yang salah sama tubuh", category:"Mitos/Keliru"},
+        {label:"Jerawat parah = pasti nggak jaga kebersihan", category:"Mitos/Keliru"},
+      ],
+    },
+    quiz:[
+      {q:"Boss: Bima tiba-tiba disindir teman-teman karena suaranya 'pecah' pas presentasi di depan kelas, dan dia keliatan malu banget. Respons paling menenangkan dari kamu...", opts:["Ikut ketawa biar nggak dibilang aneh sendiri","Bilang ke Bima itu wajar kok, semua orang pasti ngalamin, terus bantu alihkan perhatian teman-teman","Diam aja, bukan urusanmu"], correct:1},
+      {q:"Kamu diejek soal berat badan sampai sedih. Cara self-compassion yang bisa kamu lakukan...", opts:["Balas ejek balik biar impas","Bilang ke diri sendiri 'ini bukan salahku, dan aku berharga', lalu lakuin hal yang kamu suka","Nahan sendirian terus-terusan"], correct:1},
+      {q:"Rasa nggak nyaman soal tubuhmu udah bikin susah tidur & susah fokus belajar berhari-hari. Sebaiknya kamu...", opts:["Terus dipendam sendiri","Cerita ke Ruang Konseling atau orang dewasa terpercaya","Tunggu sampai hilang sendiri tanpa cerita ke siapa pun"], correct:1},
+    ],
+  },
+};
+const LEVEL_CONTENT = {
+  pubertas: LEVEL_CONTENT_PUBERTAS,
+  menstruasi_cewek:{
+    1:{
+      title:"Level 1 — Apa Itu Menstruasi",
+      mitos:[
+        {q:"Menstruasi pertama (menarche) datangnya di usia yang sama persis buat semua orang.", answer:false, explain:"Mitos — menarche bisa datang di usia berbeda-beda tiap anak, nggak ada usia 'benar' atau 'salah'."},
+        {q:"Darah yang keluar saat haid itu 'darah kotor' yang berbahaya buat tubuh.", answer:false, explain:"Mitos — itu hasil peluruhan dinding rahim, sama bersihnya dengan darah dari luka biasa."},
+        {q:"Pembalut sebaiknya diganti kurang lebih tiap 4 jam, atau saat sudah penuh.", answer:true, explain:"Fakta — ganti rutin penting buat kebersihan & kenyamanan."},
+        {q:"Kalau bingung soal menstruasi, boleh tanya ke orang tua, guru, atau tenaga kesehatan yang dipercaya.", answer:true, explain:"Fakta — dan kalau cari info di internet juga, pilih sumber yang terpercaya ya."},
+      ],
+      stepOrder:{
+        prompt:"Mini-Game: Mengganti Pembalut — urutkan langkah yang benar:",
+        steps:["Lepas kemasan pembalut baru","Tempel pembalut baru di celana dalam","Bungkus pembalut bekas rapi lalu buang ke tempat sampah","Cuci tangan sampai bersih"],
+      },
+    },
+    2:{
+      title:"Level 2 — Mengelola Menstruasi",
+      mitos:[
+        {q:"Saat haid, nggak boleh keramas.", answer:false, explain:"Mitos — tetap boleh keramas seperti biasa, malah dianjurkan lebih sering."},
+        {q:"Saat haid, nggak boleh potong kuku.", answer:false, explain:"Mitos, nggak ada hubungannya sama sekali."},
+        {q:"Makan daging atau ikan saat haid bikin darahnya makin bau.", answer:false, explain:"Mitos — daging & ikan malah bantu cegah anemia karena kandungan zat besinya."},
+        {q:"Olahraga ringan seperti jalan kaki atau stretching bisa bantu meredakan nyeri haid.", answer:true, explain:"Fakta — istirahat cukup, kompres hangat, dan minum air putih juga membantu."},
+      ],
+      packingTas:{
+        prompt:"Pilih barang yang perlu masuk 'tas siaga' menstruasi (boleh pilih lebih dari satu):",
+        items:[
+          {label:"Pembalut cadangan", correct:true},
+          {label:"Tisu", correct:true},
+          {label:"Celana dalam ganti", correct:true},
+          {label:"Kaos kaki tebal", correct:false},
+          {label:"Buku pelajaran ekstra", correct:false},
+        ],
+      },
+      kalkulator:{
+        prompt:"Haid terakhir mulai tanggal 3, haid sebelumnya mulai tanggal 5 bulan lalu. Kira-kira berapa panjang siklusnya?",
+        opts:["Sekitar 29 hari","Sekitar 15 hari","Selalu tepat 28 hari"],
+        correct:0,
+        explain:"Dari tanggal 5 ke tanggal 3 bulan berikutnya itu sekitar 29 hari — siklus tiap orang bisa beda-beda, wajar di rentang 21–35 hari.",
+      },
+      infoNetral:true, // trigger narasi fiqh netral (INFO_NETRAL) di akhir level ini
+    },
+    3:{
+      title:"Level 3 — Kapan Harus Waspada",
+      mitos:[
+        {q:"Menstruasi menandakan tubuh perempuan mulai mampu bereproduksi secara biologis — ini dikaitkan dengan pentingnya belajar tanggung jawab & menjaga diri, bukan berarti harus buru-buru menikah atau semacamnya.", answer:true, explain:"Fakta — kematangan biologis itu satu hal, kesiapan menikah/berumah tangga itu hal yang jauh berbeda dan butuh banyak pertimbangan lain saat sudah dewasa nanti."},
+      ],
+      quiz:[
+        {q:"Kamu ganti pembalut tiap kurang dari 1 jam karena darahnya banyak banget dan bikin pusing. Sebaiknya kamu...", opts:["Diamkan saja, itu hal biasa","Cerita ke orang tua/tenaga kesehatan buat diperiksa","Menahan sendiri sampai reda"], correct:1},
+        {q:"Siklus haidmu berubah-ubah drastis terus-menerus selama berbulan-bulan (bukan cuma sekali-dua kali di awal), sampai susah diprediksi sama sekali. Sebaiknya kamu...", opts:["Anggap wajar terus tanpa cerita ke siapa-siapa","Cerita ke orang tua/tenaga medis buat diperiksa","Diamkan saja, nanti juga teratur sendiri"], correct:1},
+        {q:"Kamu sudah berusia lebih dari 15 tahun tapi belum pernah menstruasi sama sekali. Sebaiknya kamu...", opts:["Nggak masalah, tunggu aja tanpa cerita ke siapa-siapa","Cerita ke orang tua supaya bisa diperiksakan ke tenaga medis","Anggap itu hal memalukan yang harus disembunyikan"], correct:1},
+        {q:"Kalau butuh izin ke UKS saat haid di depan teman laki-laki, kamu...", opts:["Berhak izin tanpa harus jelasin detail","Harus jelasin detail biar dipercaya","Sebaiknya nahan saja sampai pulang sekolah"], correct:0},
+        {q:"Ada teman laki-laki yang mengejek soal menstruasi. Sikap yang baik dari teman laki-laki lain adalah...", opts:["Ikut-ikutan biar seru","Diam saja, bukan urusannya","Mengingatkan itu nggak pantas, dan bantu lapor ke guru kalau perlu"], correct:2},
+      ],
+    },
+  },
+  menstruasi_cowo:{
+    1:{
+      title:"Level 1 — Apa Itu Mimpi Basah",
+      mitos:[
+        {q:"Mimpi basah artinya aku sudah 'nakal'.", answer:false, explain:"Mitos — itu murni proses biologis, terjadi tanpa disengaja saat tidur."},
+        {q:"Mimpi basah adalah tanda organ reproduksi mulai matang secara biologis.", answer:true, explain:"Fakta."},
+        {q:"Semua anak laki-laki pasti mengalami mimpi basah pertama di usia yang sama persis.", answer:false, explain:"Mitos — wajar terjadi di rentang usia yang berbeda-beda tiap anak."},
+        {q:"Mimpi basah itu sesuatu yang direncanakan, atau kesalahan yang mengalaminya.", answer:false, explain:"Mitos — ini terjadi tanpa disengaja saat tidur, bukan sesuatu yang direncanakan atau salah siapa pun."},
+      ],
+    },
+    2:{
+      title:"Level 2 — Kebersihan Diri",
+      mitos:[
+        {q:"Sperma \"harus\" dikeluarkan tiap hari lewat masturbasi biar nggak menumpuk.", answer:false, explain:"Mitos — tubuh punya mekanismenya sendiri, termasuk lewat mimpi basah."},
+        {q:"Setelah mimpi basah, sebelum salat lagi perlu mandi wajib.", answer:true, explain:"Fakta — mandi wajib jadi bagian rutinitas kebersihan & ibadah."},
+      ],
+      info:"Tata cara mandi wajib (mandi junub), ringkasnya:\n1. Niat ikhlas karena Allah.\n2. Basuh kedua tangan.\n3. Bersihkan alat kelamin pakai tangan kiri, lalu cuci tangan kiri pakai sabun.\n4. Berwudhu seperti wudhu mau salat.\n5. Siram air ke kepala sambil gosok pangkal rambut, lalu ratakan air ke seluruh badan (mulai sisi kanan, baru kiri) sampai 3 kali.\n6. Basuh kedua kaki masing-masing 3 kali, mulai dari kaki kanan.\n\nIni urusan pribadi — nggak perlu diceritain terbuka ke teman-teman kalau nggak nyaman. Kalau masih bingung soal caranya, boleh banget tanya ke ayah, wali laki-laki, atau guru laki-laki yang kamu percaya.",
+      stepOrder:{
+        prompt:"Urutkan langkah yang benar setelah bangun karena mimpi basah:",
+        steps:["Ganti pakaian dalam/tidur yang terkena","Mandi bersih (mandi wajib)","Lanjut aktivitas seperti biasa"],
+      },
+    },
+    3:{
+      title:"Level 3 — Sikap Dewasa",
+      mitos:[
+        {q:"Mimpi basah menandakan tubuh mulai mampu bereproduksi secara biologis — ini dikaitkan dengan pentingnya belajar tanggung jawab & menjaga diri, bukan berarti harus buru-buru menikah atau semacamnya.", answer:true, explain:"Fakta — kematangan biologis itu satu hal, kesiapan menikah/berumah tangga itu hal yang jauh berbeda dan butuh banyak pertimbangan lain saat sudah dewasa nanti."},
+      ],
+      quiz:[
+        {q:"Temanmu cerita dia baru pertama kali mimpi basah dan merasa malu. Sikap terbaik kamu...", opts:["Menjadikannya bahan ledekan ke teman lain","Dengerin & bilang itu wajar, nggak perlu malu","Diam aja, biar dia cari tahu sendiri"], correct:1},
+        {q:"Kamu nggak sengaja tahu temanmu baru mengalami mimpi basah. Sikap yang tepat...", opts:["Jadiin bahan gosip/candaan ke grup kelas","Simpan aja, itu bukan sesuatu yang perlu disebar ke orang lain","Ceritain ke sekelas biar dia belajar nggak malu-maluin"], correct:1},
+        {q:"Anak yang belum pernah mimpi basah dibanding yang sudah, artinya...", opts:["Yang belum lebih 'polos', yang sudah lebih 'nakal'","Cuma beda waktu kematangan tiap orang, bukan soal siapa lebih baik","Yang belum pasti belum baligh selamanya"], correct:1},
+      ],
+    },
+  },
+};
+
+let levelRoomId = null, levelIdx = 1, levelMitosIdx = 0, levelQuizIdx = 0, levelKategoriIdx = 0, levelExtraDone = {};
+let packingSelected = new Set(), stepOrderPicked = [];
+
+function getLevelKey(roomId){
+  if(roomId === "menstruasi") return "menstruasi_cewek";
+  if(roomId === "mimpibasah") return "menstruasi_cowo";
+  return roomId; // pubertas, dst — key sama dengan roomId langsung
+}
+function startLevelRoom(roomId){
+  levelRoomId = roomId;
+  levelIdx = 1;
+  quizScore = 0;
+  renderLevel();
+}
+function renderLevel(){
+  const level = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx];
+  document.getElementById("roomBody").innerHTML = `
+    <span class="badge-pill">${level.title}</span>
+    <div class="card">
+      ${hanaLine("semangat", "Yuk mulai bagian ini bareng-bareng.")}
+      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="beginLevelPhases()">Mulai</button>
+    </div>
+  `;
+}
+function beginLevelPhases(){
+  levelMitosIdx = 0;
+  levelQuizIdx = 0;
+  levelKategoriIdx = 0;
+  levelExtraDone = {};
+  runLevelPhase();
+}
+/* Urutan fase dalam 1 level: kartu mitos/fakta -> kartu info umum (kalau ada)
+   -> puzzle kategori (kalau ada) -> mini-game (packing tas / kalkulator
+   siklus / urutkan langkah, kalau ada) -> kuis skenario (kalau ada) -> info
+   netral (kalau ada, khusus level yg nyantumin fiqh) -> selesai. */
+function runLevelPhase(){
+  const level = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx];
+  if(level.mitos && levelMitosIdx < level.mitos.length){ renderMitosCard(level.mitos[levelMitosIdx]); return; }
+  if(level.info && !levelExtraDone.info){ renderInfoCard(level.info); return; }
+  if(level.kategori && levelKategoriIdx < level.kategori.items.length){ renderKategoriCard(level.kategori); return; }
+  if(level.packingTas && !levelExtraDone.packingTas){ renderPackingTas(level.packingTas); return; }
+  if(level.kalkulator && !levelExtraDone.kalkulator){ renderKalkulator(level.kalkulator); return; }
+  if(level.stepOrder && !levelExtraDone.stepOrder){ renderStepOrder(level.stepOrder); return; }
+  if(level.quiz && levelQuizIdx < level.quiz.length){ renderLevelQuiz(level.quiz[levelQuizIdx]); return; }
+  if(level.infoNetral && !STATE.infoNetral.menstruasi_cewek){ showInfoNetralPhase(); return; }
+  finishLevel();
+}
+function renderMitosCard(item){
+  document.getElementById("roomBody").innerHTML = `
+    <span class="badge-pill">Mitos atau Fakta?</span>
+    <div class="card">
+      <div class="quiz-q">${item.q}</div>
+      <div class="row" style="margin-top:10px;">
+        <button class="quiz-opt btn-block" onclick="answerMitos(false)">Mitos</button>
+        <button class="quiz-opt btn-block" onclick="answerMitos(true)">Fakta</button>
+      </div>
+      <div id="quizFeedback"></div>
+    </div>
+  `;
+}
+function answerMitos(chosen){
+  const level = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx];
+  const item = level.mitos[levelMitosIdx];
+  const correct = chosen === item.answer;
+  playClickSfx(correct ? "correct" : "wrong");
+  if(correct) quizScore++;
+  document.getElementById("quizFeedback").innerHTML =
+    hanaLine(correct ? "bangga" : "semangat", item.explain) +
+    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelMitosIdx++;runLevelPhase();">Lanjut →</button>`;
+}
+/* Kartu info umum, non-kuis — dipakai buat materi yang perlu dijelaskan
+   utuh (misal tata cara mandi wajib), bukan format tanya-jawab. */
+function renderInfoCard(text){
+  document.getElementById("roomBody").innerHTML = `
+    <div class="card">
+      ${hanaLine("idle", text.replace(/\n/g,"<br>"))}
+      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelExtraDone.info=true;runLevelPhase();">Lanjut →</button>
+    </div>
+  `;
+}
+function renderKategoriCard(data){
+  const item = data.items[levelKategoriIdx];
+  document.getElementById("roomBody").innerHTML = `
+    <span class="badge-pill">Puzzle Perubahan Tubuh (${levelKategoriIdx+1}/${data.items.length})</span>
+    <div class="card">
+      <p>${data.prompt}</p>
+      <div class="quiz-q">${item.label}</div>
+      <div class="col" id="kategoriOpts">${data.categories.map((c,i)=>`<button class="quiz-opt btn-block" data-cat="${i}" onclick="answerKategori(${i})">${c}</button>`).join("")}</div>
+      <div id="quizFeedback"></div>
+    </div>
+  `;
+}
+function answerKategori(chosenIdx){
+  const level = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx];
+  const data = level.kategori;
+  const item = data.items[levelKategoriIdx];
+  const chosen = data.categories[chosenIdx];
+  const correct = chosen === item.category;
+  document.querySelectorAll("#kategoriOpts .quiz-opt").forEach(el=>{
+    el.onclick = null;
+    if(data.categories[+el.dataset.cat] === item.category) el.classList.add("correct");
+    else if(+el.dataset.cat === chosenIdx) el.classList.add("wrong");
+  });
+  playClickSfx(correct ? "correct" : "wrong");
+  if(correct) quizScore++;
+  document.getElementById("quizFeedback").innerHTML =
+    hanaLine(correct ? "bangga" : "semangat", correct ? "Tepat! Masuk kategori \u201C"+item.category+"\u201D." : "Yang lebih pas: \u201C"+item.category+"\u201D.") +
+    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelKategoriIdx++;runLevelPhase();">Lanjut →</button>`;
+}
+function renderPackingTas(data){
+  packingSelected = new Set();
+  document.getElementById("roomBody").innerHTML = `
+    <span class="badge-pill">Mini-Game: Packing Tas Siaga</span>
+    <div class="card">
+      <p>${data.prompt}</p>
+      <div class="col" id="packingList">${data.items.map((it,i)=>`<button class="quiz-opt btn-block" id="pack-${i}" onclick="togglePackItem(${i})">${it.label}</button>`).join("")}</div>
+      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="submitPacking()">Selesai Packing</button>
+      <div id="packingFeedback"></div>
+    </div>
+  `;
+}
+function togglePackItem(i){
+  const el = document.getElementById("pack-"+i);
+  if(packingSelected.has(i)){ packingSelected.delete(i); el.classList.remove("selected"); }
+  else { packingSelected.add(i); el.classList.add("selected"); }
+  playClickSfx("tap");
+}
+function submitPacking(){
+  const data = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx].packingTas;
+  const correct = data.items.every((it,i) => packingSelected.has(i) === it.correct);
+  playClickSfx(correct ? "correct" : "wrong");
+  if(correct) quizScore++;
+  document.getElementById("packingFeedback").innerHTML =
+    hanaLine(correct ? "bangga" : "semangat", correct ? "Pas! Itu barang-barang paling penting buat tas siaga." : "Hampir! Fokusnya ke barang kebersihan yang bakal kepakai kalau haid datang tiba-tiba — coba cek lagi ya.") +
+    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelExtraDone.packingTas=true;runLevelPhase();">Lanjut →</button>`;
+}
+function renderKalkulator(data){
+  document.getElementById("roomBody").innerHTML = `
+    <span class="badge-pill">Mini-Game: Hitung Siklus</span>
+    <div class="card">
+      <p>${data.prompt}</p>
+      <div class="col" id="kalkOpts">${data.opts.map((o,i)=>`<button class="quiz-opt btn-block" onclick="answerKalkulator(${i})">${o}</button>`).join("")}</div>
+      <div id="kalkFeedback"></div>
+    </div>
+  `;
+}
+function answerKalkulator(chosen){
+  const data = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx].kalkulator;
+  const correct = chosen === data.correct;
+  playClickSfx(correct ? "correct" : "wrong");
+  if(correct) quizScore++;
+  document.getElementById("kalkFeedback").innerHTML =
+    hanaLine(correct ? "bangga" : "semangat", data.explain) +
+    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelExtraDone.kalkulator=true;runLevelPhase();">Lanjut →</button>`;
+}
+function renderStepOrder(data){
+  stepOrderPicked = [];
+  document.getElementById("roomBody").innerHTML = `
+    <span class="badge-pill">Mini-Game: Urutkan Langkah</span>
+    <div class="card">
+      <p>${data.prompt}</p>
+      <div class="col" id="stepList">${data.steps.map((s,i)=>`<button class="quiz-opt btn-block" id="step-${i}" onclick="pickStep(${i})">${s}</button>`).join("")}</div>
+      <p id="stepOrderResult" style="font-size:12px;color:var(--grey);"></p>
+      <div id="stepFeedback"></div>
+    </div>
+  `;
+}
+function pickStep(i){
+  if(stepOrderPicked.includes(i)) return;
+  stepOrderPicked.push(i);
+  const btn = document.getElementById("step-"+i);
+  btn.disabled = true; btn.classList.add("selected");
+  playClickSfx("tap");
+  const data = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx].stepOrder;
+  document.getElementById("stepOrderResult").textContent = "Urutanmu: " + stepOrderPicked.map(idx=>idx+1).join(" → ");
+  if(stepOrderPicked.length === data.steps.length) submitStepOrder();
+}
+function submitStepOrder(){
+  const data = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx].stepOrder;
+  const correct = stepOrderPicked.every((v,i) => v === i);
+  playClickSfx(correct ? "correct" : "wrong");
+  if(correct) quizScore++;
+  document.getElementById("stepFeedback").innerHTML =
+    hanaLine(correct ? "bangga" : "semangat", correct ? "Urutan yang tepat!" : "Urutan yang lebih pas: " + data.steps.join(" → ") + ".") +
+    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelExtraDone.stepOrder=true;runLevelPhase();">Lanjut →</button>`;
+}
+function renderLevelQuiz(item){
+  document.getElementById("roomBody").innerHTML = `
+    <span class="badge-pill">Pertanyaan</span>
+    <div class="card">
+      <div class="quiz-q">${item.q}</div>
+      <div id="quizOpts">${item.opts.map((o,i)=>`<button class="quiz-opt btn-block" onclick="answerLevelQuiz(${i},${item.correct})">${o}</button>`).join("")}</div>
+      <div id="quizFeedback"></div>
+    </div>
+  `;
+}
+function answerLevelQuiz(chosen, correct){
+  document.querySelectorAll("#quizOpts .quiz-opt").forEach((el,i)=>{
+    el.onclick = null;
+    if(i===correct) el.classList.add("correct");
+    else if(i===chosen) el.classList.add("wrong");
+  });
+  playClickSfx(chosen===correct ? "correct" : "wrong");
+  if(chosen===correct) quizScore++;
+  document.getElementById("quizFeedback").innerHTML =
+    hanaLine(chosen===correct ? "bangga" : "semangat", chosen===correct ? "Pilihan yang lebih sehat! Kamu memahaminya dengan baik." : "Tidak apa — yuk lihat pilihan yang lebih sehat, dan ingat ini untuk ke depannya.") +
+    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelQuizIdx++;runLevelPhase();">Lanjut →</button>`;
+}
+function showInfoNetralPhase(){
+  const info = INFO_NETRAL.menstruasi_cewek;
+  STATE.infoNetral.menstruasi_cewek = true;
+  saveState();
+  document.getElementById("roomBody").innerHTML = `
+    <div class="card">
+      ${hanaLine("idle", info)}
+      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="runLevelPhase();">Lanjut →</button>
+    </div>
+  `;
+}
+function finishLevel(){
+  if(levelIdx < 3){
+    document.getElementById("roomBody").innerHTML = `
+      <div class="card center">
+        <div style="font-size:30px;">✅</div>
+        <h3>Level ${levelIdx} Selesai!</h3>
+        <button class="btn-primary btn-block" onclick="levelIdx++;renderLevel();">Lanjut ke Level ${levelIdx+1} →</button>
+      </div>
+    `;
+  } else {
+    completeRoom(levelRoomId);
+  }
+}
+
+/* Render 1 quote (islam atau umum) jadi HTML — otomatis nambahin baris
+   terjemahan Indonesia di bawah quote asli kalau field `translation` diisi
+   (dipakai buat quote tokoh umum yang bahasa Inggris). */
+function hikmahQuoteHTML(q){
+  return `
+    <p class="hikmah-quote">\u201C${q.text}\u201D</p>
+    ${q.translation ? `<p class="hikmah-translation" style="font-size:12px;font-style:italic;opacity:.8;margin:-6px 0 6px;">${q.translation}</p>` : ""}
+    <p class="hikmah-source">— ${q.source}</p>
+  `;
+}
+function showHikmahModal(quotes){
+  document.getElementById("hikmahModalText").style.display = "none";
+  document.getElementById("hikmahModalSource").style.display = "none";
+  document.getElementById("hikmahModalExtra").innerHTML = quotes.map(hikmahQuoteHTML).join('<hr style="border:none;border-top:1px dashed #e2d9bd;margin:10px 0;">');
+  openModal("modalHikmah");
+}
 function completeRoom(roomId){
   const room = getRooms().find(r=>r.id===roomId);
   STATE.roomsDone[roomId] = true;
@@ -3778,20 +4763,20 @@ function completeRoom(roomId){
   saveState();
   logToSheet("selesai_ruangan", {ruangan: roomId, skor: quizScore});
   const hikmah = HIKMAH[roomId];
-  if(hikmah && !STATE.hikmah[roomId]){
+  if(hikmah && hikmah.length && !STATE.hikmah[roomId]){
     STATE.hikmah[roomId] = true; saveState();
-    document.getElementById("hikmahModalText").textContent = "\u201C"+hikmah.text+"\u201D";
-    document.getElementById("hikmahModalSource").textContent = "— "+hikmah.source;
-    openModal("modalHikmah");
+    showHikmahModal(hikmah);
     playClickSfx("success");
   }
+  let infoNetralBlock = "";
   document.getElementById("roomBody").innerHTML = `
     <div class="card center">
       <div style="font-size:34px;">${room.badge || "💬"}</div>
       <h3>Ruangan Selesai!</h3>
       <p>${room.badge ? "Kamu mendapat Badge "+room.badgeLabel+"." : "Terima kasih sudah berbagi cerita."}</p>
-      <button class="btn-primary btn-block" onclick="goTo('screen-lobby');renderLobby();">Kembali ke Lobby</button>
     </div>
+    ${infoNetralBlock}
+    <button class="btn-primary btn-block" onclick="goTo('screen-lobby');renderLobby();">Kembali ke Lobby</button>
   `;
 }
 
@@ -3828,11 +4813,9 @@ function konselingPick(mood){
       <button class="btn-primary btn-block" style="margin-top:10px;" onclick="goTo('screen-lobby');renderLobby();">Kembali ke Lobby</button>
     </div>
   `;
-  if(hikmah && !STATE.hikmah.konseling){
+  if(hikmah && hikmah.length && !STATE.hikmah.konseling){
     STATE.hikmah.konseling = true; saveState();
-    document.getElementById("hikmahModalText").textContent = "\u201C"+hikmah.text+"\u201D";
-    document.getElementById("hikmahModalSource").textContent = "— "+hikmah.source;
-    openModal("modalHikmah");
+    showHikmahModal(hikmah);
   }
 }
 function showBantuanNyata(){
@@ -3856,7 +4839,7 @@ function renderPerpustakaan(){
 
 /* ---------- REFLEKSI (before-after + jurnal) ---------- */
 function renderRefleksi(){
-  const requiredRooms = ["pubertas","menstruasi","consent","relasi","medsos","gizi","konseling"];
+  const requiredRooms = ["pubertas","menstruasi","mimpibasah","consent","relasi","medsos","gizi","konseling"];
   const doneCount = requiredRooms.filter(r=>STATE.roomsDone[r]).length;
   const body = document.getElementById("roomBody");
   if(doneCount < requiredRooms.length){
@@ -3935,13 +4918,12 @@ function renderTrophy(){
   }).join("");
 }
 function renderHikmah(){
-  const keys = Object.keys(HIKMAH);
+  const keys = Object.keys(HIKMAH).filter(k=>HIKMAH[k] && HIKMAH[k].length);
   document.getElementById("hikmahContent").innerHTML = keys.map(k=>{
     const got = STATE.hikmah[k];
-    const h = HIKMAH[k];
+    const quotes = HIKMAH[k];
     return `<div class="card ${got?'':'locked'}" style="${got?'':'opacity:.4;'}">
-      <p class="hikmah-quote">${got ? '\u201C'+h.text+'\u201D' : '🔒 Belum ditemukan'}</p>
-      ${got ? `<p class="hikmah-source">— ${h.source}</p>` : ""}
+      ${got ? quotes.map(hikmahQuoteHTML).join('<hr style="border:none;border-top:1px dashed #e2d9bd;margin:8px 0;">') : '<p class="hikmah-quote">🔒 Belum ditemukan</p>'}
     </div>`;
   }).join("");
 }
