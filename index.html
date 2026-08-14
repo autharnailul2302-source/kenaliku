@@ -1653,7 +1653,7 @@ if("serviceWorker" in navigator){
       <h3 class="center">Butuh Bantuan?</h3>
       <p style="font-size:12.5px;text-align:center;color:var(--grey);margin-bottom:10px;">Kalau kamu atau temanmu ngalamin situasi yang berat, ini beberapa pihak yang bisa dihubungi.</p>
       <div class="contact-card"><b>Guru BK / Wali Kelas</b><br>Konseling langsung di sekolah — rahasia &amp; tanpa dihakimi.</div>
-      <div class="contact-card"><b>LBH 'Aisyiyah</b><br>Layanan bantuan hukum &amp; pendampingan resmi 'Aisyiyah.</div>
+      <div class="contact-card"><b>Posbantuan Hukum 'Aisyiyah</b><br>Layanan bantuan hukum &amp; pendampingan resmi 'Aisyiyah.<br>• Jawa Timur — Jl. Darmokali 1F, Surabaya (WA: 0812-8238-0455)<br>• Pusat (Jakarta) — Jl. Menteng Raya No. 62, Jakarta Pusat (Telp: 021-3918318)</div>
       <div class="contact-card"><b>SAPA 129</b><br>Layanan Sahabat Perempuan dan Anak — hotline nasional.</div>
       <div class="contact-card"><b>Jakarta Siaga 112</b><br>Khusus untuk wilayah Jakarta.</div>
       <p style="font-size:12px;color:var(--grey);">Kamu tidak sendiri. Menghubungi bantuan ini bukan tanda lemah.</p>
@@ -4255,28 +4255,10 @@ function showTarget(){
 
 /* ---------- MINI-GAME DATA ---------- */
 const QUIZBANK = {
-  /* Ruang pubertas & menstruasi/mimpi basah sekarang pakai struktur 3-level
-     (LEVEL_CONTENT, lihat di bawah), bukan bank soal flat lagi. */
-  consent:[
-    {q:"Temanmu berkata: \"Boleh pinjam HP-mu buka galeri fotomu?\" Kamu merasa tidak nyaman. Kamu...", opts:["Berhak menolak dengan sopan","Harus mengizinkan agar tidak dibilang pelit","Diam saja walau tidak nyaman"], correct:0},
-    {q:"Consent (persetujuan) yang sehat itu diberikan...", opts:["Karena terpaksa/takut","Dengan sadar & tanpa paksaan","Hanya sekali untuk selamanya, tidak bisa berubah"], correct:1},
-    {q:"Jika kamu sudah bilang \"tidak\" tapi diabaikan, itu artinya...", opts:["Kamu harus mengalah","Batasanmu tidak dihormati, dan itu tidak apa-apa untuk dibicarakan ke orang dewasa terpercaya","Kamu yang salah"], correct:1},
-  ],
-  relasi:[
-    {q:"Kamu mulai merasa suka pada teman sekelas. Hal yang sehat untuk dilakukan adalah...", opts:["Memaksa perasaanmu diterima","Menyampaikan perasaan dengan wajar dan menerima apapun jawabannya","Mengancam kalau tidak dibalas"], correct:1},
-    {q:"Ada teman yang mengajak pacaran dan kamu belum siap. Kamu boleh...", opts:["Berkata jujur kalau kamu belum siap","Berpura-pura setuju agar tidak canggung","Menjauhi teman itu selamanya tanpa bicara"], correct:0},
-    {q:"Ciri teman yang toxic (merugikan) adalah...", opts:["Menghargai waktumu","Sering mengontrol & memaksakan kehendak","Mendukung tanpa syarat"], correct:1},
-  ],
-  medsos:[
-    {q:"Akun yang meminta foto pribadimu dengan iming-iming hadiah biasanya...", opts:["Aman untuk dituruti","Patut dicurigai sebagai modus KBGO","Wajib diladeni agar tidak dianggap sombong"], correct:1},
-    {q:"Jika ada yang menyebarkan fotomu tanpa izin, langkah pertamamu adalah...", opts:["Diam dan menyimpan sendiri","Laporkan/blokir dan cerita ke orang dewasa terpercaya","Membalas dengan menyebarkan hal serupa"], correct:1},
-    {q:"Ciri akun media sosial palsu biasanya...", opts:["Aktivitas & follower jelas bertahun-tahun","Baru dibuat, minim aktivitas, memaksa buru-buru","Selalu terverifikasi resmi"], correct:1},
-  ],
-  gizi:[
-    {q:"Piring makan remaja sehat sebaiknya diisi...", opts:["Hanya nasi & gorengan","Kombinasi karbohidrat, protein, sayur & buah","Camilan manis sepanjang hari"], correct:1},
-    {q:"Sarapan pagi bagi remaja berguna untuk...", opts:["Membantu konsentrasi belajar","Tidak berpengaruh sama sekali","Hanya untuk anak kecil"], correct:0},
-    {q:"Minum air putih yang cukup setiap hari membantu...", opts:["Menjaga tubuh tetap terhidrasi & fokus","Membuat mudah lapar","Tidak ada manfaatnya"], correct:0},
-  ],
+  /* Semua ruangan (pubertas, consent, relasi, medsos, gizi, menstruasi,
+     mimpi basah) sekarang pakai struktur 3-level (LEVEL_CONTENT, lihat di
+     bawah). QUIZBANK dibiarkan kosong sebagai fallback renderQuiz() kalau
+     nanti ada ruangan baru yang belum di-upgrade ke sistem level. */
 };
 
 /* ---------- MINI-GAME ENGINE (quiz-based rooms) ---------- */
@@ -4285,7 +4267,7 @@ function startMechanic(roomId){
   if(roomId === "konseling"){ renderKonseling(); return; }
   if(roomId === "perpustakaan"){ renderPerpustakaan(); return; }
   if(roomId === "refleksi"){ renderRefleksi(); return; }
-  if(roomId === "menstruasi" || roomId === "mimpibasah" || roomId === "pubertas"){ startLevelRoom(roomId); return; }
+  if(roomId === "menstruasi" || roomId === "mimpibasah" || roomId === "pubertas" || roomId === "consent" || roomId === "relasi" || roomId === "medsos" || roomId === "gizi"){ startLevelRoom(roomId); return; }
   quizIdx = 0; quizScore = 0;
   renderQuiz(roomId);
 }
@@ -4415,6 +4397,200 @@ const LEVEL_CONTENT_PUBERTAS = {
 };
 const LEVEL_CONTENT = {
   pubertas: LEVEL_CONTENT_PUBERTAS,
+  consent:{
+    1:{
+      title:"Level 1 — Izin Itu Penting",
+      mitos:[
+        {q:"Pinjam alat tulis atau barang teman boleh langsung diambil aja tanpa bilang dulu, yang penting nanti dikembalikan.", answer:false, explain:"Mitos — sekecil apa pun barangnya, tetap perlu minta izin dulu ke pemiliknya."},
+        {q:"Masuk ke kamar orang lain, termasuk kamar kakak/adik sendiri, sebaiknya minta izin dulu meski itu keluarga.", answer:true, explain:"Fakta — ruang pribadi orang lain tetap perlu dihormati, walau sesama keluarga."},
+        {q:"Kamu berhak menolak dipeluk/dicium/disentuh siapa pun—termasuk kerabat—kalau merasa nggak nyaman, asal disampaikan dengan sopan.", answer:true, explain:"Fakta — badanmu milikmu, dan kamu tetap bisa jaga adab ke keluarga saat bilang nggak nyaman."},
+        {q:"Motret atau merekam orang lain boleh dilakukan tanpa izin, asal cuma buat kenang-kenangan pribadi.", answer:false, explain:"Mitos — tetap perlu izin dari orangnya, apa pun alasannya."},
+      ],
+      quiz:[
+        {q:"Sepupumu yang jarang ketemu mau meluk kamu erat-erat pas lebaran, tapi kamu merasa nggak nyaman. Respons yang tetap sopan...", opts:["Diam aja biar nggak dibilang nggak sopan ke keluarga","Bilang halus, 'Maaf ya, salaman aja boleh?' sambil tetap senyum","Langsung kabur tanpa bilang apa-apa"], correct:1},
+        {q:"Temanmu mau motret kamu buat diupload ke story tanpa nanya dulu. Sikap yang tepat...", opts:["Biarin aja, itu kan cuma foto biasa","Boleh minta dia tanya dulu sebelum motret/upload","Marah besar ke dia"], correct:1},
+      ],
+    },
+    2:{
+      title:"Level 2 — Berani Bilang Tidak",
+      mitos:[
+        {q:"Diam aja waktu diajak sesuatu yang bikin nggak nyaman itu tandanya kamu setuju.", answer:false, explain:"Mitos — diam bukan berarti setuju. Persetujuan harus jelas diucapkan."},
+        {q:"Kalau udah bilang 'iya' di awal, kamu harus tetap ikutin walau berubah pikiran.", answer:false, explain:"Mitos — consent bisa berubah kapan saja, dan itu harus dihormati orang lain."},
+        {q:"Menolak ikut challenge/prank yang bikin nggak nyaman itu wajar, walau awalnya kelihatan seru buat yang lain.", answer:true, explain:"Fakta — perasaan nggak nyamanmu valid, nggak perlu ikut demi 'seru-seruan' doang."},
+      ],
+      info:"Buat teman yang punya keterbatasan bicara/pendengaran, penolakan juga bisa disampaikan lewat gerakan, misalnya:\n- Gerakkan jari telunjuk ke kanan-kiri (tanda \u201Ctidak\u201D)\n- Dorong telapak tangan ke depan (gestur \u201Cberhenti\u201D)\n- Silangkan kedua tangan di depan dada membentuk huruf \u201CX\u201D\n- Gelengkan kepala kuat sambil menunjukkan ekspresi tegas\n\nPenting buat kita semua paham bahasa isyarat penolakan ini, biar semua teman — apa pun kondisinya — batasannya tetap didengar.",
+      quiz:[
+        {q:"Temanmu ngajak ikut challenge yang menurutmu berisiko & bikin nggak nyaman, sambil bilang 'ih gitu doang takut?'. Kamu...", opts:["Ikut aja biar nggak dibilang penakut","Bilang tegas tapi sopan, 'Maaf, aku nggak nyaman, aku nggak mau ikut'","Ikut tapi diam-diam kesel"], correct:1},
+        {q:"Kamu tadinya bilang 'iya' mau nemenin teman ke suatu tempat, tapi sekarang berubah pikiran karena capek. Kamu...", opts:["Tetap ikut walau capek karena udah kadung bilang iya","Boleh bilang kalau berubah pikiran, dan temanmu seharusnya menghormati itu","Menghilang tanpa kabar"], correct:1},
+        {q:"Temanmu maksa kamu cerita rahasia yang nggak mau kamu bagi. Sikap tepatmu...", opts:["Cerita aja biar nggak dibilang nggak percaya temenan","Boleh bilang, 'itu privasiku, aku belum mau cerita'","Marah dan memutus pertemanan"], correct:1},
+      ],
+    },
+    3:{
+      title:"Level 3 — Mengenali & Melapor",
+      mitos:[
+        {q:"Kalau ada yang terus maksa walau kamu udah menolak berkali-kali, itu tandanya kamu harus ikutan aja biar nggak ribet.", answer:false, explain:"Mitos — itu tandanya batasanmu udah dilanggar, dan itu saatnya minta bantuan orang dewasa terpercaya."},
+        {q:"Diancam atau dibuat merasa bersalah supaya nurut itu bagian wajar dari pertemanan.", answer:false, explain:"Mitos — itu tanda relasi yang nggak sehat, bukan sesuatu yang normal untuk diterima."},
+        {q:"Kalau lihat teman mengalami hal yang bikin dia nggak nyaman, bantu dia lapor ke orang dewasa itu penting, bukan 'ikut campur urusan orang'.", answer:true, explain:"Fakta — bantu teman melapor adalah bentuk dukungan yang berarti."},
+      ],
+      quiz:[
+        {q:"Ke mana kamu bisa lapor kalau mengalami situasi yang bikin nggak nyaman & udah dipaksa terus-menerus?", opts:["Cuma bisa dipendam sendiri","Orang tua, wali kelas, guru BK, atau teman yang dipercaya","Nggak usah cerita ke siapa-siapa biar nggak ribet"], correct:1},
+        {q:"Temanmu cerita dia diperlakukan nggak nyaman sama seseorang, dan dia keliatan takut. Sikap terbaikmu...", opts:["Dengerin tanpa nyalahin, kasih dukungan, ajak dia lapor ke orang dewasa","Bilang, 'harusnya kamu nolak dari awal'","Sebar ceritanya ke teman lain biar rame"], correct:0},
+        {q:"Kamu lihat sendiri ada teman yang dipaksa terus-menerus meski udah menolak. Sikap yang bisa kamu lakukan...", opts:["Diam aja, bukan urusanmu","Bantu dia dan/atau bantu laporkan ke orang dewasa","Nonton aja sambil rekam buat konten"], correct:1},
+      ],
+    },
+  },
+  relasi:{
+    /* CATATAN TIM: Level 2 (rasa suka & batasan bergaul) paling sensitif
+       secara budaya — dokumen review minta ini direview bareng guru BK &
+       perwakilan orang tua/wali sebelum dikunci final. */
+    1:{
+      title:"Level 1 — Pertemanan Sehat",
+      mitos:[
+        {q:"Pertemanan sehat itu saling mendukung, jujur, dan menghargai waktu & keputusan masing-masing.", answer:true, explain:"Fakta — itu ciri-ciri utama pertemanan yang sehat."},
+        {q:"Teman yang sering merendahkan kamu di depan orang lain itu tanda pertemanan yang toxic.", answer:true, explain:"Fakta — bersama teman yang sehat, kamu harusnya merasa dihargai, bukan direndahkan."},
+        {q:"Teman yang cuma deket pas lagi butuh sesuatu doang, abis itu ilang lagi, itu ciri pertemanan sehat.", answer:false, explain:"Mitos — itu justru ciri pertemanan yang kurang sehat."},
+        {q:"Punya circle pertemanan yang beragam (nggak cuma 1 geng doang) itu hal yang aneh.", answer:false, explain:"Mitos — circle beragam itu baik, nggak harus terikat 'geng eksklusif'."},
+      ],
+      quiz:[
+        {q:"Ada geng di kelas yang bilang, 'kita temenan khusus, jangan deket-deket sama yang lain ya'. Sikap sehatmu...", opts:["Ikutin aja biar diterima geng itu","Boleh tetap berteman luas, nggak harus terikat 1 geng doang","Langsung jauhi geng itu selamanya tanpa ngobrol"], correct:1},
+        {q:"Salah satu temanmu cuma chat pas lagi butuh contekan doang, abis itu ilang lagi. Ini termasuk...", opts:["Ciri pertemanan sehat","Ciri pertemanan yang kurang sehat","Hal yang harus kamu terima aja"], correct:1},
+      ],
+    },
+    2:{
+      title:"Level 2 — Rasa Suka yang Wajar",
+      mitos:[
+        {q:"Naksir/suka sama lawan jenis pas remaja itu hal yang wajar, nggak perlu malu berlebihan.", answer:true, explain:"Fakta — itu bagian normal dari perkembangan remaja."},
+        {q:"Berduaan di tempat sepi sama gebetan itu cara paling aman buat kenalan lebih dekat.", answer:false, explain:"Mitos — lebih baik hindari berduaan di tempat sepi (khalwat), jaga komunikasi yang wajar, dan fokus ke pertemanan & prestasi dulu."},
+        {q:"Kalau diajak 'pacaran' padahal belum siap, kamu wajib menerima biar nggak menyakiti perasaan orang itu.", answer:false, explain:"Mitos — kamu boleh menolak atau menunda tanpa merasa bersalah, dan boleh didiskusikan ke orang tua."},
+      ],
+      quiz:[
+        {q:"Gebetanmu chat jam 11 malam: 'Yuk video call, udah kangen nih, sekarang ya.' Respons sehat...", opts:["Langsung video call biar nggak dikira nggak niat","Boleh bilang, 'udah malam, ngobrol lewat chat aja dulu ya'","Ghosting tanpa balasan"], correct:1},
+        {q:"Teman yang baru kenal online ngajak ketemuan berduaan di tempat sepi. Respons sehat...", opts:["Langsung setuju biar nggak keliatan ribet","Ajak ketemu di tempat ramai/umum, atau bareng teman lain","Kasih alamat rumah biar dijemput"], correct:1},
+        {q:"Kamu diajak 'jadian' sama teman sekelas, tapi kamu belum siap. Respons sehat...", opts:["Terima aja biar nggak bikin dia sedih","Boleh bilang jujur kalau kamu belum siap, dan itu nggak apa-apa","Diemin chatnya tanpa jawaban"], correct:1},
+      ],
+    },
+    3:{
+      title:"Level 3 — Mengenali Red Flag",
+      mitos:[
+        {q:"Teman yang cek HP kamu terus & melarang kamu berteman dengan orang lain itu tanda sayang yang wajar.", answer:false, explain:"Mitos — itu tanda posesif berlebihan, salah satu red flag hubungan."},
+        {q:"Teman yang memaksa kamu ikut merokok, bolos, atau menyontek itu termasuk red flag pertemanan.", answer:true, explain:"Fakta — memaksa hal berisiko bukan ciri teman yang baik."},
+        {q:"Kalau mau keluar dari relasi yang toxic, kamu harus merasa bersalah dulu baru boleh menjauh.", answer:false, explain:"Mitos — kamu nggak perlu merasa bersalah untuk menjauh dari relasi yang toxic."},
+      ],
+      quiz:[
+        {q:"Ada teman yang sering merendahkan kamu di depan orang lain, sambil terus-terusan mengecek & mengatur siapa aja yang boleh kamu temenin. Ini artinya...", opts:["Itu wajar, namanya juga sayang","Itu tanda red flag, sehatnya dibicarakan ke orang dipercaya","Harus diterima biar hubungan nggak putus"], correct:1},
+        {q:"Temanmu memaksa kamu menyontek pas ujian, sambil mengancam nggak mau berteman lagi kalau kamu nolak.", opts:["Ikutin aja daripada diputusin pertemanan","Boleh menolak, itu red flag pertemanan yang manipulatif","Nyontekin biar aman"], correct:1},
+        {q:"Kamu mau keluar dari circle pertemanan yang toxic, tapi takut dibilang nggak setia kawan.", opts:["Nggak usah keluar, tahan aja","Boleh bicara ke orang dipercaya & menjauh tanpa perlu merasa bersalah","Diam-diam aja tanpa cerita ke siapa pun"], correct:1},
+      ],
+    },
+  },
+  medsos:{
+    /* CATATAN TIM: fokus 100% ke pengenalan tanda bahaya & langkah lapor —
+       JANGAN dijelasin cara kerja/teknik pelaku (cara bikin akun palsu, cara
+       manipulasi korban, dsb). Nomor kontak Posbantuan Hukum 'Aisyiyah udah
+       diisi (lihat modalBantuan & showBantuanNyata di Ruang Konseling);
+       SAPA 129 & Jakarta Siaga 112 masih perlu diverifikasi/dilengkapi
+       kontak daerah lain sesuai wilayah sekolah pengguna. */
+    1:{
+      title:"Level 1 — Aman di Dunia Maya",
+      mitos:[
+        {q:"Alamat rumah, nomor telepon, dan tanggal lahir lengkap aman-aman aja dibagikan ke publik di media sosial.", answer:false, explain:"Mitos — itu termasuk info pribadi yang nggak boleh dibagikan sembarangan."},
+        {q:"Share lokasi real-time (live location) ke publik itu hal yang wajar dilakukan semua orang.", answer:false, explain:"Mitos — itu berisiko, sebaiknya nggak dibagikan sembarangan ke publik."},
+        {q:"Foto kartu pelajar atau dokumen penting lain sebaiknya nggak diunggah ke media sosial.", answer:true, explain:"Fakta — dokumen penting rawan disalahgunakan kalau tersebar."},
+        {q:"Akun privat (nggak semua orang bisa lihat postingan kamu) membantu menjaga privasimu.", answer:true, explain:"Fakta — atur siapa yang bisa lihat postinganmu itu langkah aman yang sederhana."},
+      ],
+      quiz:[
+        {q:"Detektif Digital: Ada akun baru follow kamu, foto profilnya kelihatan sempurna banget kayak model, followernya dikit, dan langsung ngajak chat pribadi. Profil ini...", opts:["Aman","Curigai","Laporkan & Blokir"], correct:1},
+        {q:"Detektif Digital: Teman sekelasmu yang emang udah kamu kenal lama posting foto liburan biasa. Profil ini...", opts:["Aman","Curigai","Laporkan & Blokir"], correct:0},
+        {q:"Detektif Digital: Akun asing tiba-tiba minta alamat rumah & nomor HP kamu buat 'ngirim hadiah'. Ini...", opts:["Aman","Curigai","Laporkan & Blokir"], correct:2},
+      ],
+    },
+    2:{
+      title:"Level 2 — Mengenali Tanda Bahaya",
+      mitos:[
+        {q:"Orang asing yang cepat banget akrab & sering memuji berlebihan ke kamu itu wajar aja, tandanya dia baik.", answer:false, explain:"Mitos — itu salah satu pola grooming yang perlu diwaspadai, bukan tanda dia baik."},
+        {q:"Kalau ada yang minta kamu merahasiakan obrolan kalian dari orang tua, itu tanda bahaya, apa pun alasannya.", answer:true, explain:"Fakta — permintaan dirahasiakan dari orang tua/wali selalu jadi tanda bahaya."},
+        {q:"Ajakan ketemuan dari orang yang cuma dikenal online boleh langsung diiyain sendirian aja.", answer:false, explain:"Mitos — ketemuan dengan kenalan online harus sepengetahuan & didampingi orang tua/wali."},
+      ],
+      quiz:[
+        {q:"Detektif Digital: Kenalan online yang baru sebulan chat udah manggil kamu 'sayang', muji terus, dan minta foto kamu yang lebih pribadi. Profil ini...", opts:["Aman","Curigai","Laporkan & Blokir"], correct:2},
+        {q:"Detektif Digital: Seseorang bilang, 'jangan cerita ke orang tuamu soal obrolan kita ya, ini rahasia kita aja.' Ini...", opts:["Aman","Curigai","Laporkan & Blokir"], correct:2},
+        {q:"Kenalan online ngajak ketemuan langsung, kamu jawab, 'boleh, tapi aku ajak orang tua ya.' Sikap ini...", opts:["Kurang tepat, harusnya sendirian aja","Tepat, ketemuan sama kenalan online harus sepengetahuan & didampingi orang tua/wali","Nggak perlu, kan cuma ketemu sekali"], correct:1},
+      ],
+    },
+    3:{
+      title:"Level 3 — KBGO & Cara Melapor",
+      mitos:[
+        {q:"KBGO cuma soal foto/video, bukan termasuk ancaman atau pelecehan verbal online.", answer:false, explain:"Mitos — KBGO juga termasuk ancaman, sebar konten tanpa izin, dan pelecehan verbal online."},
+        {q:"Kalau ada yang menyebarkan foto/video pribadi kamu tanpa izin, itu termasuk KBGO.", answer:true, explain:"Fakta — penyebaran konten pribadi tanpa izin termasuk kategori KBGO."},
+        {q:"Nge-repost foto/video teman sendiri tanpa izin dia itu nggak apa-apa, asal buat lucu-lucuan.", answer:false, explain:"Mitos — tetap perlu izin, walau itu teman sendiri."},
+      ],
+      quiz:[
+        {q:"Kamu dapat pesan mengancam & bikin nggak nyaman dari akun asing. Langkah pertama yang tepat...", opts:["Balas dengan emosi biar puas","Screenshot bukti, blokir pelaku, lapor ke orang tua/guru","Diamkan aja tanpa cerita ke siapa-siapa"], correct:1},
+        {q:"Temanmu cerita fotonya disebar tanpa izin dan dia ketakutan. Sikap terbaikmu...", opts:["Dengerin tanpa menghakimi, bantu amankan bukti, bantu dia terhubung ke orang tua/guru","Bilang, 'salah sendiri kenapa fotonya bisa nyebar'","Ikut nyebarin biar rame, kan udah kejadian"], correct:0},
+        {q:"Kalau kamu atau teman butuh bantuan soal KBGO, kontak resmi yang bisa dihubungi antara lain...", opts:["Sebar sendiri ke media sosial biar viral","SAPA 129, guru BK, atau lembaga pendampingan resmi seperti KPAI/Komnas Perempuan","Diamkan aja sampai hilang sendiri"], correct:1},
+      ],
+    },
+  },
+  gizi:{
+    1:{
+      title:"Level 1 — Isi Piringku",
+      mitos:[
+        {q:"Piring makan sehat sebaiknya isinya setengah sayur & buah, seperempat karbohidrat, seperempat protein.", answer:true, explain:"Fakta — ini panduan 'Isi Piringku' dari Kemenkes."},
+        {q:"Lewatin sarapan nggak masalah buat konsentrasi belajar.", answer:false, explain:"Mitos — sarapan penting buat bantu fokus & konsentrasi belajar di sekolah."},
+        {q:"Minum air putih yang cukup tiap hari itu penting, dan sebaiknya batasi minuman yang kemanisan.", answer:true, explain:"Fakta — air putih cukup bantu tubuh tetap fit, minuman manis berlebih sebaiknya dibatasi."},
+      ],
+      kategori:{
+        prompt:"Susun Menu — masukkan tiap makanan ke kategori yang benar:",
+        categories:["Karbohidrat","Protein","Sayur & Buah","Batasi (Kurang Bergizi)"],
+        items:[
+          {label:"Nasi", category:"Karbohidrat"},
+          {label:"Roti", category:"Karbohidrat"},
+          {label:"Ayam", category:"Protein"},
+          {label:"Tempe/tahu", category:"Protein"},
+          {label:"Bayam", category:"Sayur & Buah"},
+          {label:"Pisang", category:"Sayur & Buah"},
+          {label:"Gorengan", category:"Batasi (Kurang Bergizi)"},
+          {label:"Minuman boba/manis berlebih", category:"Batasi (Kurang Bergizi)"},
+        ],
+      },
+    },
+    2:{
+      title:"Level 2 — Kebutuhan Gizi Remaja",
+      mitos:[
+        {q:"Remaja putri butuh asupan zat besi lebih buat ganti yang hilang saat menstruasi, misalnya dari bayam, hati ayam, daging merah, atau kacang-kacangan.", answer:true, explain:"Fakta — ini nyambung sama yang dibahas di Ruang Menstruasi."},
+        {q:"Tablet Tambah Darah (TTD) cukup diminum sekali aja pas lagi haid doang.", answer:false, explain:"Mitos — sebaiknya rutin 1 tablet tiap minggu sepanjang tahun buat mencegah anemia."},
+        {q:"Protein penting buat pertumbuhan tinggi badan & massa otot di masa pubertas.", answer:true, explain:"Fakta."},
+        {q:"Ngemil boleh aja, yang penting porsinya wajar, nggak perlu dilarang total.", answer:true, explain:"Fakta — bukan soal dilarang total, tapi soal porsi & pilihan yang seimbang."},
+      ],
+      info:"Soal Tablet Tambah Darah (TTD): buat remaja putri, minum 1 tablet TTD tiap minggu sepanjang tahun bantu mencegah anemia. Meski baunya khas & rasanya agak pahit, manfaatnya jauh lebih besar — bantu jaga energi, bantu konsentrasi belajar, dan mendukung kesehatan sekarang maupun nanti.\n\nBiar lebih nyaman, TTD bisa diminum setelah makan atau sebelum tidur, pakai air putih. Satu tablet tiap minggu itu investasi kecil buat tubuh yang sehat & kuat.",
+      kategori:{
+        prompt:"Ngemil sehat atau perlu dibatasi porsinya? Sortir kartu ini:",
+        categories:["Ngemil Sehat","Batasi Porsinya"],
+        items:[
+          {label:"Buah potong", category:"Ngemil Sehat"},
+          {label:"Kacang-kacangan", category:"Ngemil Sehat"},
+          {label:"Salad", category:"Ngemil Sehat"},
+          {label:"Cimol", category:"Batasi Porsinya"},
+          {label:"Seblak", category:"Batasi Porsinya"},
+          {label:"Gorengan", category:"Batasi Porsinya"},
+          {label:"Minuman manis berlebih", category:"Batasi Porsinya"},
+        ],
+      },
+    },
+    3:{
+      title:"Level 3 — Pola Makan Seimbang & Sehat Mental",
+      mitos:[
+        {q:"Diet ekstrem atau sengaja melewatkan makan demi kurus itu aman-aman aja buat remaja yang masih dalam masa pertumbuhan.", answer:false, explain:"Mitos — itu berisiko buat kesehatan di usia pertumbuhan."},
+        {q:"Pola makan yang berantakan bisa memengaruhi mood & energi buat belajar.", answer:true, explain:"Fakta — pola makan & mood/energi belajar itu saling berkaitan."},
+        {q:"Menikmati makanan favorit sesekali itu nggak apa-apa, yang penting seimbang, bukan dilarang total.", answer:true, explain:"Fakta — pesan intinya keseimbangan, bukan pelarangan total."},
+      ],
+      quiz:[
+        {q:"Belanja Sehat: kamu ke warung dengan uang jajan terbatas. Kombinasi belanja yang lebih seimbang...", opts:["Cuma beli mi instan & minuman soda","Nasi, telur, sayur, dan buah","Cuma keripik & permen"], correct:1},
+        {q:"Temanmu bilang, 'aku mau kurus, jadi aku skip makan seharian.' Respons yang tepat...", opts:["Ikutan skip makan juga biar sama-sama kurus","Ingetin itu berisiko buat kesehatan, lebih baik makan teratur & porsi wajar","Diam aja, itu kan urusan dia"], correct:1},
+        {q:"Kamu pengen banget makan makanan favoritmu yang agak berminyak, sesekali. Sikap yang sehat...", opts:["Nggak boleh sama sekali, harus dihindari total","Boleh dinikmati sesekali, yang penting porsi & frekuensinya wajar","Makan sebanyak-banyaknya karena udah lama nggak makan itu"], correct:1},
+      ],
+    },
+  },
   menstruasi_cewek:{
     1:{
       title:"Level 1 — Apa Itu Menstruasi",
@@ -4485,7 +4661,7 @@ const LEVEL_CONTENT = {
         {q:"Sperma \"harus\" dikeluarkan tiap hari lewat masturbasi biar nggak menumpuk.", answer:false, explain:"Mitos — tubuh punya mekanismenya sendiri, termasuk lewat mimpi basah."},
         {q:"Setelah mimpi basah, sebelum salat lagi perlu mandi wajib.", answer:true, explain:"Fakta — mandi wajib jadi bagian rutinitas kebersihan & ibadah."},
       ],
-      info:"Tata cara mandi wajib (mandi junub), ringkasnya:\n1. Niat ikhlas karena Allah.\n2. Basuh kedua tangan.\n3. Bersihkan alat kelamin pakai tangan kiri, lalu cuci tangan kiri pakai sabun.\n4. Berwudhu seperti wudhu mau salat.\n5. Siram air ke kepala sambil gosok pangkal rambut, lalu ratakan air ke seluruh badan (mulai sisi kanan, baru kiri) sampai 3 kali.\n6. Basuh kedua kaki masing-masing 3 kali, mulai dari kaki kanan.\n\nIni urusan pribadi — nggak perlu diceritain terbuka ke teman-teman kalau nggak nyaman. Kalau masih bingung soal caranya, boleh banget tanya ke ayah, wali laki-laki, atau guru laki-laki yang kamu percaya.",
+      info:"Tata cara mandi wajib (mandi junub), ringkasnya:\n1. Niat ikhlas karena Allah.\n2. Basuh kedua tangan.\n3. Bersihkan alat kelamin pakai tangan kiri, lalu cuci tangan kiri pakai sabun.\n4. Berwudhu seperti wudhu mau salat.\n5. Siram air ke kepala sambil gosok pangkal rambut, lalu ratakan air ke seluruh badan (mulai sisi kanan, baru kiri) sampai 3 kali.\n6. Basuh kedua kaki masing-masing 3 kali, mulai dari kaki kanan.\n\nIni urusan pribadi — nggak perlu diceritain terbuka ke teman-teman kalau nggak nyaman. Kalau masih bingung soal caranya, boleh banget tanya ke orangtua, wali laki-laki, atau guru laki-laki yang kamu percaya.",
       stepOrder:{
         prompt:"Urutkan langkah yang benar setelah bangun karena mimpi basah:",
         steps:["Ganti pakaian dalam/tidur yang terkena","Mandi bersih (mandi wajib)","Lanjut aktivitas seperti biasa"],
@@ -4804,11 +4980,52 @@ function konselingPick(mood){
   STATE.points += 5;
   saveState();
   logToSheet("konseling", {mood});
-  const hikmah = HIKMAH.konseling;
   document.getElementById("roomBody").innerHTML = `
     <div class="card">
       ${hanaLine(KONSELING_EKSPRESI[mood] || "idle", KONSELING_RESPON[mood])}
-      <button class="btn-outline btn-block" onclick="showBantuanNyata()">Butuh teman cerita di dunia nyata?</button>
+      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="konselingStrategi('${mood}')">Lanjut →</button>
+    </div>
+  `;
+}
+/* Level 2 — strategi menenangkan diri sederhana & aman per emosi, muncul
+   setelah validasi. Sengaja nggak ada strategi yang melibatkan rasa sakit
+   fisik/sensasi ekstrem apa pun. */
+const KONSELING_STRATEGI = {
+  sedih:["Coba tarik napas dalam 3 kali, pelan-pelan.","Cerita ke orang yang kamu percaya — nggak harus sekarang juga.","Lakuin hobi yang bikin kamu nyaman, misalnya dengerin musik atau menggambar."],
+  takut:["Tarik napas dalam 3 kali, coba fokus ke sekitarmu.","Tulis di jurnal apa yang bikin kamu takut, biar lebih jelas.","Cerita ke orang dewasa yang kamu percaya."],
+  marah:["Tarik napas dalam 3 kali sebelum ngomong atau bertindak.","Jalan-jalan sebentar buat 'dinginin kepala'.","Tulis di jurnal apa yang bikin kamu marah."],
+  bingung:["Tulis di jurnal apa aja yang bikin kamu bingung, biar lebih terurai.","Cerita ke orang yang kamu percaya — kadang ngomong bareng bikin lebih jelas.","Nggak apa belum punya jawaban sekarang, kasih diri waktu."],
+};
+function konselingStrategi(mood){
+  const list = KONSELING_STRATEGI[mood] || [];
+  document.getElementById("roomBody").innerHTML = `
+    <div class="card">
+      ${hanaLine("idle", "Ini beberapa hal kecil yang mungkin bisa bantu kamu ngerasa lebih tenang:")}
+      <ul style="font-size:13px;line-height:1.6;padding-left:18px;margin:8px 0;">
+        ${list.map(s=>`<li>${s}</li>`).join("")}
+      </ul>
+      <p style="font-size:12px;color:var(--grey);">Ini bukan pengganti bantuan profesional kalau masalahnya berat ya — cuma buat perasaan sehari-hari yang wajar.</p>
+      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="konselingLanjutan()">Lanjut →</button>
+    </div>
+  `;
+}
+/* Level 3 — pengenalan tanda "butuh bantuan lebih". SENGAJA disajikan
+   sebagai informasi statis buat semua pemain (bukan mekanik/kuis yang coba
+   mendeteksi kondisi pemain), dan SELALU diakhiri arahan ke kontak bantuan
+   manusia. Ruangan ini TIDAK memberi saran/strategi terkait menyakiti diri
+   sendiri dalam bentuk apa pun. */
+function konselingLanjutan(){
+  const hikmah = HIKMAH.konseling;
+  document.getElementById("roomBody").innerHTML = `
+    <div class="card">
+      ${hanaLine("idle", "Kadang, perasaan yang berat butuh lebih dari sekadar strategi kecil di atas. Beberapa tanda kalau kamu — atau temanmu — mungkin butuh bantuan lebih:")}
+      <ul style="font-size:13px;line-height:1.6;padding-left:18px;margin:8px 0;">
+        <li>Perasaan berat itu berlangsung lama dan mulai mengganggu sekolah, tidur, atau makan</li>
+        <li>Muncul keinginan buat menarik diri dari orang-orang sekitar</li>
+        <li>Muncul pikiran untuk menyakiti diri sendiri</li>
+      </ul>
+      <p style="font-size:13px;">Kalau salah satu ini kerasa familiar, nggak apa-apa untuk cerita ke orang dewasa yang kamu percaya, atau hubungi bantuan di bawah ini. <b>Menghubungi bantuan ini bukan tanda lemah.</b></p>
+      <button class="btn-outline btn-block" style="margin-top:10px;" onclick="showBantuanNyata()">Butuh teman cerita di dunia nyata?</button>
       <div id="bantuanNyataBox"></div>
       <button class="btn-primary btn-block" style="margin-top:10px;" onclick="goTo('screen-lobby');renderLobby();">Kembali ke Lobby</button>
     </div>
@@ -4820,7 +5037,7 @@ function konselingPick(mood){
 }
 function showBantuanNyata(){
   document.getElementById("bantuanNyataBox").innerHTML = `
-    <div class="contact-card"><b>LBH 'Aisyiyah</b><br>Layanan bantuan hukum & pendampingan resmi 'Aisyiyah.</div>
+    <div class="contact-card"><b>Posbantuan Hukum 'Aisyiyah</b><br>Layanan bantuan hukum & pendampingan resmi 'Aisyiyah.<br>• Jawa Timur — Jl. Darmokali 1F, Surabaya (WA: 0812-8238-0455)<br>• Pusat (Jakarta) — Jl. Menteng Raya No. 62, Jakarta Pusat (Telp: 021-3918318)</div>
     <div class="contact-card"><b>SAPA 129</b><br>Layanan Sahabat Perempuan dan Anak — hotline nasional.</div>
     <div class="contact-card"><b>Jakarta Siaga 112</b><br>Khusus untuk wilayah Jakarta.</div>
     <p style="font-size:12px;color:var(--grey);">Kamu tidak sendiri. Menghubungi bantuan ini bukan tanda lemah.</p>
