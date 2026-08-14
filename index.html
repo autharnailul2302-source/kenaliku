@@ -2816,10 +2816,30 @@ function hanaLine(expr, text){
 }
 
 /* ---------- STORY (before-after: pemahaman awal + narasi pembuka) ---------- */
+/* Bank soal "before/after" — dipakai 2x: pas intro cerita (Pemahaman Awal)
+   & pas Ruang Refleksi (Pemahaman Akhir), buat dibandingin. Distribusi soal
+   sesuai dokumen review: Pubertas 2, Menstruasi/Mimpi Basah 2, Consent 2,
+   Relasi Sehat 2, Media Sosial 2, Gizi 1, Konseling 1 = 12 soal total. */
 const beforeQuestions = [
+  // Pubertas (2)
+  {q:"Perubahan tubuh saat pubertas itu...", opts:["Hal yang wajar dan berbeda tiap orang","Tanda ada yang salah dengan tubuhku","Harus dirahasiakan dari semua orang"], correct:0},
+  {q:"Kalau pubertasmu lebih cepat/lambat dari teman-teman, itu artinya...", opts:["Ada yang salah dengan tubuhku","Wajar, kecepatan pubertas beda-beda tiap orang","Aku harus buru-buru menyusul supaya sama"], correct:1},
+  // Menstruasi/Mimpi Basah (2)
+  {q:"Kalau ngomongin soal menstruasi/mimpi basah, sikap yang paling pas...", opts:["Malu banget sampai gak mau denger sama sekali","Tenang, karena itu proses biologis yang wajar","Anggap itu topik tabu yang gak boleh dibahas"], correct:1},
+  {q:"Menstruasi/mimpi basah pertama biasanya bikin kaget atau malu. Sikap yang sehat...", opts:["Simpan sendiri, gak boleh tanya siapa-siapa","Wajar buat cari tahu & tanya ke orang yang dipercaya","Anggap itu aib yang harus ditutupi selamanya"], correct:1},
+  // Consent (2)
   {q:"Menurutmu, siapa yang berhak menentukan apakah tubuhmu boleh disentuh orang lain?", opts:["Orang lain, kalau mereka lebih tua","Aku sendiri","Tidak ada yang berhak menolak"], correct:1},
   {q:"Kalau ada teman yang memaksa hal yang tidak nyaman buatmu, sebaiknya kamu...", opts:["Menurut saja biar tidak dimusuhi","Boleh menolak dan bicara ke orang dewasa terpercaya","Diam dan menjauh selamanya"], correct:1},
-  {q:"Perubahan tubuh saat pubertas itu...", opts:["Hal yang wajar dan berbeda tiap orang","Tanda ada yang salah dengan tubuhku","Harus dirahasiakan dari semua orang"], correct:0},
+  // Relasi Sehat (2)
+  {q:"Ciri pertemanan yang kurang sehat itu...", opts:["Saling mendukung & menghargai waktu","Sering merendahkan & memaksakan kehendak","Jujur satu sama lain"], correct:1},
+  {q:"Kalau ada teman/gebetan yang posesif banget (melarang berteman sama orang lain, cek HP terus), itu tandanya...", opts:["Tanda sayang yang wajar","Red flag yang perlu diwaspadai","Hal yang harus diterima demi hubungan"], correct:1},
+  // Media Sosial (2)
+  {q:"Akun asing yang baru dibuat, followernya dikit, terus langsung ngajak chat pribadi, sebaiknya kamu...", opts:["Langsung percaya & balas chatnya","Curigai & hati-hati, jangan buru-buru kasih info pribadi","Kasih semua info yang diminta biar cepat akrab"], correct:1},
+  {q:"Kalau ada yang minta kamu merahasiakan obrolan kalian dari orang tua, itu tandanya...", opts:["Wajar aja, biar jadi rahasia berdua","Tanda bahaya yang harus diwaspadai","Bukti kalau dia bisa dipercaya"], correct:1},
+  // Gizi (1)
+  {q:"Piring makan yang gizinya seimbang sebaiknya berisi...", opts:["Kombinasi karbohidrat, protein, sayur & buah","Cuma nasi & gorengan","Camilan manis sepanjang hari"], correct:0},
+  // Konseling (1)
+  {q:"Kalau kamu lagi ngerasa berat atau sedih, sikap yang sehat...", opts:["Pendam sendiri terus-terusan","Boleh cerita ke orang yang kamu percaya, itu bukan tanda lemah","Anggap itu hal yang harus disembunyikan"], correct:1},
 ];
 let storyStep = 0;
 let beforeIdx = 0;
@@ -3378,6 +3398,7 @@ function renderBeforeQuiz(){
       <div class="vn-quizwrap">
         <div class="vn-quiz-panel">
           <div class="vn-speaker">Pemahaman Awal ${beforeIdx+1}/${beforeQuestions.length}</div>
+          ${beforeIdx===0 ? `<p style="font-size:12.5px;color:var(--grey);margin-bottom:8px;">Yuk jawab dulu, santai aja — nggak ada yang bakal dinilai salah. Nanti di akhir perjalanan, kamu bisa lihat seberapa jauh kamu berkembang!</p>` : ""}
           <div class="quiz-q">${item.q}</div>
           ${item.opts.map((o,i)=>`<button class="quiz-opt btn-block" onclick="answerBefore(${i})">${o}</button>`).join("")}
         </div>
@@ -4407,6 +4428,7 @@ const LEVEL_CONTENT = {
         {q:"Motret atau merekam orang lain boleh dilakukan tanpa izin, asal cuma buat kenang-kenangan pribadi.", answer:false, explain:"Mitos — tetap perlu izin dari orangnya, apa pun alasannya."},
       ],
       quiz:[
+        {q:"Temanmu bilang, 'Pinjam HP-mu dong, bentar aja.' Respons yang tetap sopan tapi tegas...", opts:["Kasih aja langsung tanpa bilang apa-apa, biar cepat","Boleh, tapi jangan buka galeriku ya' — izin boleh, asal ada batasan","Menolak sambil marah-marah"], correct:1},
         {q:"Sepupumu yang jarang ketemu mau meluk kamu erat-erat pas lebaran, tapi kamu merasa nggak nyaman. Respons yang tetap sopan...", opts:["Diam aja biar nggak dibilang nggak sopan ke keluarga","Bilang halus, 'Maaf ya, salaman aja boleh?' sambil tetap senyum","Langsung kabur tanpa bilang apa-apa"], correct:1},
         {q:"Temanmu mau motret kamu buat diupload ke story tanpa nanya dulu. Sikap yang tepat...", opts:["Biarin aja, itu kan cuma foto biasa","Boleh minta dia tanya dulu sebelum motret/upload","Marah besar ke dia"], correct:1},
       ],
@@ -4420,6 +4442,7 @@ const LEVEL_CONTENT = {
       ],
       info:"Buat teman yang punya keterbatasan bicara/pendengaran, penolakan juga bisa disampaikan lewat gerakan, misalnya:\n- Gerakkan jari telunjuk ke kanan-kiri (tanda \u201Ctidak\u201D)\n- Dorong telapak tangan ke depan (gestur \u201Cberhenti\u201D)\n- Silangkan kedua tangan di depan dada membentuk huruf \u201CX\u201D\n- Gelengkan kepala kuat sambil menunjukkan ekspresi tegas\n\nPenting buat kita semua paham bahasa isyarat penolakan ini, biar semua teman — apa pun kondisinya — batasannya tetap didengar.",
       quiz:[
+        {q:"Sepupumu maksa cium pipi kamu pas ketemu, padahal kamu nggak nyaman. Sikap terbaik...", opts:["Ikutin aja biar nggak dibilang nggak sopan","Menolak dengan sopan sambil tetap salim atau sapa dengan cara lain yang nyaman","Diam aja lalu menjauh tanpa bilang apa-apa"], correct:1},
         {q:"Temanmu ngajak ikut challenge yang menurutmu berisiko & bikin nggak nyaman, sambil bilang 'ih gitu doang takut?'. Kamu...", opts:["Ikut aja biar nggak dibilang penakut","Bilang tegas tapi sopan, 'Maaf, aku nggak nyaman, aku nggak mau ikut'","Ikut tapi diam-diam kesel"], correct:1},
         {q:"Kamu tadinya bilang 'iya' mau nemenin teman ke suatu tempat, tapi sekarang berubah pikiran karena capek. Kamu...", opts:["Tetap ikut walau capek karena udah kadung bilang iya","Boleh bilang kalau berubah pikiran, dan temanmu seharusnya menghormati itu","Menghilang tanpa kabar"], correct:1},
         {q:"Temanmu maksa kamu cerita rahasia yang nggak mau kamu bagi. Sikap tepatmu...", opts:["Cerita aja biar nggak dibilang nggak percaya temenan","Boleh bilang, 'itu privasiku, aku belum mau cerita'","Marah dan memutus pertemanan"], correct:1},
@@ -4436,6 +4459,7 @@ const LEVEL_CONTENT = {
         {q:"Ke mana kamu bisa lapor kalau mengalami situasi yang bikin nggak nyaman & udah dipaksa terus-menerus?", opts:["Cuma bisa dipendam sendiri","Orang tua, wali kelas, guru BK, atau teman yang dipercaya","Nggak usah cerita ke siapa-siapa biar nggak ribet"], correct:1},
         {q:"Temanmu cerita dia diperlakukan nggak nyaman sama seseorang, dan dia keliatan takut. Sikap terbaikmu...", opts:["Dengerin tanpa nyalahin, kasih dukungan, ajak dia lapor ke orang dewasa","Bilang, 'harusnya kamu nolak dari awal'","Sebar ceritanya ke teman lain biar rame"], correct:0},
         {q:"Kamu lihat sendiri ada teman yang dipaksa terus-menerus meski udah menolak. Sikap yang bisa kamu lakukan...", opts:["Diam aja, bukan urusanmu","Bantu dia dan/atau bantu laporkan ke orang dewasa","Nonton aja sambil rekam buat konten"], correct:1},
+        {q:"Refleksi: temanmu udah bilang, 'udahan ah, aku capek' pas lagi main prank bareng, tapi kamu lanjutin terus karena masih seru buatmu. Apakah ini melanggar consent?", opts:["Enggak, kan cuma prank, gak serius", "Iya, karena aku nggak menghormati pilihannya untuk berhenti", "Tergantung siapa yang mulai duluan"], correct:1},
       ],
     },
   },
@@ -4464,7 +4488,7 @@ const LEVEL_CONTENT = {
         {q:"Kalau diajak 'pacaran' padahal belum siap, kamu wajib menerima biar nggak menyakiti perasaan orang itu.", answer:false, explain:"Mitos — kamu boleh menolak atau menunda tanpa merasa bersalah, dan boleh didiskusikan ke orang tua."},
       ],
       quiz:[
-        {q:"Gebetanmu chat jam 11 malam: 'Yuk video call, udah kangen nih, sekarang ya.' Respons sehat...", opts:["Langsung video call biar nggak dikira nggak niat","Boleh bilang, 'udah malam, ngobrol lewat chat aja dulu ya'","Ghosting tanpa balasan"], correct:1},
+        {q:"Temanmu chat, 'Km knp deket bgt sm dia? Km ga sayang temenan aku lagi ya kalo msh temenan sm dia.' Ini contoh kalimat...", opts:["Wajar, tanda sayang sama temenan","Posesif — respons baik: tetap tegas jaga circle pertemanan sambil komunikasi baik-baik","Harus dituruti biar nggak berantem"], correct:1},
         {q:"Teman yang baru kenal online ngajak ketemuan berduaan di tempat sepi. Respons sehat...", opts:["Langsung setuju biar nggak keliatan ribet","Ajak ketemu di tempat ramai/umum, atau bareng teman lain","Kasih alamat rumah biar dijemput"], correct:1},
         {q:"Kamu diajak 'jadian' sama teman sekelas, tapi kamu belum siap. Respons sehat...", opts:["Terima aja biar nggak bikin dia sedih","Boleh bilang jujur kalau kamu belum siap, dan itu nggak apa-apa","Diemin chatnya tanpa jawaban"], correct:1},
       ],
@@ -4480,6 +4504,7 @@ const LEVEL_CONTENT = {
         {q:"Ada teman yang sering merendahkan kamu di depan orang lain, sambil terus-terusan mengecek & mengatur siapa aja yang boleh kamu temenin. Ini artinya...", opts:["Itu wajar, namanya juga sayang","Itu tanda red flag, sehatnya dibicarakan ke orang dipercaya","Harus diterima biar hubungan nggak putus"], correct:1},
         {q:"Temanmu memaksa kamu menyontek pas ujian, sambil mengancam nggak mau berteman lagi kalau kamu nolak.", opts:["Ikutin aja daripada diputusin pertemanan","Boleh menolak, itu red flag pertemanan yang manipulatif","Nyontekin biar aman"], correct:1},
         {q:"Kamu mau keluar dari circle pertemanan yang toxic, tapi takut dibilang nggak setia kawan.", opts:["Nggak usah keluar, tahan aja","Boleh bicara ke orang dipercaya & menjauh tanpa perlu merasa bersalah","Diam-diam aja tanpa cerita ke siapa pun"], correct:1},
+        {q:"Gebetanmu minta video call jam 11 malam, dan ini kejadian terus tiap hari sampai ganggu waktu belajar & istirahatmu. Respons yang tepat...", opts:["Terus dituruti biar hubungan langgeng","Menolak dengan sopan & menjelaskan batasan waktu ke dia","Diam-diam kesel tapi tetap dituruti"], correct:1},
       ],
     },
   },
@@ -4499,7 +4524,7 @@ const LEVEL_CONTENT = {
         {q:"Akun privat (nggak semua orang bisa lihat postingan kamu) membantu menjaga privasimu.", answer:true, explain:"Fakta — atur siapa yang bisa lihat postinganmu itu langkah aman yang sederhana."},
       ],
       quiz:[
-        {q:"Detektif Digital: Ada akun baru follow kamu, foto profilnya kelihatan sempurna banget kayak model, followernya dikit, dan langsung ngajak chat pribadi. Profil ini...", opts:["Aman","Curigai","Laporkan & Blokir"], correct:1},
+        {q:"Detektif Digital: Akun baru follow kamu, follower cuma 3, foto profilnya pakai foto selebriti, terus langsung DM 'Hai cantik, kenalan yuk'. Profil ini...", opts:["Aman","Curigai","Laporkan & Blokir"], correct:1},
         {q:"Detektif Digital: Teman sekelasmu yang emang udah kamu kenal lama posting foto liburan biasa. Profil ini...", opts:["Aman","Curigai","Laporkan & Blokir"], correct:0},
         {q:"Detektif Digital: Akun asing tiba-tiba minta alamat rumah & nomor HP kamu buat 'ngirim hadiah'. Ini...", opts:["Aman","Curigai","Laporkan & Blokir"], correct:2},
       ],
@@ -4528,6 +4553,7 @@ const LEVEL_CONTENT = {
         {q:"Kamu dapat pesan mengancam & bikin nggak nyaman dari akun asing. Langkah pertama yang tepat...", opts:["Balas dengan emosi biar puas","Screenshot bukti, blokir pelaku, lapor ke orang tua/guru","Diamkan aja tanpa cerita ke siapa-siapa"], correct:1},
         {q:"Temanmu cerita fotonya disebar tanpa izin dan dia ketakutan. Sikap terbaikmu...", opts:["Dengerin tanpa menghakimi, bantu amankan bukti, bantu dia terhubung ke orang tua/guru","Bilang, 'salah sendiri kenapa fotonya bisa nyebar'","Ikut nyebarin biar rame, kan udah kejadian"], correct:0},
         {q:"Kalau kamu atau teman butuh bantuan soal KBGO, kontak resmi yang bisa dihubungi antara lain...", opts:["Sebar sendiri ke media sosial biar viral","SAPA 129, guru BK, atau lembaga pendampingan resmi seperti KPAI/Komnas Perempuan","Diamkan aja sampai hilang sendiri"], correct:1},
+        {q:"Kamu lihat sendiri ada teman sekelas nyebarin foto pribadi orang lain di grup kelas. Langkah yang benar...", opts:["Ikut nge-forward biar nggak ketinggalan info","Nggak ikut menyebarkan, dan laporkan ke wali kelas/guru BK","Screenshot buat koleksi pribadi"], correct:1},
       ],
     },
   },
@@ -4576,6 +4602,9 @@ const LEVEL_CONTENT = {
           {label:"Minuman manis berlebih", category:"Batasi Porsinya"},
         ],
       },
+      quiz:[
+        {q:"Belanja Sehat: uang jajanmu Rp15.000. Kombinasi belanja yang lebih bergizi seimbang...", opts:["3 bungkus keripik","Telur + sayur + nasi","Cuma minuman soda"], correct:1},
+      ],
     },
     3:{
       title:"Level 3 — Pola Makan Seimbang & Sehat Mental",
@@ -4978,6 +5007,9 @@ function konselingPick(mood){
   STATE.roomsDone["konseling"] = true;
   STATE.kunciNilai["konseling"] = true;
   STATE.points += 5;
+  if(mood === "sedih"){
+    STATE.konselingSedihCount = (STATE.konselingSedihCount || 0) + 1;
+  }
   saveState();
   logToSheet("konseling", {mood});
   document.getElementById("roomBody").innerHTML = `
@@ -5016,6 +5048,13 @@ function konselingStrategi(mood){
    sendiri dalam bentuk apa pun. */
 function konselingLanjutan(){
   const hikmah = HIKMAH.konseling;
+  const sedihCount = STATE.konselingSedihCount || 0;
+  /* Eskalasi lembut: kalau pemain udah beberapa kali (lintas sesi) milih
+     'sedih', tambahin ajakan halus ke bantuan nyata — bukan mekanik
+     deteksi krisis, cuma pengingat tambahan yang konsisten & nggak maksa. */
+  const eskalasi = sedihCount >= 3
+    ? `<p style="font-size:13px;background:var(--green-soft);border-radius:8px;padding:8px 10px;margin:8px 0;">Kamu udah beberapa kali cerita lagi ngerasa sedih ke Kak Hana. Nggak apa-apa — tapi Kak Hana pengen mastiin kamu juga punya teman ngobrol beneran, nggak cuma di sini aja.</p>`
+    : "";
   document.getElementById("roomBody").innerHTML = `
     <div class="card">
       ${hanaLine("idle", "Kadang, perasaan yang berat butuh lebih dari sekadar strategi kecil di atas. Beberapa tanda kalau kamu — atau temanmu — mungkin butuh bantuan lebih:")}
@@ -5025,6 +5064,7 @@ function konselingLanjutan(){
         <li>Muncul pikiran untuk menyakiti diri sendiri</li>
       </ul>
       <p style="font-size:13px;">Kalau salah satu ini kerasa familiar, nggak apa-apa untuk cerita ke orang dewasa yang kamu percaya, atau hubungi bantuan di bawah ini. <b>Menghubungi bantuan ini bukan tanda lemah.</b></p>
+      ${eskalasi}
       <button class="btn-outline btn-block" style="margin-top:10px;" onclick="showBantuanNyata()">Butuh teman cerita di dunia nyata?</button>
       <div id="bantuanNyataBox"></div>
       <button class="btn-primary btn-block" style="margin-top:10px;" onclick="goTo('screen-lobby');renderLobby();">Kembali ke Lobby</button>
@@ -5045,12 +5085,77 @@ function showBantuanNyata(){
 }
 
 /* ---------- PERPUSTAKAAN ---------- */
+/* Rencana koleksi sesuai dokumen review — 7 item lintas topik. Item yang
+   butuh aset ilustrasi/animasi asli (komik, video) ditandai ready:false
+   (nunggu tim art/konten, sesuai catatan dokumen "dikerjakan bertahap").
+   Item infografis/poster/artikel yang isinya bisa dirangkum dari teks
+   materi yang udah ada, aku isi kontennya langsung (ready:true). */
+const PERPUS_ITEMS = [
+  {id:"komik_pubertas", type:"Komik", icon:"📖", title:"Cerita dari Rumah 'Aisyiyah", desc:"Cerita pendek tentang siswa yang bingung menghadapi perubahan tubuhnya.", unlockRooms:["pubertas"], ready:false},
+  {id:"video_pubertas", type:"Video", icon:"🎬", title:"Mengenal Tubuhku", desc:"Animasi pendek 2–3 menit soal pubertas & menstruasi.", unlockRooms:["pubertas","menstruasi"], unlockAny:true, ready:false},
+  {id:"info_pubertas", type:"Infografis", icon:"🖼️", title:"Mitos vs Fakta Pubertas", unlockRooms:["pubertas"], ready:true, content:[
+    "Mitos: Semua anak mengalami pubertas di usia yang sama persis. → Fakta: kecepatan pubertas beda-beda tiap orang, dan itu normal.",
+    "Mitos: Kalau pubertasmu lebih lambat/cepat dari teman, berarti ada yang salah. → Fakta: nggak ada yang 'terlambat' atau 'aneh'.",
+    "Mitos: Suasana hati naik-turun (mood swing) tandanya kamu 'baperan'. → Fakta: itu wajar, dipengaruhi perubahan hormon.",
+    "Mitos: Tinggi badan berhenti tumbuh begitu suara berubah. → Fakta: pertumbuhan tinggi biasanya masih berlanjut.",
+    "Mitos: Anak laki-laki nggak boleh menangis, itu tanda lemah. → Fakta: semua orang boleh mengekspresikan perasaannya, termasuk laki-laki.",
+  ]},
+  {id:"info_consent", type:"Infografis", icon:"🛡️", title:"5 Tanda Kamu Berhak Bilang Tidak", unlockRooms:["consent"], ready:true, content:[
+    "Kamu merasa nggak nyaman, walau alasannya belum jelas buatmu.",
+    "Kamu diminta melakukan sesuatu tanpa dijelasin kenapa.",
+    "Kamu diburu-buru buat langsung jawab 'iya'.",
+    "Kamu diancam atau dibuat merasa bersalah kalau menolak.",
+    "Kamu udah bilang 'iya' tapi berubah pikiran — itu tetap sah buat bilang 'tidak' sekarang.",
+  ]},
+  {id:"poster_medsos", type:"Poster", icon:"📱", title:"Ciri Akun Palsu", unlockRooms:["medsos"], ready:true, content:[
+    "Foto profil kelihatan 'terlalu sempurna', atau mirip foto orang terkenal.",
+    "Akun baru dibuat, jumlah followernya sedikit.",
+    "Buru-buru ngajak chat pribadi begitu follow.",
+    "Minta info pribadi (alamat, nomor HP, nama sekolah) di awal kenalan.",
+    "Minta kamu merahasiakan obrolan dari orang tua/wali.",
+  ]},
+  {id:"info_gizi", type:"Infografis", icon:"🍎", title:"Isi Piringku Versi Remaja", unlockRooms:["gizi"], ready:true, content:[
+    "Separuh piring: sayur & buah.",
+    "Seperempat piring: karbohidrat (nasi/roti/kentang).",
+    "Seperempat piring: protein (ayam/telur/tempe/tahu/ikan).",
+    "Air putih cukup tiap hari, batasi minuman manis.",
+    "Remaja putri: tambahan zat besi (bayam, hati ayam, kacang-kacangan) + Tablet Tambah Darah rutin 1x/minggu.",
+  ]},
+  {id:"artikel_konseling", type:"Artikel Ringan", icon:"💬", title:"Kenapa Cerita ke Orang Lain Itu Bukan Tanda Lemah", unlockRooms:["konseling"], ready:true, article:
+    "Banyak dari kita mikir kalau butuh bantuan itu artinya kita gagal atau lemah. Padahal nggak gitu. Semua orang — sekuat apa pun kelihatannya — pasti pernah ada momen yang berat buat dihadapi sendirian.\n\nCerita ke orang lain bukan berarti kamu nyerah. Justru itu butuh keberanian: berani jujur soal apa yang kamu rasain, berani percaya orang lain buat ikut bantu mikirin jalan keluarnya.\n\nKamu nggak harus nunggu sampai semuanya 'cukup parah' buat cerita. Perasaan yang masih kecil pun berhak didengar. Dan kamu berhak punya orang yang mau dengerin — entah itu orang tua, guru BK, atau teman yang kamu percaya.\n\nJadi kalau lagi berat, nggak apa-apa untuk cerita. Itu bukan tanda lemah — itu tanda kamu peduli sama dirimu sendiri."},
+];
 function renderPerpustakaan(){
   document.getElementById("roomBody").innerHTML = `
-    <div class="card">📖 Komik: "Cerita dari Ruang Tumbuh" — segera hadir</div>
-    <div class="card">🎬 Video: "Mengenal Tubuhku" — segera hadir</div>
-    <div class="card">🖼️ Infografis: "Mitos vs Fakta Pubertas" — segera hadir</div>
+    ${PERPUS_ITEMS.map((it,i)=>{
+      const unlocked = it.unlockAny
+        ? it.unlockRooms.some(r=>STATE.roomsDone[r])
+        : it.unlockRooms.every(r=>STATE.roomsDone[r]);
+      if(!unlocked){
+        const names = it.unlockRooms.map(r=>(getRooms().find(x=>x.id===r)||{}).name || r).join(it.unlockAny ? " / " : " & ");
+        return `<div class="card" style="opacity:.5;">🔒 ${it.icon} <b>${it.title}</b><br><span style="font-size:12px;color:var(--grey);">${it.type} — selesaikan Ruang ${names} dulu.</span></div>`;
+      }
+      if(!it.ready){
+        return `<div class="card">${it.icon} <b>${it.title}</b><br><span style="font-size:12px;color:var(--grey);">${it.type} — ${it.desc || ""} (segera hadir, materi lagi disiapin tim)</span></div>`;
+      }
+      return `<div class="card">${it.icon} <b>${it.title}</b><br><span style="font-size:11px;color:var(--text-accent);">${it.type}</span>
+        <button class="btn-outline btn-block" style="margin-top:8px;" onclick="perpusOpen('${it.id}')">Baca</button></div>`;
+    }).join("")}
     <p style="font-size:12px;color:var(--grey);">Koleksi terbuka setelah kamu menyelesaikan ruangan terkait.</p>
+  `;
+}
+function perpusOpen(id){
+  const it = PERPUS_ITEMS.find(x=>x.id===id);
+  if(!it) return;
+  const body = it.article
+    ? `<p style="font-size:13px;line-height:1.6;white-space:pre-line;">${it.article}</p>`
+    : `<ul style="font-size:13px;line-height:1.7;padding-left:18px;">${it.content.map(c=>`<li>${c}</li>`).join("")}</ul>`;
+  document.getElementById("roomBody").innerHTML = `
+    <div class="card">
+      <span class="badge-pill">${it.type}</span>
+      <h3 style="margin:8px 0;">${it.icon} ${it.title}</h3>
+      ${body}
+      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="renderPerpustakaan()">← Kembali ke Rak</button>
+    </div>
   `;
 }
 
@@ -5066,6 +5171,7 @@ function renderRefleksi(){
   body.innerHTML = `
     <div class="card">
       <span class="badge-pill">Pemahaman Akhir</span>
+      <p style="font-size:12.5px;color:var(--grey);margin-bottom:8px;">Soal yang sama kayak di awal perjalanan — jawab sejujurnya aja, ini bukan buat dinilai benar/salah.</p>
       ${beforeQuestions.map((item,i)=>`
         <div class="quiz-q">${item.q}</div>
         ${item.opts.map((o,oi)=>`<button class="quiz-opt btn-block" data-q="${i}" data-oi="${oi}" onclick="answerAfter(${i},${oi})">${o}</button>`).join("")}
