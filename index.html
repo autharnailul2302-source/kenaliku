@@ -28,6 +28,10 @@
     --danger:#B5482F;
     --radius:18px;
     --shadow:0 10px 30px rgba(31,94,74,.18);
+    /* identitas peran — dipakai konsisten di kartu pilih peran (login) & Panel Admin,
+       supaya "wilayah Admin" dan "wilayah Fasilitator" selalu terasa beda di mata siswa/guru. */
+    --admin-deep:#7A2456; --admin-mid:#B0508A; --admin-soft:#F7EAF2;
+    --facil-deep:#1F4E79; --facil-mid:#4C86C4; --facil-soft:#EAF1FA;
     font-family:'Segoe UI', 'Nunito', system-ui, -apple-system, sans-serif;
   }
   #rotateOverlay{
@@ -83,6 +87,57 @@
   h1,h2,h3{font-family:'Georgia','Iowan Old Style',serif;color:var(--text-accent);margin:0 0 6px;}
   p{color:var(--ink);line-height:1.5;margin:0 0 12px;}
   .tagline{color:var(--gold);font-style:italic;font-size:14px;margin-bottom:18px;}
+
+  /* ===== Ruangan — hero bergambar (bg disiapkan per ruangan lewat ROOMS[].bg) ===== */
+  #screen-room{padding-top:18px;}
+  .room-hero{
+    position:relative;min-height:300px;border-radius:var(--radius);overflow:hidden;
+    background-size:cover;background-position:center;background-color:var(--green-deep);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    box-shadow:var(--shadow);margin-bottom:18px;
+  }
+  .room-hero-scrim{
+    position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(180deg, rgba(15,20,15,.05) 0%, rgba(15,20,15,.12) 45%, rgba(10,14,10,.72) 100%);
+  }
+  .room-hero-card{
+    position:relative;z-index:1;text-align:center;color:#fff;
+    background:rgba(15,20,15,.5);backdrop-filter:blur(3px);
+    border-radius:14px;padding:16px 26px;max-width:80%;
+    box-shadow:0 8px 22px rgba(0,0,0,.25);
+  }
+  .room-hero-eyebrow{font-size:11px;letter-spacing:3px;font-weight:800;color:var(--gold);}
+  .room-hero-title{font-family:'Georgia','Iowan Old Style',serif;font-size:23px;margin:2px 0 4px;color:#fff;}
+  .room-hero-tagline{font-style:italic;color:#ece4cc;font-size:13.5px;margin:0;}
+  .room-hero-actions{
+    position:absolute;left:0;right:0;bottom:16px;z-index:1;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 16px;
+    flex-wrap:wrap;row-gap:8px;
+  }
+  .room-hero-btn{
+    border-radius:999px;font-weight:800;font-size:12px;line-height:1.2;
+    padding:11px 16px;border:2px solid rgba(255,255,255,.28);
+    box-shadow:0 8px 16px rgba(0,0,0,.28);font-family:inherit;
+    transition:transform .15s,filter .15s;flex:none;
+  }
+  .room-hero-btn--side{background:rgba(20,25,18,.55);color:#f2ecd9;}
+  .room-hero-btn--primary{
+    background:linear-gradient(180deg,var(--green-mid),var(--green-deep));
+    color:#fff;font-size:13.5px;padding:13px 24px;text-align:center;
+  }
+  @media (hover:hover) and (pointer:fine){
+    .room-hero-btn:hover{transform:translateY(-2px);filter:brightness(1.1);}
+  }
+  .room-wrap{max-width:640px;margin:0 auto;}
+  @media (min-width:700px){
+    .room-hero{min-height:400px;}
+    .room-hero-title{font-size:27px;}
+    .room-hero-card{padding:20px 34px;}
+  }
+  @media (min-width:900px){
+    .room-hero{min-height:460px;max-width:900px;margin-left:auto;margin-right:auto;}
+    .room-wrap{max-width:900px;}
+  }
   .center{text-align:center;}
   .grow{flex:1;}
   .row{display:flex;gap:10px;}
@@ -1027,8 +1082,6 @@
   }
 
   /* room */
-  .room-tabs{display:flex;gap:8px;margin-bottom:14px;}
-  .room-tabs button{flex:1;}
   .quiz-q{font-weight:700;margin-bottom:10px;}
   .quiz-opt{background:var(--card);border:2px solid #e2d9bd;border-radius:12px;padding:11px 14px;margin-bottom:8px;text-align:left;font-weight:600;color:var(--ink);transition:background .15s,border-color .15s,transform .1s;}
   .quiz-opt:hover:not(:disabled){border-color:var(--green-mid);background:#dcefe4;}
@@ -1149,37 +1202,162 @@
   .field-label{font-size:12.5px;font-weight:700;color:var(--text-accent);margin:0 0 -8px 2px;display:block;}
 
   /* ===== Admin panel ===== */
-  #screen-admin{padding:0;}
-  .admin-tabs{display:flex;gap:8px;padding:0 22px 14px;flex:none;}
+  #screen-admin{padding:0;background:
+      radial-gradient(circle at 15% 0%, #fbf1f7 0%, var(--cream) 55%);}
+  .admin-topbar{
+    background:linear-gradient(135deg,var(--admin-deep),#5a1a3f);
+    border-radius:0 0 20px 20px;margin:0 0 14px;padding:14px 22px 16px;
+    box-shadow:0 8px 20px rgba(122,36,86,.28);position:relative;overflow:hidden;
+  }
+  .admin-topbar::after{
+    content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;
+    background:radial-gradient(circle,rgba(255,255,255,.10),transparent 70%);
+  }
+  .admin-topbar .who{display:flex;align-items:center;gap:8px;font-size:14px;}
+  .admin-topbar .who .crest{
+    width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.16);
+    display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;
+  }
+  .admin-wrap{max-width:900px;margin:0 auto;width:100%;padding:0 22px 22px;display:flex;flex-direction:column;flex:1;min-height:0;}
+  .admin-tabs{display:flex;gap:8px;margin-bottom:16px;flex:none;background:rgba(0,0,0,.04);padding:5px;border-radius:16px;}
   .admin-tab{
-    flex:1;background:var(--green-soft);color:var(--text-accent);border:2px solid transparent;
-    border-radius:12px;padding:10px 8px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;
-    display:flex;flex-direction:column;align-items:center;gap:2px;
+    flex:1;background:transparent;color:var(--grey);border:2px solid transparent;
+    border-radius:12px;padding:11px 8px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:inherit;
+    display:flex;flex-direction:column;align-items:center;gap:3px;transition:background .18s,color .18s,transform .12s;
   }
-  .admin-tab .count{background:var(--gold);color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;}
-  .admin-tab.active{background:var(--green-deep);color:#fff;border-color:var(--green-deep);}
-  .admin-body{padding:0 22px 22px;overflow-y:auto;flex:1;}
+  .admin-tab .count{background:#ddd4c4;color:#63594a;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:800;transition:background .18s,color .18s;}
+  .admin-tab.tab-facil.active{background:var(--facil-deep);color:#fff;box-shadow:0 6px 14px rgba(31,78,121,.35);}
+  .admin-tab.tab-facil.active .count{background:rgba(255,255,255,.22);color:#fff;}
+  .admin-tab.tab-siswa.active{background:var(--green-deep);color:#fff;box-shadow:0 6px 14px rgba(31,94,74,.35);}
+  .admin-tab.tab-siswa.active .count{background:rgba(255,255,255,.22);color:#fff;}
+  @media (hover:hover) and (pointer:fine){
+    .admin-tab:not(.active):hover{background:rgba(0,0,0,.05);color:var(--ink);transform:translateY(-1px);}
+  }
+  .admin-body{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;
+    overflow-y:auto;flex:1;align-content:start;
+  }
   .admin-row{
-    background:var(--card);border-radius:14px;padding:14px;margin-bottom:10px;
-    box-shadow:0 4px 12px rgba(31,94,74,.10);
+    background:var(--card);border-radius:14px;padding:14px;
+    box-shadow:0 4px 14px rgba(43,43,40,.10);border-left:4px solid var(--grey);
+    animation:adminRowIn .32s cubic-bezier(.2,.9,.3,1.1) backwards;
+    animation-delay:calc(var(--i,0) * 45ms);
+    transition:transform .15s,box-shadow .15s;
   }
-  .admin-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px;}
-  .admin-row-name{font-weight:800;font-size:14.5px;color:var(--ink);}
-  .admin-row-sub{font-size:12px;color:var(--grey);margin-top:2px;}
+  @keyframes adminRowIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+  @media (hover:hover) and (pointer:fine){
+    .admin-row:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(43,43,40,.16);}
+  }
+  .admin-row--facil{border-left-color:var(--facil-mid);}
+  .admin-row--siswa{border-left-color:var(--green-mid);}
+  .admin-row-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;}
+  .admin-row-id{display:flex;align-items:center;gap:10px;min-width:0;}
+  .admin-avatar{
+    width:36px;height:36px;border-radius:11px;flex:none;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:14px;color:#fff;
+  }
+  .admin-row--facil .admin-avatar{background:linear-gradient(150deg,var(--facil-mid),var(--facil-deep));}
+  .admin-row--siswa .admin-avatar{background:linear-gradient(150deg,var(--green-mid),var(--green-deep));}
+  .admin-row-name{font-weight:800;font-size:14.5px;color:var(--ink);line-height:1.25;}
+  .admin-row-sub{font-size:12px;color:var(--grey);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .status-pill{
     display:inline-block;border-radius:999px;padding:3px 10px;font-size:11px;font-weight:800;flex:none;
     white-space:nowrap;
   }
   .status-pill.pending{background:#fbe9d0;color:#8a5a12;}
-  .status-pill.approved{background:var(--green-soft);color:var(--green-deep);}
+  .status-pill.approved{background:var(--facil-soft);color:var(--facil-deep);}
   .admin-row-actions{display:flex;gap:8px;}
-  .admin-row-actions button{flex:1;padding:9px 8px;font-size:12.5px;border-radius:10px;}
-  .btn-approve{background:var(--green-deep);color:#fff;}
+  .admin-row-actions button{flex:1;padding:9px 8px;font-size:12.5px;border-radius:10px;font-weight:800;transition:filter .15s,transform .1s;}
+  .admin-row--facil .btn-approve{background:linear-gradient(180deg,var(--facil-mid),var(--facil-deep));color:#fff;}
+  .admin-row--siswa .btn-approve{background:linear-gradient(180deg,var(--green-mid),var(--green-deep));color:#fff;}
   .btn-reject{background:transparent;color:var(--danger);border:2px solid var(--danger);}
-  .admin-row select{margin:8px 0 0;padding:9px 12px;font-size:13px;}
-  .admin-empty{text-align:center;color:var(--grey);font-size:13px;padding:30px 10px;}
+  @media (hover:hover) and (pointer:fine){
+    .admin-row-actions button:hover{filter:brightness(1.08);transform:translateY(-1px);}
+  }
+  .admin-row select{margin:8px 0 0;padding:9px 12px;font-size:13px;border-color:#ddd0ac;}
+  .admin-empty{
+    text-align:center;color:var(--grey);font-size:13px;padding:44px 16px;grid-column:1/-1;
+    background:var(--card);border-radius:16px;border:2px dashed #e2d9bd;
+  }
+  .admin-empty .ee-icon{font-size:30px;display:block;margin-bottom:8px;}
   .hikmah-quote{font-style:italic;color:var(--text-accent);font-size:15px;margin:10px 0;}
   .hikmah-source{font-size:12px;color:var(--grey);margin-bottom:14px;}
+
+  /* ===== Dashboard Fasilitator ===== */
+  #screen-fasilitator{padding:0;background:
+      radial-gradient(circle at 15% 0%, #eaf3fb 0%, var(--cream) 55%);}
+  .facil-topbar{
+    background:linear-gradient(135deg,var(--facil-deep),#12314f);
+    border-radius:0 0 20px 20px;margin:0 0 14px;padding:14px 22px 16px;
+    box-shadow:0 8px 20px rgba(31,78,121,.28);position:relative;overflow:hidden;
+  }
+  .facil-topbar::after{
+    content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;
+    background:radial-gradient(circle,rgba(255,255,255,.10),transparent 70%);
+  }
+  .facil-topbar .who{display:flex;align-items:center;gap:8px;font-size:14px;}
+  .facil-topbar .who .crest{
+    width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.16);
+    display:flex;align-items:center;justify-content:center;font-size:15px;flex:none;
+  }
+  .facil-summary{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;
+  }
+  .facil-stat{
+    background:var(--card);border-radius:14px;padding:14px;box-shadow:0 4px 12px rgba(31,78,121,.10);
+    border-top:3px solid var(--facil-mid);
+  }
+  .facil-stat .n{font-size:22px;font-weight:800;color:var(--facil-deep);line-height:1.2;}
+  .facil-stat .l{font-size:11.5px;color:var(--grey);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin-top:2px;}
+  .facil-row{
+    background:var(--card);border-radius:14px;padding:14px;
+    box-shadow:0 4px 14px rgba(43,43,40,.10);border-left:4px solid var(--facil-mid);
+    animation:adminRowIn .32s cubic-bezier(.2,.9,.3,1.1) backwards;
+    animation-delay:calc(var(--i,0) * 45ms);
+    transition:transform .15s,box-shadow .15s;
+  }
+  @media (hover:hover) and (pointer:fine){
+    .facil-row:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(43,43,40,.16);}
+  }
+  .facil-row-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;min-width:0;}
+  .facil-row-name{font-weight:800;font-size:14.5px;color:var(--ink);line-height:1.25;}
+  .facil-row-sub{font-size:12px;color:var(--grey);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .facil-progress-wrap{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .facil-progress-bar{flex:1;height:8px;border-radius:999px;background:#e2e9f0;overflow:hidden;}
+  .facil-progress-bar > div{height:100%;background:linear-gradient(90deg,var(--facil-mid),var(--facil-deep));border-radius:999px;transition:width .4s ease;}
+  .facil-progress-label{font-size:11.5px;font-weight:800;color:var(--facil-deep);flex:none;}
+  .facil-mood-tag{
+    display:inline-flex;align-items:center;gap:4px;font-size:11.5px;color:var(--grey);
+    background:var(--facil-soft);border-radius:999px;padding:3px 10px;
+  }
+  .status-pill.info{background:var(--facil-soft);color:var(--facil-deep);}
+  .status-pill.done{background:var(--green-soft);color:var(--green-deep);}
+  .facil-row--attn{border-left-color:var(--danger);}
+  .facil-row-attn-flag{
+    display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:var(--danger);
+    margin-bottom:8px;
+  }
+  .facil-row-status-line{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;}
+  .facil-history-row{
+    background:var(--card);border-radius:14px;padding:12px 14px;
+    box-shadow:0 4px 12px rgba(43,43,40,.10);border-left:4px solid var(--facil-mid);
+    animation:adminRowIn .32s cubic-bezier(.2,.9,.3,1.1) backwards;animation-delay:calc(var(--i,0) * 40ms);
+  }
+  .facil-history-row .h-top{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--grey);margin-bottom:4px;}
+  .facil-history-row .h-body{font-size:13px;color:var(--ink);line-height:1.4;}
+  .facil-history-row .h-body b{color:var(--facil-deep);}
+
+  /* badge titik merah kecil di tombol pesan lobby (nunjuk ada pesan baru) */
+  #lobbyMessageBtn{position:relative;}
+  .msg-dot{
+    position:absolute;top:2px;right:2px;width:9px;height:9px;border-radius:50%;
+    background:var(--danger);box-shadow:0 0 0 2px rgba(20,15,8,.55);
+  }
+  .pesan-item{
+    background:var(--facil-soft);border-radius:12px;padding:12px 14px;margin-bottom:10px;
+  }
+  .pesan-item-top{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--facil-deep);font-weight:700;margin-bottom:4px;}
+  .pesan-item-text{font-size:13.5px;color:var(--ink);line-height:1.45;margin:0;}
 
   .badge-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
   .badge-cell{background:var(--card);border-radius:14px;padding:12px 6px;text-align:center;box-shadow:var(--shadow);}
@@ -1406,6 +1584,7 @@ if("serviceWorker" in navigator){
       </div>
       <div class="lobby-topright">
         <div class="coin" id="lobbyCoinBadge" role="button" tabindex="0" aria-label="Apa itu poin?" onclick="openModal('modalPoin')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openModal('modalPoin');}">🪙 <span id="lobbyPoints">0</span></div>
+        <button class="icon-btn-float" id="lobbyMessageBtn" onclick="openPesanModal()" aria-label="Pesan dari fasilitator">💬<span class="msg-dot" id="lobbyMsgDot" style="display:none;"></span></button>
         <button class="icon-btn-float" id="lobbyGuideBtn" onclick="startLobbyCoach()" aria-label="Panduan">❓</button>
         <button class="icon-btn-float" id="lobbySettingsBtn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
         <button class="icon-btn-float js-fs-btn" id="lobbyFsBtn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
@@ -1527,19 +1706,41 @@ if("serviceWorker" in navigator){
 
   <!-- PANEL ADMIN -->
   <section class="screen" id="screen-admin">
-    <div class="topbar"><div class="who">Panel Admin<small id="adminWhoLabel"></small></div>
+    <div class="topbar admin-topbar"><div class="who"><span class="crest">🛡️</span>Panel Admin<small id="adminWhoLabel"></small></div>
       <button class="icon-btn" onclick="adminLogout()" aria-label="Keluar">🚪 Keluar</button>
     </div>
-    <div class="admin-tabs">
-      <button class="admin-tab active" id="adminTabPending" onclick="switchAdminTab('pending')">
-        <span>✅ Persetujuan Fasilitator</span><span class="count" id="adminPendingCount">0</span>
-      </button>
-      <button class="admin-tab" id="adminTabUsers" onclick="switchAdminTab('users')">
-        <span>👥 Penempatan Siswa</span><span class="count" id="adminUsersCount">0</span>
-      </button>
+    <div class="admin-wrap">
+      <div class="admin-tabs">
+        <button class="admin-tab tab-facil active" id="adminTabPending" onclick="switchAdminTab('pending')">
+          <span>✅ Persetujuan Fasilitator</span><span class="count" id="adminPendingCount">0</span>
+        </button>
+        <button class="admin-tab tab-siswa" id="adminTabUsers" onclick="switchAdminTab('users')">
+          <span>👥 Penempatan Siswa</span><span class="count" id="adminUsersCount">0</span>
+        </button>
+      </div>
+      <div class="admin-body" id="adminPendingList"></div>
+      <div class="admin-body" id="adminUsersList" style="display:none;"></div>
     </div>
-    <div class="admin-body" id="adminPendingList"></div>
-    <div class="admin-body" id="adminUsersList" style="display:none;"></div>
+  </section>
+
+  <!-- FASILITATOR DASHBOARD -->
+  <section class="screen" id="screen-fasilitator">
+    <div class="topbar facil-topbar"><div class="who"><span class="crest">🧑‍🏫</span><span>Dashboard Fasilitator<small id="facilWhoLabel"></small></span></div>
+      <button class="icon-btn" onclick="facilitatorLogout()" aria-label="Keluar">🚪 Keluar</button>
+    </div>
+    <div class="admin-wrap">
+      <div class="facil-summary" id="facilSummary"></div>
+      <div class="admin-tabs">
+        <button class="admin-tab tab-facil active" id="facilTabStudents" onclick="switchFacilTab('students')">
+          <span>👥 Siswa Bimbingan</span><span class="count" id="facilStudentsCount">0</span>
+        </button>
+        <button class="admin-tab tab-facil" id="facilTabHistory" onclick="switchFacilTab('history')">
+          <span>🕘 Riwayat</span>
+        </button>
+      </div>
+      <div class="admin-body" id="facilStudentList"></div>
+      <div class="admin-body" id="facilHistoryList" style="display:none;"></div>
+    </div>
   </section>
 
   <!-- ===== MODALS ===== -->
@@ -1564,6 +1765,41 @@ if("serviceWorker" in navigator){
       <p style="font-size:13.5px;line-height:1.5;">Poin ini nunjukin seberapa jauh kamu udah menjelajah &amp; belajar di rumah ini — nambah tiap kamu menyelesaikan sebuah ruangan atau aktivitas refleksi.</p>
       <p style="font-size:13.5px;line-height:1.5;">Poin bukan buat dibelanjakan — anggap aja ini catatan perjalananmu, sama kayak lencana di Trophy.</p>
       <button class="btn-primary btn-block" onclick="closeModal('modalPoin')">Oke, ngerti</button>
+    </div>
+  </div>
+
+  <!-- Tindak Lanjuti siswa — dibuka fasilitator dari kartu siswa di Dashboard
+       Fasilitator. Satu form buat dua aksi sekaligus: ubah status & (opsional)
+       kirim pesan singkat, biar fasilitator nggak perlu bolak-balik. -->
+  <div class="modal-backdrop" id="modalTindakLanjut">
+    <div class="modal-card" style="text-align:left;">
+      <div class="center" style="font-size:30px;">🧑‍🏫</div>
+      <h3 class="center" style="margin-top:2px;" id="tindakLanjutNama">Nama Siswa</h3>
+      <span class="field-label">Status Tindak Lanjut</span>
+      <select id="tindakLanjutStatus">
+        <option value="belum">🕓 Belum Ditindaklanjuti</option>
+        <option value="dihubungi">📞 Sudah Dihubungi</option>
+        <option value="selesai">✅ Sudah Ditangani</option>
+      </select>
+      <span class="field-label">Kirim Pesan Singkat (opsional)</span>
+      <textarea id="tindakLanjutPesan" rows="3" placeholder="Mis: Kalau mau cerita, aku ada di ruang BK hari Senin ya 🙂" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #ddd0ac;font-size:14px;font-family:inherit;margin:10px 0 6px;resize:vertical;"></textarea>
+      <p style="font-size:11.5px;color:var(--grey);margin:0 0 14px;">Pesan ini akan dilihat langsung oleh siswa di dalam game. Jaga tetap suportif &amp; tidak memuat detail masalah pribadi ya — catatan lengkap cukup untuk kamu sendiri.</p>
+      <p id="tindakLanjutError" style="display:none;color:var(--danger);font-size:12.5px;margin:0 0 10px;"></p>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-outline btn-block" onclick="closeModal('modalTindakLanjut')">Batal</button>
+        <button class="btn-primary btn-block" id="btnSimpanTindakLanjut" onclick="submitTindakLanjut()">💾 Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Kotak pesan siswa — dibuka dari lonceng 💬 di lobby. Cuma satu arah
+       (fasilitator -> siswa), siswa nggak bisa membalas dari sini. -->
+  <div class="modal-backdrop" id="modalPesan">
+    <div class="modal-card" style="text-align:left;max-height:78vh;overflow-y:auto;">
+      <div class="center" style="font-size:34px;">💬</div>
+      <h3 class="center" style="margin-top:6px;">Pesan dari Fasilitator</h3>
+      <div id="pesanModalList"></div>
+      <button class="btn-primary btn-block" onclick="closeModal('modalPesan')">Tutup</button>
     </div>
   </div>
 
@@ -1851,9 +2087,12 @@ let STATE = loadState() || {
      Dipakai buat nentuin ekspresi+narasi Kak Hana di lobby (lihat MOOD_HANA),
      dan moodHistory buat deteksi pola 3-hari-berturut (lihat computeMoodStreak).
      moodHistory ikut ke-sync ke server lewat syncStateToSheet (STATE utuh),
-     jadi datanya sudah tersedia di sheet server meski dashboard fasilitator
-     yang menampilkannya belum dibangun (lihat catatan di loginFasilitator). */
-  mood: "", moodAt: "", moodHistory: [], moodStreak: 0,
+     jadi datanya sudah tersedia di sheet server dan ditampilkan di Dashboard
+     Fasilitator (lihat renderFacilitatorDashboard).
+     pesanLastSeenAt: waktu terakhir siswa buka kotak pesan dari fasilitator —
+     dipakai buat nentuin titik notifikasi 💬 di lobby masih perlu tampil atau
+     nggak (lihat checkFacilitatorMessages). */
+  mood: "", moodAt: "", moodHistory: [], moodStreak: 0, pesanLastSeenAt: "",
 };
 
 function saveState(){
@@ -2398,7 +2637,7 @@ function confirmNewAccountProceed(){
   proceedNewAccount();
 }
 function proceedNewAccount(){
-  STATE = { name:"", pin:"", gender:"perempuan", jenjang:"sma", points:0, level:1, badges:{}, kunciNilai:{}, hikmah:{}, infoNetral:{}, roomsDone:{}, before:{}, after:{}, journal:"", charChosen:false, fasilitator:"" };
+  STATE = { name:"", pin:"", gender:"perempuan", jenjang:"sma", points:0, level:1, badges:{}, kunciNilai:{}, hikmah:{}, infoNetral:{}, roomsDone:{}, before:{}, after:{}, journal:"", charChosen:false, fasilitator:"", pesanLastSeenAt:"" };
   saveState();
   closeModal("modalEntryChoice");
   openChooseFasilitator();
@@ -2514,8 +2753,11 @@ async function submitFasilitatorLogin(){
   btn.disabled = false; btn.textContent = "MASUK SEBAGAI FASILITATOR";
   if(result.status === "ok"){
     logToSheet("login_fasilitator", {nama: result.nama});
+    FACIL_SESSION = {username, password, nama: result.nama, instansi: result.instansi||""};
     closeModal("modalFasilitatorLogin");
-    showInfoModal("INFO", "Selamat datang, "+result.nama+". Dashboard fasilitator sedang disiapkan dan akan segera hadir.");
+    document.getElementById("facilWhoLabel").textContent = result.nama;
+    goTo("screen-fasilitator");
+    renderFacilitatorDashboard();
   } else if(result.status === "pending"){
     errorEl.textContent = "Akun fasilitatormu masih menunggu persetujuan admin.";
     errorEl.style.display = "block";
@@ -2528,6 +2770,159 @@ async function submitFasilitatorLogin(){
   }
 }
 
+/* ---------- DASHBOARD FASILITATOR ---------- */
+let FACIL_SESSION = null; // {username, password, nama, instansi} — disimpan di memori saja
+let FACIL_STUDENTS = []; // cache list terakhir, dipakai modal Tindak Lanjuti tanpa fetch ulang
+const STATUS_OPTIONS = [
+  {key:"belum",      label:"Belum Ditindaklanjuti", emoji:"🕓", cls:"pending"},
+  {key:"dihubungi",  label:"Sudah Dihubungi",       emoji:"📞", cls:"info"},
+  {key:"selesai",    label:"Sudah Ditangani",       emoji:"✅", cls:"done"},
+];
+function facilParams(){
+  return FACIL_SESSION ? {facUser: FACIL_SESSION.username, facPass: FACIL_SESSION.password} : {};
+}
+function facilitatorLogout(){
+  FACIL_SESSION = null;
+  goTo("screen-title");
+}
+function switchFacilTab(tab){
+  document.getElementById("facilTabStudents").classList.toggle("active", tab==="students");
+  document.getElementById("facilTabHistory").classList.toggle("active", tab==="history");
+  document.getElementById("facilStudentList").style.display = tab==="students" ? "grid" : "none";
+  document.getElementById("facilHistoryList").style.display = tab==="history" ? "grid" : "none";
+  if(tab === "history") renderFacilitatorHistory();
+}
+async function renderFacilitatorDashboard(){
+  const statusLookup = Object.fromEntries(STATUS_OPTIONS.map(s=>[s.key,s]));
+  const moodLookup = Object.fromEntries(MOOD_OPTIONS.map(m=>[m.key,m]));
+  const totalRooms = ROOMS.length;
+  const summaryBox = document.getElementById("facilSummary");
+  const listBox = document.getElementById("facilStudentList");
+  listBox.innerHTML = `<p class="admin-empty">Memuat…</p>`;
+  const result = await apiGet("list_students_for_facilitator", facilParams());
+  if(result.status !== "ok"){
+    summaryBox.innerHTML = "";
+    listBox.innerHTML = `<p class="admin-empty"><span class="ee-icon">⚠️</span>Gagal memuat data. Coba lagi.</p>`;
+    return;
+  }
+  let list = result.list || [];
+  document.getElementById("facilStudentsCount").textContent = list.length;
+  const isAttn = u => (u.mood==="sedih"||u.mood==="berat") && u.status!=="selesai";
+  const avgRooms = list.length ? Math.round(list.reduce((a,u)=>a+(u.roomsDone||0),0)/list.length) : 0;
+  const needAttention = list.filter(isAttn).length;
+  summaryBox.innerHTML = `
+    <div class="facil-stat"><div class="n">${list.length}</div><div class="l">Siswa Bimbingan</div></div>
+    <div class="facil-stat"><div class="n">${avgRooms}/${totalRooms}</div><div class="l">Rata² Ruangan</div></div>
+    <div class="facil-stat"><div class="n">${needAttention}</div><div class="l">Perlu Perhatian</div></div>
+  `;
+  if(list.length === 0){
+    FACIL_STUDENTS = [];
+    listBox.innerHTML = `<p class="admin-empty"><span class="ee-icon">🧑‍🏫</span>Belum ada siswa yang ditempatkan ke kamu. Hubungi admin sekolah untuk penempatan.</p>`;
+    return;
+  }
+  // siswa yang perlu perhatian tampil paling atas, biar nggak kelewat
+  list = list.slice().sort((a,b)=> (isAttn(b)?1:0) - (isAttn(a)?1:0));
+  FACIL_STUDENTS = list;
+  listBox.innerHTML = list.map((u,i)=>{
+    const pct = Math.round(((u.roomsDone||0)/totalRooms)*100);
+    const moodInfo = moodLookup[u.mood];
+    const moodTag = moodInfo
+      ? `<span class="facil-mood-tag">${moodInfo.emoji} ${moodInfo.label}${u.moodStreak>=3?" · "+u.moodStreak+" hari berturut":""}</span>`
+      : `<span class="facil-mood-tag">Belum ada check-in mood</span>`;
+    const statusInfo = statusLookup[u.status];
+    const statusPill = statusInfo
+      ? `<span class="status-pill ${statusInfo.cls}">${statusInfo.emoji} ${statusInfo.label}</span>`
+      : `<span class="status-pill pending">🕓 Belum Ditindaklanjuti</span>`;
+    const attnFlag = isAttn(u) ? `<div class="facil-row-attn-flag">⚠️ Perlu perhatian — mood ${moodInfo?moodInfo.label.toLowerCase():"kurang baik"} beberapa waktu terakhir</div>` : "";
+    return `
+    <div class="facil-row ${isAttn(u)?'facil-row--attn':''}" style="--i:${i}">
+      ${attnFlag}
+      <div class="facil-row-top">
+        <div class="admin-avatar">${initials(u.nama)}</div>
+        <div style="min-width:0;">
+          <div class="facil-row-name">${escapeHtml(u.nama)}</div>
+          <div class="facil-row-sub">${u.points||0} poin · terakhir aktif ${formatTanggalSingkat(u.terakhir)}</div>
+        </div>
+      </div>
+      <div class="facil-progress-wrap">
+        <div class="facil-progress-bar"><div style="width:${pct}%"></div></div>
+        <span class="facil-progress-label">${u.roomsDone||0}/${totalRooms}</span>
+      </div>
+      ${moodTag}
+      <div class="facil-row-status-line">
+        ${statusPill}
+        <button class="btn-approve" style="flex:none;padding:8px 14px;font-size:12px;border-radius:10px;background:linear-gradient(180deg,var(--facil-mid),var(--facil-deep));color:#fff;font-weight:800;" onclick="openTindakLanjutModal('${u.nama.replace(/'/g,"\\'")}','${u.pin}')">✏️ Tindak Lanjuti</button>
+      </div>
+    </div>
+  `;}).join("");
+}
+async function renderFacilitatorHistory(){
+  const box = document.getElementById("facilHistoryList");
+  box.innerHTML = `<p class="admin-empty">Memuat…</p>`;
+  const result = await apiGet("list_history_for_facilitator", facilParams());
+  if(result.status !== "ok"){
+    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">⚠️</span>Gagal memuat data. Coba lagi.</p>`;
+    return;
+  }
+  const list = result.list || [];
+  if(list.length === 0){
+    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">🕘</span>Belum ada riwayat tindakan. Mulai dari tab Siswa Bimbingan.</p>`;
+    return;
+  }
+  const statusLookup = Object.fromEntries(STATUS_OPTIONS.map(s=>[s.key,s]));
+  box.innerHTML = list.map((h,i)=>{
+    const isStatus = h.jenis === "status";
+    const statusInfo = isStatus ? statusLookup[h.isi] : null;
+    const bodyHtml = isStatus
+      ? `Status <b>${escapeHtml(h.siswaNama)}</b> diubah jadi ${statusInfo ? statusInfo.emoji+" "+statusInfo.label : escapeHtml(h.isi)}`
+      : `Kirim pesan ke <b>${escapeHtml(h.siswaNama)}</b>: "${escapeHtml(h.isi)}"`;
+    return `
+    <div class="facil-history-row" style="--i:${i}">
+      <div class="h-top"><span>${isStatus?"🔄 Ubah status":"💬 Pesan terkirim"}</span><span>${formatTanggalSingkat(h.waktu)}</span></div>
+      <div class="h-body">${bodyHtml}</div>
+    </div>
+  `;}).join("");
+}
+let TINDAK_LANJUT_TARGET = null; // {nama, pin} siswa yang lagi diedit di modal
+function openTindakLanjutModal(nama, pin){
+  const siswa = FACIL_STUDENTS.find(u=>u.nama===nama && String(u.pin)===String(pin));
+  TINDAK_LANJUT_TARGET = {nama, pin};
+  document.getElementById("tindakLanjutNama").textContent = nama;
+  document.getElementById("tindakLanjutStatus").value = (siswa && siswa.status) || "belum";
+  document.getElementById("tindakLanjutPesan").value = "";
+  document.getElementById("tindakLanjutError").style.display = "none";
+  openModal("modalTindakLanjut");
+}
+async function submitTindakLanjut(){
+  if(!TINDAK_LANJUT_TARGET) return;
+  const errorEl = document.getElementById("tindakLanjutError");
+  const btn = document.getElementById("btnSimpanTindakLanjut");
+  const status = document.getElementById("tindakLanjutStatus").value;
+  const pesan = document.getElementById("tindakLanjutPesan").value.trim();
+  btn.disabled = true; btn.textContent = "Menyimpan...";
+  errorEl.style.display = "none";
+  const {nama, pin} = TINDAK_LANJUT_TARGET;
+  const statusResult = await apiGet("set_student_status", Object.assign({}, facilParams(), {nama, pin, status}));
+  let pesanResult = {status:"ok"};
+  if(pesan) pesanResult = await apiGet("send_message_to_student", Object.assign({}, facilParams(), {nama, pin, pesan}));
+  btn.disabled = false; btn.textContent = "💾 Simpan";
+  if(statusResult.status === "ok" && pesanResult.status === "ok"){
+    closeModal("modalTindakLanjut");
+    renderFacilitatorDashboard();
+  } else {
+    errorEl.textContent = "Gagal menyimpan. Cek koneksi internet, lalu coba lagi.";
+    errorEl.style.display = "block";
+  }
+}
+function formatTanggalSingkat(val){
+  if(!val) return "-";
+  try{
+    const d = new Date(val);
+    if(isNaN(d.getTime())) return "-";
+    return d.toLocaleDateString("id-ID",{day:"numeric",month:"short",year:"numeric"});
+  }catch(e){ return "-"; }
+}
+
 /* ---------- ADMIN ---------- */
 function entryAdminLogin(){
   closeModal("modalEntryChoice");
@@ -2537,6 +2932,18 @@ function entryAdminLogin(){
   openModal("modalAdminLogin");
 }
 let ADMIN_SESSION = null; // {username, password} — disimpan di memori saja, dikirim ulang tiap panggilan API admin
+
+// Code.gs (adminGuard_) membaca kredensial admin dari field "adminUser"/"adminPass",
+// BUKAN "username"/"password" — nama itu sengaja dipisah supaya tidak pernah
+// bentrok dengan field "username" yang dipakai endpoint lain (mis. username
+// fasilitator target di approve_fasilitator). Helper ini yang menerjemahkannya.
+function adminParams(){
+  return ADMIN_SESSION ? {adminUser: ADMIN_SESSION.username, adminPass: ADMIN_SESSION.password} : {};
+}
+function initials(name){
+  const parts = (name||"?").trim().split(/\s+/);
+  return ((parts[0]?.[0]||"") + (parts[1]?.[0]||"")).toUpperCase() || "?";
+}
 
 async function submitAdminLogin(){
   const username = document.getElementById("adminUsername").value.trim();
@@ -2574,32 +2981,35 @@ function adminLogout(){
 function switchAdminTab(tab){
   document.getElementById("adminTabPending").classList.toggle("active", tab==="pending");
   document.getElementById("adminTabUsers").classList.toggle("active", tab==="users");
-  document.getElementById("adminPendingList").style.display = tab==="pending" ? "block" : "none";
-  document.getElementById("adminUsersList").style.display = tab==="users" ? "block" : "none";
+  document.getElementById("adminPendingList").style.display = tab==="pending" ? "grid" : "none";
+  document.getElementById("adminUsersList").style.display = tab==="users" ? "grid" : "none";
   if(tab === "pending") renderAdminPending();
   else renderAdminUsers();
 }
 async function renderAdminPending(){
   const box = document.getElementById("adminPendingList");
-  box.innerHTML = `<p class="admin-empty">Memuat...</p>`;
-  const result = await apiGet("list_fasilitator_pending", ADMIN_SESSION||{});
+  box.innerHTML = `<p class="admin-empty">Memuat…</p>`;
+  const result = await apiGet("list_fasilitator_pending", adminParams());
   if(result.status !== "ok"){
-    box.innerHTML = `<p class="admin-empty">Gagal memuat data. Coba lagi.</p>`;
+    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">⚠️</span>Gagal memuat data. Coba lagi.</p>`;
     document.getElementById("adminPendingCount").textContent = "0";
     return;
   }
   const list = result.list || [];
   document.getElementById("adminPendingCount").textContent = list.length;
   if(list.length === 0){
-    box.innerHTML = `<p class="admin-empty">🎉 Tidak ada pendaftaran fasilitator yang menunggu persetujuan.</p>`;
+    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">🎉</span>Tidak ada pendaftaran fasilitator yang menunggu persetujuan.</p>`;
     return;
   }
-  box.innerHTML = list.map(f=>`
-    <div class="admin-row">
+  box.innerHTML = list.map((f,i)=>`
+    <div class="admin-row admin-row--facil" style="--i:${i}">
       <div class="admin-row-top">
-        <div>
-          <div class="admin-row-name">${f.nama}</div>
-          <div class="admin-row-sub">${f.instansi||"-"} · @${f.username}</div>
+        <div class="admin-row-id">
+          <div class="admin-avatar">${initials(f.nama)}</div>
+          <div>
+            <div class="admin-row-name">${f.nama}</div>
+            <div class="admin-row-sub">${f.instansi||"-"} · @${f.username}</div>
+          </div>
         </div>
         <span class="status-pill pending">MENUNGGU</span>
       </div>
@@ -2611,34 +3021,37 @@ async function renderAdminPending(){
   `).join("");
 }
 async function approveFasilitatorAction(username, approve){
-  await apiGet("approve_fasilitator", Object.assign({}, ADMIN_SESSION, {username, approve: approve?"1":"0"}));
+  await apiGet("approve_fasilitator", Object.assign({}, adminParams(), {username, approve: approve?"1":"0"}));
   renderAdminPending();
 }
 async function renderAdminUsers(){
   const box = document.getElementById("adminUsersList");
-  box.innerHTML = `<p class="admin-empty">Memuat...</p>`;
+  box.innerHTML = `<p class="admin-empty">Memuat…</p>`;
   const [usersResult] = await Promise.all([
-    apiGet("list_users", ADMIN_SESSION||{}),
+    apiGet("list_users", adminParams()),
     loadFasilitatorList(),
   ]);
   if(usersResult.status !== "ok"){
-    box.innerHTML = `<p class="admin-empty">Gagal memuat data. Coba lagi.</p>`;
+    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">⚠️</span>Gagal memuat data. Coba lagi.</p>`;
     document.getElementById("adminUsersCount").textContent = "0";
     return;
   }
   const list = usersResult.list || [];
   document.getElementById("adminUsersCount").textContent = list.length;
   if(list.length === 0){
-    box.innerHTML = `<p class="admin-empty">Belum ada siswa yang tersimpan di server.</p>`;
+    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">🎓</span>Belum ada siswa yang tersimpan di server.</p>`;
     return;
   }
   const fasilitatorOptions = FASILITATOR_LIST.map(f=>`<option value="${f.username}">${f.nama}${f.instansi?" — "+f.instansi:""}</option>`).join("");
   box.innerHTML = list.map((u,i)=>`
-    <div class="admin-row">
+    <div class="admin-row admin-row--siswa" style="--i:${i}">
       <div class="admin-row-top">
-        <div>
-          <div class="admin-row-name">${u.nama}</div>
-          <div class="admin-row-sub">${u.points||0} poin · ${u.roomsDone||0} ruangan selesai${u.mood ? " · mood terakhir: "+u.mood+(u.moodStreak>=3?" ("+u.moodStreak+" hari berturut)":"") : ""}</div>
+        <div class="admin-row-id">
+          <div class="admin-avatar">${initials(u.nama)}</div>
+          <div>
+            <div class="admin-row-name">${u.nama}</div>
+            <div class="admin-row-sub">${u.points||0} poin · ${u.roomsDone||0} ruangan selesai${u.mood ? " · mood terakhir: "+u.mood+(u.moodStreak>=3?" ("+u.moodStreak+" hari berturut)":"") : ""}</div>
+          </div>
         </div>
         <span class="status-pill ${u.fasilitator?'approved':'pending'}">${u.fasilitator ? "ADA FASILITATOR" : "BELUM ADA"}</span>
       </div>
@@ -2654,7 +3067,7 @@ async function renderAdminUsers(){
   list.forEach((u,i)=>{ document.getElementById("assignSel"+i).value = u.fasilitator || ""; });
 }
 async function assignFasilitatorAction(nama, pin, fasilitatorUsername){
-  await apiGet("assign_fasilitator", Object.assign({}, ADMIN_SESSION, {nama, pin, fasilitator: fasilitatorUsername}));
+  await apiGet("assign_fasilitator", Object.assign({}, adminParams(), {nama, pin, fasilitator: fasilitatorUsername}));
   renderAdminUsers();
 }
 function startNewOrContinue(){
@@ -2887,6 +3300,39 @@ function setAvatarSrc(imgEl, src){
   imgEl.style.visibility = "visible";
   imgEl.src = src;
 }
+
+/* ---------- KOTAK PESAN SISWA (dari fasilitator) ---------- */
+let FACIL_MESSAGES = [];
+async function checkFacilitatorMessages(){
+  if(!STATE.name || !STATE.pin) return;
+  const result = await apiGet("list_messages_for_student", {nama: STATE.name, pin: STATE.pin});
+  if(result.status !== "ok") return;
+  FACIL_MESSAGES = result.list || [];
+  const lastSeen = STATE.pesanLastSeenAt ? new Date(STATE.pesanLastSeenAt) : null;
+  const hasUnread = FACIL_MESSAGES.some(m => !lastSeen || new Date(m.waktu) > lastSeen);
+  const dot = document.getElementById("lobbyMsgDot");
+  if(dot) dot.style.display = hasUnread ? "block" : "none";
+}
+function openPesanModal(){
+  const box = document.getElementById("pesanModalList");
+  if(FACIL_MESSAGES.length === 0){
+    box.innerHTML = `<p style="font-size:13.5px;color:var(--grey);text-align:center;padding:20px 0;">Belum ada pesan dari fasilitator.</p>`;
+  } else {
+    box.innerHTML = FACIL_MESSAGES.map(m=>`
+      <div class="pesan-item">
+        <div class="pesan-item-top"><span>🧑‍🏫 ${escapeHtml(m.fasilitatorNama||"Fasilitator")}</span><span>${formatTanggalSingkat(m.waktu)}</span></div>
+        <p class="pesan-item-text">${escapeHtml(m.isi)}</p>
+      </div>
+    `).join("");
+  }
+  openModal("modalPesan");
+  // tandai sudah dibaca: simpan waktu sekarang, sembunyikan titik notifikasi
+  STATE.pesanLastSeenAt = new Date().toISOString();
+  saveState();
+  const dot = document.getElementById("lobbyMsgDot");
+  if(dot) dot.style.display = "none";
+}
+
 const NARASI_CHAR = {
   player: playerPortraitSrc,
   hana: ()=>"images/hana_semangat.png",
@@ -3435,16 +3881,16 @@ function finishStoryIntro(){
    pemain apapun gendernya (bukan lagi 1 slot yang gambarnya ganti-ganti
    sesuai STATE.gender). Isi tiap pintu FIXED sesuai namanya. */
 const ROOMS = [
-  {id:"pubertas", name:"Pubertas", icon:"🧑", tema:"Mengenal Tubuhku", badge:"⭐", badgeLabel:"Percaya Diri", kunci:"Mengenal Diri"},
-  {id:"menstruasi", doorImg:"menstruasi_cewe", name:"Menstruasi", icon:"🌸", tema:"Aku Siap", badge:"🌸", badgeLabel:"Peduli Diri", kunci:"Merawat Diri"},
-  {id:"mimpibasah", doorImg:"menstruasi_cowo", name:"Mimpi Basah", icon:"🌙", tema:"Siap Bertumbuh", badge:"🌙", badgeLabel:"Siap Bertumbuh", kunci:"Merawat Diri"},
-  {id:"consent", name:"Consent", icon:"🛡️", tema:"Menghargai Batasan", badge:"🛡️", badgeLabel:"Respect", kunci:"Menghargai Batasan"},
-  {id:"relasi", name:"Relasi Sehat", icon:"🤝", tema:"Healthy Relationship", badge:"🤝", badgeLabel:"Relasi Sehat", kunci:"Menghargai Orang Lain"},
-  {id:"medsos", name:"Media Sosial", icon:"📱", tema:"KBGO", badge:"📱", badgeLabel:"Digital Hero", kunci:"Bijak Bermedia"},
-  {id:"gizi", name:"Gizi", icon:"🍎", tema:"Tubuh Sehat", badge:"🍎", badgeLabel:"Healthy Badge", kunci:"Menjaga Kesehatan"},
-  {id:"konseling", name:"Konseling", icon:"💬", tema:"Ruang Tenang", badge:null, kunci:"Berani Meminta Bantuan"},
-  {id:"perpustakaan", name:"Perpustakaan", icon:"📚", tema:"Koleksi Terbuka", badge:null, kunci:null},
-  {id:"refleksi", name:"Refleksi", icon:"🪞", tema:"Ruang Terakhir", badge:null, kunci:null},
+  {id:"pubertas", name:"Pubertas", icon:"🧑", tema:"Mengenal Tubuhku", badge:"⭐", badgeLabel:"Percaya Diri", kunci:"Mengenal Diri", bg:"images/bg_ruang_pubertas.png"},
+  {id:"menstruasi", doorImg:"menstruasi_cewe", name:"Menstruasi", icon:"🌸", tema:"Aku Siap", badge:"🌸", badgeLabel:"Peduli Diri", kunci:"Merawat Diri", bg:"images/bg_ruang_menstruasi.png"},
+  {id:"mimpibasah", doorImg:"menstruasi_cowo", name:"Mimpi Basah", icon:"🌙", tema:"Siap Bertumbuh", badge:"🌙", badgeLabel:"Siap Bertumbuh", kunci:"Merawat Diri", bg:"images/bg_ruang_mimpibasah.png"},
+  {id:"consent", name:"Consent", icon:"🛡️", tema:"Menghargai Batasan", badge:"🛡️", badgeLabel:"Respect", kunci:"Menghargai Batasan", bg:"images/bg_ruang_consent.png"},
+  {id:"relasi", name:"Relasi Sehat", icon:"🤝", tema:"Healthy Relationship", badge:"🤝", badgeLabel:"Relasi Sehat", kunci:"Menghargai Orang Lain", bg:"images/bg_ruang_relasi.png"},
+  {id:"medsos", name:"Media Sosial", icon:"📱", tema:"KBGO", badge:"📱", badgeLabel:"Digital Hero", kunci:"Bijak Bermedia", bg:"images/bg_ruang_medsos.png"},
+  {id:"gizi", name:"Gizi", icon:"🍎", tema:"Tubuh Sehat", badge:"🍎", badgeLabel:"Healthy Badge", kunci:"Menjaga Kesehatan", bg:"images/bg_ruang_gizi.png"},
+  {id:"konseling", name:"Konseling", icon:"💬", tema:"Ruang Tenang", badge:null, kunci:"Berani Meminta Bantuan", bg:"images/bg_ruang_konseling.png"},
+  {id:"perpustakaan", name:"Perpustakaan", icon:"📚", tema:"Koleksi Terbuka", badge:null, kunci:null, bg:"images/bg_ruang_perpustakaan.png"},
+  {id:"refleksi", name:"Refleksi", icon:"🪞", tema:"Ruang Terakhir", badge:null, kunci:null, bg:"images/bg_ruang_refleksi.png"},
 ];
 function getRooms(){ return ROOMS.slice(); }
 
@@ -3907,6 +4353,7 @@ function tapLobbyHana(){
 function renderLobby(){
   startLobbyAmbientCycle();
   maybeShowLobbyGuide();
+  checkFacilitatorMessages(); // fire-and-forget: update badge lonceng pesan kalau ada pesan baru dari fasilitator
   document.getElementById("lobbyName").textContent = STATE.name || "Aisyah";
   document.getElementById("lobbyLevel").textContent = STATE.level;
   // avatar bulat di pojok kiri atas — pakai potret narasi (sama kayak yang muncul
@@ -4230,17 +4677,23 @@ function openRoom(id, doorEl){
 function renderRoomHome(){
   const c = document.getElementById("roomContent");
   c.innerHTML = `
-    <div class="card center">
-      <h2>${currentRoom.icon} ${currentRoom.name}</h2>
-      <p class="tagline">${currentRoom.tema}</p>
+    <div class="room-hero" style="background-image:url('${currentRoom.bg||''}')">
+      <div class="room-hero-scrim"></div>
+      <div class="room-hero-card">
+        <div class="room-hero-eyebrow">RUANG</div>
+        <h2 class="room-hero-title">${currentRoom.icon} ${currentRoom.name}</h2>
+        <p class="room-hero-tagline">${currentRoom.tema}</p>
+      </div>
+      <div class="room-hero-actions">
+        <button class="room-hero-btn room-hero-btn--side" onclick="showMateri()">MATERI</button>
+        <button class="room-hero-btn room-hero-btn--primary" onclick="startMechanic('${currentRoom.id}')">MULAI<br>GAME</button>
+        <button class="room-hero-btn room-hero-btn--side" onclick="showTarget()">TARGET</button>
+      </div>
     </div>
-    ${temanCard(currentRoom.id)}
-    <div class="room-tabs">
-      <button class="btn-outline" onclick="showMateri()">MATERI</button>
-      <button class="btn-primary" onclick="startMechanic('${currentRoom.id}')">MULAI GAME</button>
-      <button class="btn-outline" onclick="showTarget()">TARGET</button>
+    <div class="room-wrap">
+      ${temanCard(currentRoom.id)}
+      <div id="roomBody"></div>
     </div>
-    <div id="roomBody"></div>
   `;
 }
 const MATERI_TEXT = {
