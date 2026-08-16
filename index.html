@@ -28,10 +28,19 @@
     --danger:#B5482F;
     --radius:18px;
     --shadow:0 10px 30px rgba(31,94,74,.18);
+    /* Lebar Kak Hana versi "besar pojok kiri" (.room-hana-corner) — dipakai
+       ulang buat ngitung offset centering kartu kuis biar nggak berat
+       sebelah (lihat #roomContent:has(> .room-hero.backdrop-mode)). */
+    --hana-corner-w:clamp(190px,26vw,300px);
     /* identitas peran — dipakai konsisten di kartu pilih peran (login) & Panel Admin,
        supaya "wilayah Admin" dan "wilayah Fasilitator" selalu terasa beda di mata siswa/guru. */
     --admin-deep:#7A2456; --admin-mid:#B0508A; --admin-soft:#F7EAF2;
     --facil-deep:#1F4E79; --facil-mid:#4C86C4; --facil-soft:#EAF1FA;
+    /* versi r,g,b dari --card (dipisah biar bisa dipakai di rgba() buat kartu
+       kaca #roomBody .card) — WAJIB disetel ulang bareng --card tiap ganti
+       mode (lihat body.mode-contrast), kalau nggak kartu kaca nggak ikut
+       gelap pas mode kontras aktif. */
+    --card-rgb:251,248,239;
     font-family:'Segoe UI', 'Nunito', system-ui, -apple-system, sans-serif;
   }
   #rotateOverlay{
@@ -99,6 +108,79 @@
     position:absolute;inset:0;pointer-events:none;
     background:linear-gradient(180deg, rgba(15,20,15,0) 55%, rgba(10,14,10,.75) 100%);
   }
+  /* MODE BACKDROP: dipakai selama main (kuis/level/mini-game) berlangsung.
+     Foto ruangan TETAP kelihatan (bukan diganti cream polos) tapi diredam
+     jadi backdrop blur full-layar di belakang konten, biar tema ruangan
+     kerasa nyambung terus tanpa ganggu keterbacaan teks/tombol di depannya
+     — soalnya kontennya sendiri dipindah ke gaya "kartu kaca" (lihat
+     #roomBody .card di bawah). position:fixed dipakai (bukan absolute) biar
+     nutup FULL viewport termasuk area di belakang topbar, apa pun tinggi
+     konten di roomBody nanti (bisa discroll panjang). */
+  .room-hero.backdrop-mode{
+    position:fixed;inset:0;z-index:0;width:100%;height:100%;min-height:0;flex:none;
+    /* Turun lagi dari 11px -> 7px, brightness naik dari .62 -> .74 — biar
+       bentuk objek di foto (rak, jendela, dst) masih bisa ditebak siluetnya,
+       nggak jatuh jadi "warna dasar doang". Kartu kaca di depan tetap
+       kebaca karena dia punya blur+tint sendiri (lihat #roomBody .card),
+       independen dari pengaturan ini. */
+    filter:blur(9.5px) brightness(.74) saturate(1.1);
+    transform:scale(1.08);
+  }
+  .room-hero.backdrop-mode .room-hero-scrim,
+  .room-hero.backdrop-mode .room-hero-actions,
+  .room-hero.backdrop-mode .room-char-wrap,
+  .room-hero.backdrop-mode .hana-intro-wrap{display:none;}
+  /* transisi sesaat: scene narasi Kak Hana (lihat .hana-intro-wrap) numpang
+     tampil DI ATAS foto ruangan yang masih tajam — companion ruangan &
+     tombol MATERI/MULAI/TARGET disembunyikan sementara biar nggak numpuk
+     sama Kak Hana yang lagi "ngomong". */
+  /* transisi sesaat: scene narasi Kak Hana (lihat .hana-intro-wrap) numpang
+     tampil DI ATAS foto ruangan yang masih tajam — tombol MATERI/MULAI/TARGET
+     disembunyikan sementara (nggak relevan pas lagi ada dialog). Companion
+     ruangan SENGAJA nggak disembunyikan lagi di sini — dia cuma diredupin
+     lewat class .dimmed (lihat roomCompanion & showHanaGameIntro) biar nggak
+     tiba-tiba ilang dari layar. */
+  .room-hero.hero-in-transition .room-hero-actions{display:none;}
+  /* Kak Hana muncul di scene pembuka sebelum kuis/level dimulai — posisinya
+     di KANAN (companion ruangan biasanya di kiri), biar dua momen (cerita
+     teman vs pengantar Kak Hana) nggak numpuk visual walau beda waktu. Dia
+     SELALU ada di DOM sejak ruangan dibuka (lihat renderRoomHome), mulai
+     dalam kondisi .dimmed (bubble/chip belum ada) — pas giliran ngomong,
+     class .dimmed dicabut & baru diisi teks (lihat showHanaGameIntro). Jadi
+     dia juga nggak "tiba-tiba muncul", cuma pindah terang. */
+  .hana-intro-wrap{
+    position:absolute;width:36%;max-width:220px;z-index:2;
+    display:flex;flex-direction:column;align-items:flex-end;pointer-events:none;
+  }
+  .hana-intro-bubble{
+    pointer-events:auto;flex:none;margin-right:8px;margin-bottom:6px;
+    max-width:calc(100% - 8px);background:var(--card);color:var(--ink);
+    border-radius:16px;border-right:4px solid var(--gold);padding:9px 13px;
+    font-size:12px;line-height:1.42;box-shadow:0 6px 14px rgba(0,0,0,.35);
+    position:relative;text-align:left;transition:opacity .35s ease;
+  }
+  .hana-intro-bubble b{display:block;color:var(--text-accent);font-size:10.5px;letter-spacing:.3px;margin-bottom:2px;}
+  .hana-intro-bubble::after{
+    content:'';position:absolute;right:14px;bottom:-7px;
+    width:0;height:0;border:7px solid transparent;
+    border-top-color:var(--card);border-bottom:0;
+  }
+  .hana-intro-standing{
+    display:block;width:100%;height:auto;max-height:50vh;
+    object-fit:contain;object-position:bottom right;
+    filter:drop-shadow(0 8px 10px rgba(0,0,0,.5));
+    animation:roomCharBreathe 3.6s ease-in-out infinite;transform-origin:bottom center;
+    transition:filter .5s ease;
+  }
+  .hana-intro-wrap.dimmed .hana-intro-standing{filter:drop-shadow(0 8px 10px rgba(0,0,0,.5)) brightness(.4) saturate(.3);}
+  /* "reply chip" — pengganti gambar player (nggak ada asetnya) biar tetap
+     kerasa dialog dua arah: muncul abis Kak Hana selesai "ngomong". */
+  .hana-reply-chip{
+    pointer-events:auto;visibility:hidden;margin-top:10px;margin-right:8px;
+    background:var(--green-deep);color:#fff;border:none;border-radius:999px;
+    padding:10px 18px;font-size:13px;font-weight:800;box-shadow:0 8px 16px rgba(0,0,0,.3);
+    align-self:flex-end;font-family:inherit;
+  }
   /* kontrol atas (← Lobby / judul / ikon) nempel di ATAS foto ruangan itu
      sendiri — bukan bar hijau solid terpisah yang makan tinggi layar &
      bikin dobel-bar + scroll. Cukup gradient tipis di paling atas biar ikon
@@ -111,6 +193,11 @@
   }
   .room-topbar-overlay > *{pointer-events:auto;}
   .room-topbar-overlay .who{font-size:13px;font-weight:700;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.5);}
+  /* 4 ikon kanan atas dikelompokkan jadi 2 pasang (Pengaturan+Layar Penuh /
+     Musik+Keluar) dengan jarak antar-grup lebih lega dari jarak dalam grup,
+     biar nggak numpuk rapat & nggak gampang mis-tap di layar kecil. */
+  .room-topbar-icons{display:flex;align-items:center;gap:12px;margin-left:auto;}
+  .room-topbar-icon-group{display:flex;align-items:center;gap:6px;}
   /* karakter teman berdiri penuh di dalam ruangan (sprite yang sama dipakai di
      adegan cerita) — dipasang persis seperti Kak Hana di lobby, BUKAN avatar
      bulat kecil + kotak chat. Bubble krem sama gayanya (lihat .lobby-char-bubble).
@@ -125,8 +212,13 @@
     max-width:calc(100% - 8px);background:var(--card);color:var(--ink);
     border-radius:16px;border-left:4px solid var(--gold);padding:9px 13px;
     font-size:12px;line-height:1.42;box-shadow:0 6px 14px rgba(0,0,0,.35);
-    position:relative;
+    position:relative;transition:opacity .35s ease;
   }
+  /* "spotlight": pas giliran Kak Hana ngomong (lihat showHanaGameIntro),
+     teman ruangan nggak ilang tiba-tiba — cuma diredupin & bubble-nya
+     memudar, jadi transisinya halus, bukan pop in/out. */
+  .room-char-wrap.dimmed .room-char-standing{filter:drop-shadow(0 8px 10px rgba(0,0,0,.5)) brightness(.4) saturate(.3);}
+  .room-char-wrap.dimmed .room-char-bubble{opacity:0;pointer-events:none;}
   .room-char-bubble b{display:block;color:var(--text-accent);font-size:10.5px;letter-spacing:.3px;margin-bottom:2px;}
   .room-char-bubble::after{
     content:'';position:absolute;left:14px;bottom:-7px;
@@ -148,6 +240,64 @@
     object-fit:contain;object-position:bottom left;
     filter:drop-shadow(0 8px 10px rgba(0,0,0,.5));
     animation:roomCharBreathe 3.6s ease-in-out infinite;transform-origin:bottom center;
+    transition:filter .5s ease;
+  }
+  /* ===== Kak Hana "besar di pojok kiri" (screen-room, layar lebar) =====
+     Fixed ke viewport (bukan ke #roomBody yang bisa panjang & discroll),
+     jadi dia selalu kelihatan nempel di kiri bawah nggak peduli konten kartu
+     lagi sepanjang apa — sama kayak Kak Hana di Lobby. Lebarnya dibatasi %
+     + max-width supaya nggak numpuk sama kartu tengah (.room-wrap max-width
+     640px) di layar medium; makanya versi ini DIMATIKAN total di bawah
+     1100px lewat media query di bawah, digantikan avatar bulat ringkas
+     (.hana-line, sudah ada dari awal) yang lebih pas buat layar sempit/HP. */
+  .room-hana-corner{
+    position:fixed;left:0;bottom:0;z-index:1;
+    width:var(--hana-corner-w);
+    height:min(76vh,600px);
+    display:none; /* default disembunyikan — cuma tampil pas fase main beneran,
+      lihat class .showing yang ditoggle di hideRoomHero()/renderRoomHome() */
+    align-items:flex-end;justify-content:flex-start;
+    pointer-events:none;
+  }
+  .room-hana-corner.showing{display:flex;}
+  .room-hana-corner-standing{
+    height:100%;width:100%;object-fit:contain;object-position:bottom left;
+    filter:drop-shadow(0 10px 14px rgba(0,0,0,.5));
+    animation:charBreatheLobby 2.6s ease-in-out infinite;transform-origin:bottom center;
+  }
+  /* balon penjelasan nempel di sekitar kepala, gaya sama kayak
+     .lobby-char-bubble — krem, lidah segitiga di bawah kiri. */
+  .room-hana-corner-bubble{
+    position:absolute;left:58%;bottom:64%;
+    width:max-content;max-width:250px;background:var(--card);color:var(--ink);
+    border-radius:16px;border-left:4px solid var(--gold);padding:10px 14px 10px 12px;
+    font-size:12.5px;line-height:1.45;box-shadow:0 6px 14px rgba(0,0,0,.35);
+  }
+  .room-hana-corner-bubble b{display:block;color:var(--text-accent);font-size:10.5px;letter-spacing:.3px;margin-bottom:2px;}
+  .room-hana-corner-bubble::after{
+    content:'';position:absolute;left:22px;bottom:-7px;
+    width:0;height:0;border:7px solid transparent;
+    border-top-color:var(--card);border-bottom:0;
+  }
+  /* animasi kecil tiap teksnya ganti (lihat hanaLine() — retrigger lewat
+     reflow), biar kerasa "baru ngomong", bukan teks yang cuma diam-diam
+     ganti sendiri. Reuse keyframes bubblePopIn punya Lobby. */
+  .room-hana-corner-bubble.pop-in{animation:bubblePopIn .4s cubic-bezier(.34,1.56,.64,1);}
+  @media (max-width: 1100px){
+    .room-hana-corner.showing{display:none;}
+  }
+  @media (min-width: 1101px){
+    /* Di layar lebar giliran versi pojok kiri yang tampil, jadi avatar bulat
+       ringkas yang nempel di tiap kartu (mitos/kuis/dst) disembunyikan biar
+       nggak dobel-dobel nampilin Kak Hana di 2 tempat sekaligus.
+       Selector-nya sengaja ditulis 2x (.hana-line.hana-line) buat naikin
+       spesifisitas dikit — soalnya base rule ".hana-line{display:flex}"
+       (lihat CSS-nya di bagian bawah, dekat #roomBody) letaknya lebih
+       BELAKANG di file ini, dan spesifisitasnya sama-sama 1 class, jadi
+       tanpa trik ini base rule itu yang menang di urutan cascade & bikin
+       versi kecilnya tetap nongol dobel sama versi pojok kiri di layar
+       lebar (persis bug yang kejadian). */
+    .hana-line.hana-line{display:none;}
   }
   @keyframes roomCharBreathe{
     0%,100%{transform:scaleY(1);}
@@ -172,11 +322,76 @@
   @media (hover:hover) and (pointer:fine){
     .room-hero-btn:hover{transform:translateY(-2px);filter:brightness(1.1);}
   }
-  .room-wrap{max-width:640px;margin:0 auto;padding:18px 22px 22px;}
+  .room-wrap{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:18px 22px 22px;}
   /* Sebelum "Mulai Game" diklik, #roomBody masih kosong — biar nggak nyisain
      celah cream (padding doang, nggak ada isi) di bawah foto yang bikin harus
      scroll, wrapper-nya diciutkan total selama masih kosong. */
   .room-wrap:has(> #roomBody:empty){padding:0;margin:0;max-width:none;}
+  /* MODE BACKDROP (kuis/level/mini-game aktif, lihat .room-hero.backdrop-mode):
+     dulu #roomBody nempel di atas layar, nyisain jurang blur kosong gede di
+     bawahnya kalau kontennya pendek (mis. kartu Mitos/Fakta). Sekarang
+     di-center vertikal di sisa tinggi layar (bukan pin ke atas) — kalau
+     kontennya lebih panjang dari layar (mis. Materi/Target panjang), flex
+     ini otomatis nggak masalah, tetap discroll normal dari atas. */
+  .room-hero.backdrop-mode + .room-wrap{
+    min-height:100%;display:flex;flex-direction:column;justify-content:center;
+  }
+  /* Komposisi jadi berat sebelah kiri kalau kartu di-center di TENGAH FULL
+     LEBAR LAYAR gitu aja — soalnya Kak Hana pojok kiri (.room-hana-corner,
+     cuma tampil >=1101px) nambah bobot visual di kiri yang nggak diimbangin
+     apa-apa di kanan. Solusinya: kasih #roomContent "jatah ruang" di kiri
+     seukuran lebar Kak Hana (padding-left), jadi kartu (yang masih margin:
+     auto di dalamnya) otomatis nge-center di sisa ruang SETELAH Kak Hana,
+     bukan di tengah layar penuh — bikin grup "Kak Hana + kartu" kerasa
+     seimbang sebagai satu komposisi. */
+  @media (min-width:1101px){
+    #roomContent:has(> .room-hero.backdrop-mode){
+      padding-left:var(--hana-corner-w);box-sizing:border-box;
+    }
+  }
+  /* Kartu (.room-wrap) defaultnya shrink-to-fit ngikutin konten (nggak
+     dipaksa penuh) — di layar SANGAT lebar itu bikin dia jauh lebih kecil
+     dari sisa ruang setelah Hana, jadi gap kosong di kanan kerasa gede &
+     nyasar walau kartunya udah di-center. Dicoba geser rata-kiri dulu, tapi
+     itu malah bikin SEMUA sisa ruang numpuk ke kanan — makin lebar, bukan
+     makin kecil. Solusi yang bener: kasih kartu lebar eksplisit yang lebih
+     lega (bukan cuma max-width), jadi dia beneran makan lebih banyak ruang
+     tengah & margin kiri-kanannya (tetap center) jadi lebih tipis. */
+  @media (min-width:1101px){
+    .room-hero.backdrop-mode + .room-wrap{
+      width:min(clamp(480px, 36vw, 680px), calc(100% - 20px));
+    }
+  }
+  /* Spotlight halus khusus fase kuis/level (backdrop-mode) — dulu coba
+     gelapin PINGGIR (vignette klasik), tapi karena foto ruangannya sendiri
+     udah gelap dari sononya, efeknya nyaris nggak kerasa. Dibalik: sekarang
+     kasih glow terang lembut di TENGAH (area kartu), bukan negelapin
+     pinggir — jadi kartu kerasa "diangkat" spotlight, bukan ngambang
+     polos. Bukan child dari .room-hero (yang kena filter blur), tapi
+     pseudo-element milik .room-wrap sendiri, jadi tetep TAJAM. */
+  .room-hero.backdrop-mode + .room-wrap::before{
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:radial-gradient(ellipse 55% 50% at 50% 42%, rgba(244,238,221,.16) 0%, rgba(244,238,221,0) 70%);
+  }
+  @media (min-width:1101px){
+    /* Di layar lebar kartu udah digeser kanan (lihat #roomContent:has(...)
+       di atas) buat ngimbangin Kak Hana — glow-nya ikut digeser sejauh
+       yang sama biar tetap pas nempel di bawah kartu, bukan nyorot titik
+       kosong di tengah layar penuh. */
+    .room-hero.backdrop-mode + .room-wrap::before{
+      background:radial-gradient(ellipse 42% 55% at calc(50% + var(--hana-corner-w)/2) 42%, rgba(244,238,221,.18) 0%, rgba(244,238,221,0) 70%);
+    }
+  }
+  /* KARTU KACA — dipakai HANYA di dalam #roomBody (konten kuis/level/mekanik
+     lain, lihat .room-hero.backdrop-mode di atas), BUKAN global .card, biar
+     modal/Progress/Trophy/Admin dll tetep solid seperti biasa. Transparan +
+     blur biar foto ruangan yang jadi backdrop tetep kerasa nyambung di
+     belakangnya, tapi teks & tombol di dalamnya tetap kebaca jelas apa pun
+     foto ruangannya. */
+  #roomBody .card{
+    background:rgba(var(--card-rgb),.86);
+    -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  }
   @media (min-width:900px){
     .room-wrap{max-width:900px;}
   }
@@ -200,6 +415,9 @@
   @keyframes btnPop{0%{transform:scale(1);}40%{transform:scale(.92);}100%{transform:scale(1);}}
   .btn-pop{animation:btnPop .24s cubic-bezier(.3,1.4,.4,1);}
   .btn-primary{background:var(--green-deep);color:#fff;box-shadow:0 6px 14px rgba(31,94,74,.35);}
+  /* Tombol level yang TERKUNCI harus keliatan nggak bisa diklik (abu-abu polos,
+     bukan hijau btn-primary yang keliatan "aktif") — lihat openLevelSelect(). */
+  .btn-primary:disabled{background:#b9b3a2;color:#fff;box-shadow:none;opacity:.75;}
   .btn-gold{background:var(--gold);color:#fff;box-shadow:0 6px 14px rgba(192,138,46,.35);}
   .btn-outline{background:var(--card);color:var(--text-accent);border:2px solid var(--green-mid);}
   .btn-ghost{background:transparent;color:var(--text-accent);text-decoration:underline;font-weight:600;padding:8px;}
@@ -225,6 +443,10 @@
   .topbar .who{font-size:13px;font-weight:700;}
   .topbar .who small{display:block;font-weight:400;opacity:.85;font-size:11px;}
   .icon-btn{background:rgba(255,255,255,.15);color:#fff;border-radius:10px;padding:8px 10px;font-size:14px;}
+  /* teks nama ruangan di topbar overlay disembunyikan secara visual — sudah
+     ada plakat "RUANG ..." di tiap gambar background, jadi dobel kalau
+     ditampilin lagi di sini. Tetap dipertahankan buat screen reader. */
+  .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 
   /* splash / title */
   .logo-leaf{font-size:52px;}
@@ -1140,7 +1362,239 @@
   .quiz-opt.wrong{border-color:var(--danger);background:#fbeae5;}
   .quiz-opt.selected{border-color:var(--gold);background:#f7ecd9;}
   .quiz-opt:disabled{opacity:.75;}
+  /* pop feedback pas jawaban muncul — quiz-opt.correct/.wrong dikasih kelas
+     tambahan .pop sesaat lewat JS (lihat markQuizFeedback) biar kerasa hidup,
+     bukan cuma ganti warna diam-diam. */
+  .quiz-opt.correct.pop{animation:optPopCorrect .45s ease;}
+  .quiz-opt.wrong.pop{animation:optPopWrong .35s ease;}
+  @keyframes optPopCorrect{
+    0%{transform:scale(1);}
+    35%{transform:scale(1.045);box-shadow:0 0 0 4px rgba(62,142,110,.25);}
+    100%{transform:scale(1);}
+  }
+  @keyframes optPopWrong{
+    0%,100%{transform:translateX(0);}
+    20%{transform:translateX(-4px);}
+    40%{transform:translateX(4px);}
+    60%{transform:translateX(-3px);}
+    80%{transform:translateX(3px);}
+  }
+  /* ===== Progress bar level (Soal X dari Y + skor jalan) =====
+     Dipasang di atas tiap fase level (mitos/kuis/mini-game dst) lewat
+     renderLevelProgressBar() supaya siswa selalu kerasa progresnya jalan,
+     bukan cuma 'entah masih berapa lama lagi'. */
+  .level-progress{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .level-progress .lp-track{flex:1;height:9px;border-radius:999px;background:#e2d9bd;overflow:hidden;}
+  .level-progress .lp-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--green-mid),var(--green-deep));transition:width .5s cubic-bezier(.34,1.56,.64,1);}
+  .level-progress .lp-label{font-size:11.5px;font-weight:700;color:var(--text-accent);white-space:nowrap;}
+  .level-progress .lp-score{font-size:11.5px;font-weight:700;color:var(--gold);white-space:nowrap;}
+  .level-progress .lp-score.bump{animation:lpScoreBump .4s ease;}
+  @keyframes lpScoreBump{
+    0%{transform:scale(1);}
+    40%{transform:scale(1.35);}
+    100%{transform:scale(1);}
+  }
+  /* Kak Hana ikut 'napas'/nge-react dikit tiap tampil, biar dia kerasa hidup
+     bukan gambar statis — durasi beda tiap ekspresi biar nggak monoton. */
+  .hana-line img{animation:hanaBreathe 2.6s ease-in-out infinite;}
+  @keyframes hanaBreathe{
+    0%,100%{transform:translateY(0) scale(1);}
+    50%{transform:translateY(-2px) scale(1.02);}
+  }
+  /* ===== Urutkan Langkah: drag & drop (ganti dari klik-urut) =====
+     List kartu yang bisa diseret pakai Pointer Events (mouse + touch jadi
+     satu implementasi). Item lain BARU pindah posisi pas kartu yang diseret
+     dilepas (drop), bukan geser live realtime — supaya urutan gampang
+     dikontrol siswa dan bebas bug reorder pas jari gemetar dikit. */
+  .step-draggable-list{display:flex;flex-direction:column;gap:8px;}
+  .step-drag-item{
+    display:flex;align-items:center;gap:10px;
+    background:var(--card);border:2px solid #e2d9bd;border-radius:12px;
+    padding:11px 12px;font-weight:600;color:var(--ink);font-size:14px;
+    touch-action:none;user-select:none;cursor:grab;
+    transition:box-shadow .15s ease, border-color .15s ease;
+  }
+  .step-drag-item.dragging{
+    cursor:grabbing;position:relative;z-index:5;
+    box-shadow:0 10px 24px rgba(31,94,74,.28);border-color:var(--green-mid);
+  }
+  .step-drag-item .sdi-num{
+    flex:0 0 auto;width:22px;height:22px;border-radius:50%;
+    background:var(--green-soft);color:var(--text-accent);
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:800;
+  }
+  .step-drag-item .sdi-handle{flex:0 0 auto;color:var(--grey);font-size:15px;letter-spacing:-2px;line-height:1;}
+  .step-drag-item .sdi-text{flex:1;}
+  .step-drag-item.correct{border-color:var(--green-mid);background:var(--green-soft);}
+  .step-drag-item.wrong{border-color:var(--danger);background:#fbeae5;}
+  .step-drag-item.correct.pop{animation:optPopCorrect .45s ease;}
+  .step-drag-item.wrong.pop{animation:optPopWrong .35s ease;}
+  .step-draggable-list.locked .step-drag-item{touch-action:auto;cursor:default;}
+  /* ===== Packing Tas: drag-ke-tas =====
+     Barang mulai di "rak" (.packing-pool), diseret ke kotak tas
+     (.packing-bag). Sama Pointer Events pattern-nya kayak Urutkan Langkah
+     di atas, cuma pindah antar 2 container, bukan reorder 1 list. */
+  .packing-bag{
+    border:2px dashed #cbbf94;border-radius:14px;padding:10px 12px;margin-bottom:12px;
+    background:#faf6e8;transition:background .15s ease,border-color .15s ease;
+  }
+  .packing-bag.drag-over{border-color:var(--green-mid);background:var(--green-soft);}
+  .packing-bag-label{font-size:12px;font-weight:800;color:var(--text-accent);margin-bottom:6px;}
+  .packing-bag-items{display:flex;flex-wrap:wrap;gap:8px;min-height:36px;}
+  .packing-bag-empty{font-size:12px;color:var(--grey);align-self:center;}
+  .packing-pool{display:flex;flex-wrap:wrap;gap:8px;}
+  .packing-item{
+    background:var(--card);border:2px solid #e2d9bd;border-radius:12px;
+    padding:9px 13px;font-weight:600;font-size:13px;color:var(--ink);
+    touch-action:none;user-select:none;cursor:grab;
+    transition:box-shadow .15s ease,border-color .15s ease;
+  }
+  .packing-item.packed{border-color:var(--gold);background:#f7ecd9;}
+  .packing-item.dragging{cursor:grabbing;position:relative;z-index:5;box-shadow:0 10px 24px rgba(31,94,74,.28);border-color:var(--green-mid);}
+  .packing-item.correct{border-color:var(--green-mid);background:var(--green-soft);}
+  .packing-item.wrong{border-color:var(--danger);background:#fbeae5;}
+  /* ===== Mitos/Fakta: swipe kartu (ala Tinder) =====
+     Kartu pertanyaan itu sendiri yang diseret kiri (Mitos) / kanan (Fakta).
+     Tombol Mitos/Fakta di bawahnya TETAP ada sebagai cara alternatif (buat
+     yang lebih nyaman klik, atau kalau swipe kepencet nggak sengaja). */
+  .swipe-stage{position:relative;}
+  .swipe-card{
+    position:relative;background:var(--card);border:2px solid #e2d9bd;border-radius:16px;
+    padding:16px 16px 6px;touch-action:pan-y;cursor:grab;
+    transition:transform .3s ease, box-shadow .15s ease;
+  }
+  .swipe-card.dragging{cursor:grabbing;transition:none;box-shadow:0 12px 26px rgba(31,94,74,.22);}
+  .swipe-card.fly-left{transform:translateX(-140%) rotate(-18deg) !important;opacity:0;}
+  .swipe-card.fly-right{transform:translateX(140%) rotate(18deg) !important;opacity:0;}
+  .swipe-stamp{
+    position:absolute;top:14px;padding:4px 12px;border-radius:8px;
+    font-family:'Georgia','Iowan Old Style',serif;font-weight:700;font-size:15px;
+    letter-spacing:1px;text-transform:uppercase;pointer-events:none;opacity:0;
+  }
+  .swipe-stamp.left{left:14px;border:3px solid var(--danger);color:var(--danger);transform:rotate(-14deg);}
+  .swipe-stamp.right{right:14px;border:3px solid var(--green-mid);color:var(--green-mid);transform:rotate(14deg);}
+  /* Tombol Mitos/Fakta di bawah kartu swipe dulu putih polos berdua (cuma
+     beda teks) — sekarang dikasih warna senada sama cap "Mitos"(merah) &
+     "Fakta"(hijau) di kartunya sendiri, biar milihnya lebih cepat & kerasa
+     "gamified" (bukan cuma dua tombol form biasa). */
+  /* :not(.correct):not(.wrong) — begitu udah dijawab, feedback benar/salah
+     (lihat .quiz-opt.correct/.wrong) yang harus menang, bukan warna
+     Mitos/Fakta bawaan ini (biar nggak ketuker mana yang "bener" nurut
+     sistem vs mana yang "mitos secara warna"). */
+  #mitosOpts .quiz-opt[data-val="0"]:not(.correct):not(.wrong){background:rgba(181,72,47,.08);border-color:rgba(181,72,47,.4);color:var(--danger);}
+  #mitosOpts .quiz-opt[data-val="0"]:not(.correct):not(.wrong):hover:not(:disabled){background:rgba(181,72,47,.15);border-color:var(--danger);}
+  #mitosOpts .quiz-opt[data-val="1"]:not(.correct):not(.wrong){background:rgba(62,142,110,.1);border-color:rgba(62,142,110,.45);color:var(--green-deep);}
+  #mitosOpts .quiz-opt[data-val="1"]:not(.correct):not(.wrong):hover:not(:disabled){background:rgba(62,142,110,.18);border-color:var(--green-mid);}
+  .swipe-hint{text-align:center;font-size:11px;color:var(--grey);margin:6px 0 12px;}
+  /* ===== Bingkai narasi: briefing misi (awal level) & reward reveal (akhir level) ===== */
+  .mission-brief{margin-top:6px;}
+  .mission-brief-label{font-size:12px;font-weight:700;color:var(--text-accent);margin-bottom:8px;}
+  .mission-brief-row{
+    display:flex;align-items:center;gap:10px;
+    background:var(--green-soft);border-radius:10px;padding:8px 12px;margin-bottom:6px;
+    font-size:13px;color:var(--ink);font-weight:600;
+    opacity:0;animation:missionRowIn .4s ease forwards;
+  }
+  @keyframes missionRowIn{
+    from{opacity:0;transform:translateX(-8px);}
+    to{opacity:1;transform:none;}
+  }
+  .mb-icon{flex:0 0 auto;font-size:16px;}
+  /* Badge kecil pas lagi streak jawaban benar (>=3 beruntun) — muncul di
+     bawah bubble Kak Hana, sebelum tombol Lanjut. */
+  .streak-badge{
+    text-align:center;font-size:12px;font-weight:800;color:#b8860b;
+    background:#fdf3d9;border:1px solid #f0d998;border-radius:20px;
+    padding:5px 12px;margin:-2px 0 10px;display:inline-block;
+    animation:streakPop .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes streakPop{
+    0%{opacity:0;transform:scale(.6);}
+    100%{opacity:1;transform:scale(1);}
+  }
+  .streak-badge .flame{display:inline-block;animation:flameFlicker .6s ease-in-out infinite alternate;}
+  @keyframes flameFlicker{
+    0%{transform:scale(1) rotate(-4deg);}
+    100%{transform:scale(1.15) rotate(4deg);}
+  }
+  .reward-reveal{padding-top:10px;position:relative;overflow:hidden;animation:rewardCardIn .35s ease;}
+  @keyframes rewardCardIn{
+    0%{opacity:0;transform:scale(.92);}
+    100%{opacity:1;transform:scale(1);}
+  }
+  .reward-trophy{
+    position:relative;display:inline-block;font-size:34px;
+    animation:trophyPop .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .reward-trophy::after{
+    content:"";position:absolute;left:50%;top:50%;width:64px;height:64px;
+    transform:translate(-50%,-50%) scale(.4);border-radius:50%;
+    background:radial-gradient(circle, rgba(224,178,60,.45), rgba(224,178,60,0) 72%);
+    animation:trophyGlow 1.6s ease-out .3s infinite;pointer-events:none;
+  }
+  @keyframes trophyPop{
+    0%{transform:scale(0) rotate(-20deg);opacity:0;}
+    70%{transform:scale(1.15) rotate(6deg);opacity:1;}
+    100%{transform:scale(1) rotate(0);}
+  }
+  @keyframes trophyGlow{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.4);}
+    35%{opacity:1;}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1.5);}
+  }
+  .reward-stars{margin:6px 0 12px;}
+  .reward-star{
+    position:relative;font-size:30px;color:#e2d9bd;display:inline-block;
+    opacity:0;transform:scale(0);animation:starPop .4s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  .reward-star.filled{color:var(--gold);}
+  .reward-star.filled::after{
+    content:"";position:absolute;inset:-6px;
+    background:conic-gradient(from 0deg, rgba(255,255,255,0) 0deg, rgba(255,255,255,.9) 12deg, rgba(255,255,255,0) 24deg);
+    opacity:0;animation:starShine .7s ease-out forwards;
+    animation-delay:inherit;pointer-events:none;
+  }
+  @keyframes starPop{
+    0%{opacity:0;transform:scale(0) rotate(-30deg);}
+    55%{opacity:1;transform:scale(1.35) rotate(10deg);}
+    75%{transform:scale(.92) rotate(-4deg);}
+    100%{opacity:1;transform:scale(1) rotate(0);}
+  }
+  @keyframes starShine{
+    0%{opacity:0;transform:rotate(0deg) scale(.6);}
+    40%{opacity:1;}
+    100%{opacity:0;transform:rotate(140deg) scale(1.1);}
+  }
+  /* Confetti burst — dipicu lewat JS (confettiHTML()) di reward-reveal
+     (finishLevel / completeRoom). Potongan warna-warni jatuh & muter dari
+     atas kartu, murni CSS/JS tanpa gambar/asset tambahan. */
+  .confetti-wrap{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1;}
+  .confetti-piece{
+    position:absolute;top:-12px;width:7px;height:12px;border-radius:2px;
+    opacity:0;transform:rotate(var(--rot,0deg));
+    animation-name:confettiFall;animation-timing-function:ease-in;animation-fill-mode:forwards;
+  }
+  @keyframes confettiFall{
+    0%{opacity:0;transform:translateY(-12px) rotate(var(--rot,0deg));}
+    12%{opacity:1;}
+    100%{opacity:0;transform:translateY(180px) rotate(calc(var(--rot,0deg) + 200deg));}
+  }
   .feedback{font-size:13px;padding:10px 12px;border-radius:10px;background:var(--green-soft);color:var(--text-accent);margin-top:8px;}
+  /* Burst mini ("checkpoint") — dipicu SEKALI pas satu fase (mitos/kategori/
+     kuis) beneran kelar, BUKAN tiap jawaban benar (itu udah kepegang lewat
+     pop+SFX+ekspresi Hana, lihat quiz-opt.correct.pop). Numpang tampil
+     sebentar di atas kartu terakhir fase itu sebelum lanjut, biar transisi
+     antar-fase kerasa jadi checkpoint, bukan lompat diam-diam. Lihat JS:
+     showPhaseCompleteBurst(). */
+  .phase-burst-card{position:relative;overflow:hidden;}
+  .phase-burst{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5;}
+  .phase-burst-badge{
+    background:var(--green-deep);color:#fff;font-weight:800;font-size:13px;
+    padding:10px 18px;border-radius:999px;box-shadow:0 10px 22px rgba(0,0,0,.35);
+    text-align:center;opacity:0;animation:starPop .4s cubic-bezier(.34,1.56,.64,1) forwards;
+    animation-delay:.15s;
+  }
 
   .modal-backdrop{position:absolute;inset:0;background:rgba(20,20,15,.42);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);z-index:20;display:none;align-items:center;justify-content:center;padding:24px;overflow-y:auto;}
   .modal-backdrop.active{display:flex;}
@@ -1153,6 +1607,18 @@
     .modal-card{max-height:calc(100vh - 16px);max-height:calc(100dvh - 16px);padding:16px;}
   }
   @keyframes modalPop{from{opacity:0;transform:scale(.92) translateY(8px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  /* Modal Pilih Level — lebih lebar dari modal biasa & 3 levelnya disusun
+     SEJAJAR horizontal (grid 3 kolom), bukan ditumpuk vertikal yang bikin
+     modalnya jadi panjang & butuh scroll internal. Di layar sempit (HP)
+     otomatis balik jadi 1 kolom (tumpuk), karena di situ nggak ada ruang
+     buat 3 kolom sejajar. */
+  .level-select-card{max-width:min(900px,92vw);}
+  .level-select-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;align-items:stretch;}
+  .level-select-grid .card{margin-bottom:0;display:flex;flex-direction:column;}
+  .level-select-grid .card > button{margin-top:auto;}
+  @media (max-width:720px){
+    .level-select-grid{grid-template-columns:1fr;}
+  }
 
   /* themed modal (Ruang Tumbuh style — gold border, leaf corners, plaque header) */
   .modal-card-themed{
@@ -1226,6 +1692,21 @@
   .target-hana img{width:64px;height:64px;border-radius:50%;object-fit:cover;object-position:top center;border:3px solid var(--gold);box-shadow:0 6px 14px rgba(0,0,0,.25);background:#f2e9cf;}
   .target-hana .name{font-weight:800;color:var(--text-accent);font-size:12px;letter-spacing:.3px;}
   .target-hana .bubble{background:var(--green-soft);border-radius:2px 12px 12px 12px;padding:10px 12px;font-size:12.5px;line-height:1.5;color:var(--ink);text-align:left;}
+  /* Modal Profil — horizontal: identitas & form nama di kiri, ganti karakter
+     di kanan (dipisah garis putus-putus, sama pola kayak .tentang-grid).
+     Grid karakter dipaksa 2 kolom di dalam sini (bukan 4 kayak default
+     .char-card-grid) biar kartunya nggak kegencet di kolom yang lebih
+     sempit. Tombol aksi (Bantuan/Pengaturan/Tutup) tetap full-width di
+     bawah, ngelewatin dua kolom. */
+  .profile-card{max-width:400px;}
+  .profile-grid{display:block;}
+  .profile-grid .profile-col-right{margin-top:16px;}
+  @media (min-width:640px){
+    .profile-card{max-width:640px;}
+    .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;}
+    .profile-grid .profile-col-right{margin-top:0;border-left:1px dashed #d8cba0;padding-left:20px;}
+  }
+  .profile-char-grid.char-card-grid{grid-template-columns:repeat(2,1fr);max-width:100%;margin:6px 0 0;}
   .modal-plaque{
     display:inline-block;background:var(--green-deep);color:#fff;
     border-radius:999px;padding:9px 22px;font-size:14px;font-weight:800;
@@ -1486,7 +1967,7 @@
   }
 
   /* accessibility modes */
-  body.mode-contrast #game{--cream:#0f0f0f;--card:#1c1c1c;--ink:#f5f5f5;--green-soft:#123324;--grey:#cfcfcf;--text-accent:#8CE6B0;background:#000;}
+  body.mode-contrast #game{--cream:#0f0f0f;--card:#1c1c1c;--card-rgb:28,28,28;--ink:#f5f5f5;--green-soft:#123324;--grey:#cfcfcf;--text-accent:#8CE6B0;background:#000;}
   body.mode-contrast .tip,body.mode-contrast .footer-note,body.mode-contrast .grey-text{color:#cfcfcf;}
   body.mode-bigfont #game{font-size:19px;}
   body.mode-bigfont h1{font-size:36px;}
@@ -1728,15 +2209,32 @@ if("serviceWorker" in navigator){
   <section class="screen" id="screen-room">
     <div class="room-topbar-overlay">
       <button class="icon-btn" onclick="goTo('screen-lobby');renderLobby();">← Lobby</button>
-      <div class="who" id="roomTitleTop">Ruangan</div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
-        <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
-        <button class="icon-btn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
-        <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+      <div class="who sr-only" id="roomTitleTop">Ruangan</div>
+      <div class="room-topbar-icons">
+        <div class="room-topbar-icon-group">
+          <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan" title="Pengaturan">⚙</button>
+          <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh" title="Layar Penuh">⛶</button>
+        </div>
+        <div class="room-topbar-icon-group">
+          <button class="icon-btn js-music-btn" onclick="toggleMusic()" aria-label="Musik" title="Musik">🔊</button>
+          <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama" title="Kembali ke Menu Utama">🏠</button>
+        </div>
       </div>
     </div>
     <div id="roomContent"></div>
+    <!-- Kak Hana versi "besar di pojok kiri, tanpa frame" — gaya SAMA kayak di
+         Lobby (lihat .lobby-char-wrap). Elemen ini SEKALI ada di DOM selama
+         screen-room aktif (bukan di-render ulang tiap ganti fase), lalu
+         hanaLine() (lihat JS) yang update gambar+teksnya tiap dipanggil.
+         Cuma tampil di layar lebar (lihat media query .room-hana-corner) —
+         di HP otomatis balik ke versi ringkas avatar bulat+bubble (.hana-line)
+         yang sudah ada dari awal, biar nggak numpuk sama kartu konten. -->
+    <div class="room-hana-corner" id="roomHanaCorner">
+      <img class="room-hana-corner-standing" id="roomHanaCornerImg" src="images/hana_idle.png" alt="Kak Hana" onerror="this.style.display='none'">
+      <div class="room-hana-corner-bubble" id="roomHanaCornerBubble" style="display:none;">
+        <b>KAK HANA</b><span id="roomHanaCornerText"></span>
+      </div>
+    </div>
   </section>
 
   <!-- PROGRESS -->
@@ -1880,6 +2378,18 @@ if("serviceWorker" in navigator){
     </div>
   </div>
 
+  <!-- Pilih Level — dibuka dari tombol "PILIH LEVEL" di foto ruangan. Modal
+       (bukan navigasi ke layar/konten baru yang perlu discroll) biar siswa
+       bisa cek & pilih level lewat popup singkat lalu balik lagi, sama kayak
+       pola modalRoomInfo (Materi/Target) di atas. -->
+  <div class="modal-backdrop" id="modalLevelSelect">
+    <div class="modal-card level-select-card" id="levelSelectModalCard" style="text-align:left;max-height:82vh;overflow-y:auto;">
+      <h3 style="margin-top:0;" id="levelSelectModalTitle">📋 Pilih Level</h3>
+      <div id="levelSelectModalBody"></div>
+      <button class="btn-outline btn-block" style="margin-top:14px;" onclick="closeModal('modalLevelSelect')">Tutup</button>
+    </div>
+  </div>
+
   <!-- Tindak Lanjuti siswa — dibuka fasilitator dari kartu siswa di Dashboard
        Fasilitator. Satu form buat dua aksi sekaligus: ubah status & (opsional)
        kirim pesan singkat, biar fasilitator nggak perlu bolak-balik. -->
@@ -1966,24 +2476,30 @@ if("serviceWorker" in navigator){
        karena ini game client-side buat remaja dan nggak ada alasan kuat buat
        nyimpen data kontak pribadi semacam itu. -->
   <div class="modal-backdrop" id="modalProfile">
-    <div class="modal-card" style="text-align:left;">
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-        <div class="profile-avatar-lg"><img id="profileAvatarImg" alt=""></div>
-        <div>
-          <h3 style="margin:0;">Profil Pemain</h3>
-          <p style="margin:2px 0 0;font-size:12.5px;color:var(--grey);">Level <span id="profileLevel">1</span> · <span id="profilePoints">0</span> Poin</p>
+    <div class="modal-card profile-card" style="text-align:left;">
+      <div class="profile-grid">
+        <div class="profile-col-left">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <div class="profile-avatar-lg"><img id="profileAvatarImg" alt=""></div>
+            <div>
+              <h3 style="margin:0;">Profil Pemain</h3>
+              <p style="margin:2px 0 0;font-size:12.5px;color:var(--grey);">Level <span id="profileLevel">1</span> · <span id="profilePoints">0</span> Poin</p>
+            </div>
+          </div>
+
+          <label style="font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.4px;">Nama</label>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <input type="text" id="profileNameInput" maxlength="30" style="flex:1;">
+            <button class="btn-primary" style="white-space:nowrap;padding:0 16px;" onclick="saveProfileName()">Simpan</button>
+          </div>
+          <p id="profileNameNote" style="font-size:11px;color:var(--grey);margin:5px 0 0;">Nama & PIN dipakai buat nyambungin progres kamu — kalau diganti, inget nama barunya ya biar tetap bisa lanjut dari perangkat lain.</p>
+        </div>
+
+        <div class="profile-col-right">
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.4px;">Ganti Karakter</label>
+          <div class="char-card-grid profile-char-grid" id="profileCharGrid"></div>
         </div>
       </div>
-
-      <label style="font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.4px;">Nama</label>
-      <div style="display:flex;gap:8px;margin-top:4px;">
-        <input type="text" id="profileNameInput" maxlength="30" style="flex:1;">
-        <button class="btn-primary" style="white-space:nowrap;padding:0 16px;" onclick="saveProfileName()">Simpan</button>
-      </div>
-      <p id="profileNameNote" style="font-size:11px;color:var(--grey);margin:5px 0 0;">Nama & PIN dipakai buat nyambungin progres kamu — kalau diganti, inget nama barunya ya biar tetap bisa lanjut dari perangkat lain.</p>
-
-      <label style="display:block;margin-top:16px;font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.4px;">Ganti Karakter</label>
-      <div class="char-card-grid" id="profileCharGrid" style="max-width:320px;margin:6px 0 0;"></div>
 
       <div class="settings-footer" style="margin-top:16px;">
         <button class="btn-outline btn-block" onclick="closeModal('modalProfile');openModal('modalBantuan');">💬 Butuh Bantuan Cepat?</button>
@@ -2205,7 +2721,22 @@ let STATE = loadState() || {
      dipakai buat nentuin titik notifikasi 💬 di lobby masih perlu tampil atau
      nggak (lihat checkFacilitatorMessages). */
   mood: "", moodAt: "", moodHistory: [], moodStreak: 0, pesanLastSeenAt: "",
+  /* Progres per-level DALAM 1 ruangan (levelIdx 1-3 + skor sejauh ini),
+     key-nya roomId. Sebelum ini levelIdx cuma variabel biasa (nggak
+     ke-save), jadi keluar-masuk lobby bikin main dari Level 1 lagi
+     walau Level 1 udah kelar & dapat bintang. Dihapus dari sini pas
+     ruangan itu selesai total (lihat completeRoom). */
+  levelProgress: {},
+  /* Bintang TERBAIK yang pernah dicapai per level per ruangan — key-nya roomId,
+     isinya {levelIdx: jumlahBintang}. Beda dengan levelProgress (yang dihapus
+     pas ruangan tuntas), ini TETAP disimpan terus walau ruangan udah selesai,
+     supaya layar "Pilih Level" (lihat openLevelSelect) masih bisa nampilin
+     riwayat bintang tiap level & siswa bisa balik ngulang level manapun yang
+     udah pernah ditempuh, bukan cuma level yang baru aja diselesaikan. */
+  levelStars: {},
 };
+STATE.levelProgress = STATE.levelProgress || {}; // akun lama sebelum fitur ini ada
+STATE.levelStars = STATE.levelStars || {}; // akun lama sebelum fitur ini ada
 
 function saveState(){
   localStorage.setItem("rumah_aisyiyah_state", JSON.stringify(STATE));
@@ -2295,6 +2826,115 @@ function playClickSfx(kind){
       gain.gain.exponentialRampToValueAtTime(0.0001, t0+0.26);
       osc.connect(gain).connect(sfxCtx.destination);
       osc.start(t0); osc.stop(t0+0.28);
+      return;
+    }
+
+    // Badge terbuka: kilau ✨ — 4 nada tinggi cepat naik, kayak berkilau
+    if(kind === "badge"){
+      [1046.5, 1318.5, 1568, 2093].forEach((f,i)=>{
+        const osc = sfxCtx.createOscillator(), gain = sfxCtx.createGain();
+        const t = t0 + i*0.055;
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, t);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.11, t+0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t+0.16);
+        osc.connect(gain).connect(sfxCtx.destination);
+        osc.start(t); osc.stop(t+0.18);
+      });
+      return;
+    }
+    // Level selesai: jingle fanfare pendek 🎵 — 4 nada naik, lebih "penuh" dari correct biasa
+    if(kind === "levelComplete"){
+      [523.25, 659.25, 783.99, 1046.5].forEach((f,i)=>{
+        const osc = sfxCtx.createOscillator(), gain = sfxCtx.createGain();
+        const t = t0 + i*0.1;
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(f, t);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.19, t+0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t+0.26);
+        osc.connect(gain).connect(sfxCtx.destination);
+        osc.start(t); osc.stop(t+0.28);
+      });
+      return;
+    }
+    // Reward ruangan selesai: dua kilau beruntun ✨✨
+    if(kind === "reward"){
+      [0, 0.22].forEach(offset=>{
+        [1568, 2093].forEach((f,i)=>{
+          const osc = sfxCtx.createOscillator(), gain = sfxCtx.createGain();
+          const t = t0 + offset + i*0.05;
+          osc.type = "sine";
+          osc.frequency.setValueAtTime(f, t);
+          gain.gain.setValueAtTime(0.0001, t);
+          gain.gain.exponentialRampToValueAtTime(0.13, t+0.01);
+          gain.gain.exponentialRampToValueAtTime(0.0001, t+0.15);
+          osc.connect(gain).connect(sfxCtx.destination);
+          osc.start(t); osc.stop(t+0.17);
+        });
+      });
+      return;
+    }
+    // Ganti halaman materi: swish singkat — noise band-pass yang turun cepat
+    if(kind === "pageTurn"){
+      const bufSize = Math.floor(sfxCtx.sampleRate * 0.18);
+      const buffer = sfxCtx.createBuffer(1, bufSize, sfxCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for(let i=0;i<bufSize;i++){ data[i] = Math.random()*2-1; }
+      const noise = sfxCtx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = sfxCtx.createBiquadFilter();
+      filter.type = "bandpass"; filter.Q.value = 0.9;
+      filter.frequency.setValueAtTime(2200, t0);
+      filter.frequency.exponentialRampToValueAtTime(600, t0+0.16);
+      const gain = sfxCtx.createGain();
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.16, t0+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0+0.18);
+      noise.connect(filter).connect(gain).connect(sfxCtx.destination);
+      noise.start(t0); noise.stop(t0+0.19);
+      return;
+    }
+    // Lanjut dialog: tick lembut & pendek, biar nggak ganggu kalau diklik cepat berulang
+    if(kind === "dialogueTick"){
+      const osc = sfxCtx.createOscillator(), gain = sfxCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(720, t0);
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(0.07, t0+0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0+0.05);
+      osc.connect(gain).connect(sfxCtx.destination);
+      osc.start(t0); osc.stop(t0+0.06);
+      return;
+    }
+    // Pilih mood: chime lembut dua nada
+    if(kind === "moodChime"){
+      [660, 880].forEach((f,i)=>{
+        const osc = sfxCtx.createOscillator(), gain = sfxCtx.createGain();
+        const t = t0 + i*0.09;
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, t);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(0.13, t+0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t+0.22);
+        osc.connect(gain).connect(sfxCtx.destination);
+        osc.start(t); osc.stop(t+0.24);
+      });
+      return;
+    }
+    // Refleksi selesai: lonceng hangat — dua nada interval hangat, ekor panjang
+    if(kind === "reflectionBell"){
+      [392, 587.33].forEach((f,i)=>{
+        const osc = sfxCtx.createOscillator(), gain = sfxCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(f, t0);
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.exponentialRampToValueAtTime(i===0?0.18:0.08, t0+0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0+0.9);
+        osc.connect(gain).connect(sfxCtx.destination);
+        osc.start(t0); osc.stop(t0+0.95);
+      });
       return;
     }
 
@@ -2418,7 +3058,7 @@ function stopBirdChirp(){
    .quiz-opt dikecualikan karena punya bunyi benar/salah sendiri (lihat answerQuiz).
    Delegasi di document supaya otomatis berlaku untuk elemen yang dirender belakangan. */
 document.addEventListener("click", (e)=>{
-  const el = e.target.closest("button:not(:disabled):not(.quiz-opt), .char-card, .door:not(.locked)");
+  const el = e.target.closest("button:not(:disabled):not(.quiz-opt):not(.sfx-custom), .char-card, .door:not(.locked)");
   if(!el) return;
   const isBack = el.classList.contains("btn-ghost");
   playClickSfx(isBack ? "back" : "tap");
@@ -3309,13 +3949,14 @@ function renderMoodCheck(){
           <p>Sebelum mulai, gimana harimu hari ini?</p>
         </div>
         <div class="mood-choices">
-          ${MOOD_OPTIONS.map(m=>`<button type="button" class="mood-choice-btn" onclick="pickMood('${m.key}')"><span>${m.emoji}</span>${m.label}</button>`).join("")}
+          ${MOOD_OPTIONS.map(m=>`<button type="button" class="mood-choice-btn sfx-custom" onclick="pickMood('${m.key}')"><span>${m.emoji}</span>${m.label}</button>`).join("")}
         </div>
       </div>
     </div>
   `;
 }
 function pickMood(key){
+  playClickSfx("moodChime");
   const todayKey = new Date().toISOString().slice(0,10);
   STATE.mood = key;
   STATE.moodAt = new Date().toISOString();
@@ -3332,8 +3973,27 @@ function pickMood(key){
 
 /* Avatar Kak Hana dengan ekspresi berbeda-beda sesuai konteks.
    File yang dipakai: hana_idle.png, hana_semangat.png, hana_bangga.png,
-   hana_tertawa.png, hana_sedih.png, hana_nangis.png (semua di folder images/) */
+   hana_tertawa.png, hana_sedih.png, hana_nangis.png (semua di folder images/)
+   Selain balikin markup avatar-bulat-ringkas (dipakai di HP, lihat CSS
+   .hana-line), fungsi ini JUGA update Kak Hana versi besar di pojok kiri
+   (#roomHanaCorner, dipakai di layar lebar) sebagai side-effect — supaya
+   tiap tempat yang manggil hanaLine() otomatis nge-update KEDUA versi
+   sekaligus tanpa perlu ubah pemanggilnya satu-satu. */
 function hanaLine(expr, text){
+  const cornerImg = document.getElementById("roomHanaCornerImg");
+  const cornerBubble = document.getElementById("roomHanaCornerBubble");
+  const cornerText = document.getElementById("roomHanaCornerText");
+  if(cornerImg && cornerBubble && cornerText){
+    cornerImg.src = `images/hana_${expr}.png`;
+    cornerText.innerHTML = text;
+    cornerBubble.style.display = "block";
+    if(cornerBubble.dataset.lastLine !== text){
+      cornerBubble.dataset.lastLine = text;
+      cornerBubble.classList.remove("pop-in");
+      void cornerBubble.offsetWidth; // reflow biar animasinya bisa diputer ulang
+      cornerBubble.classList.add("pop-in");
+    }
+  }
   return `<div class="hana-line">
     <img src="images/hana_${expr}.png" alt="Kak Hana" onerror="this.remove()">
     <div class="bubble"><b>KAK HANA</b>${text}</div>
@@ -3516,7 +4176,7 @@ function renderStory(){
       ${renderCharacters(beat.chars, beat.speakerKey)}
       ${hasCheckpointAhead ? `<button type="button" class="vn-skip" onclick="skipStory()">LEWATI ⏭</button>` : ""}
       <div class="grow"></div>
-      <button type="button" class="vn-dialogue btn-block" onclick="nextStoryBeat()">
+      <button type="button" class="vn-dialogue btn-block sfx-custom" onclick="nextStoryBeat()">
         <div class="vn-speaker ${speakerLabel(beat).cls}">${speakerLabel(beat).text}</div>
         <p class="vn-text ${speakerLabel(beat).cls}">${beatText}</p>
         <span class="vn-continue">Ketuk untuk lanjut ▶</span>
@@ -3524,7 +4184,7 @@ function renderStory(){
     </div>
   `;
 }
-function nextStoryBeat(){ storyStep++; saveStoryProgress(); renderStory(); }
+function nextStoryBeat(){ playClickSfx("dialogueTick"); storyStep++; saveStoryProgress(); renderStory(); }
 /* Lewati narasi teks menuju checkpoint berikutnya (kuis Pemahaman Awal ATAU sesi
    perjalanan ketemu teman) — datanya/interaksinya penting, jadi jangan pernah dilompati.
    Kalau nggak ada checkpoint lagi di depan, tombol ini nggak ditampilkan (lihat renderStory). */
@@ -4749,22 +5409,24 @@ function corridorGoBack(){
 /* ---------- ROOM RENDERING ---------- */
 let currentRoom = null;
 /* "Kata Teman": testimoni singkat dari teman sekelas, muncul pas buka ruangan yang temanya cocok.
-   Aset yang dipakai: sprite_arga_kutubuku.png, sprite_arka_kakicacat.png, sprite_aldo_tunarungu.png,
+   Aset yang dipakai: sprite_arka_kakicacat.png, sprite_yola_gadis_papua.png, sprite_meilan_gadis_tionghoa.png,
+   sprite_amel_inscure.png, sprite_arga_kutubuku.png, sprite_aldo_tunarungu.png, sprite_radi_boy_keren.png,
    sprite_vira_disabilitas.png, sprite_rara_minder.png, sprite_rama_nerd.png (semua di images/) */
 const TEMAN_ROOM = {
-  // 8 sprite teman yang ada: aldo_tunarungu, amel_inscure, arga_kutubuku,
-  // arka_kakicacat, hana, rama_nerd, rara_minder, vira_disabilitas.
-  // 10 ruangan -> Hana & Rama kepakai 2x, sisanya masing-masing unik.
-  perpustakaan: {name:"Kak Hana", img:"images/sprite_hana.png", text:"Yuk mampir baca-baca dulu di sini — banyak bacaan ringan yang bisa nambah wawasanmu."},
+  // 10 sprite teman, 10 ruangan -> sekarang masing-masing unik, nggak ada
+  // yang dobel lagi. sprite_hana.png BELUM dipakai di sini — Kak Hana
+  // tampil lewat hanaLine()/showHanaGameIntro() (mentor lintas ruangan),
+  // bukan sebagai "teman" satu ruangan tertentu.
+  perpustakaan: {name:"Yola", img:"images/sprite_yola_gadis_papua.png", text:"Aku dulu males banget baca, sekarang malah keasyikan mampir ke sini tiap istirahat — banyak buku yang jawab pertanyaan yang aku malu tanya langsung."},
   pubertas:     {name:"Arka", img:"images/sprite_arka_kakicacat.png", text:"Tubuhku beda dari kebanyakan, tapi perubahan yang aku alami tetap sama kok — itu bikin aku makin paham diriku."},
   menstruasi:   {name:"Amel", img:"images/sprite_amel_inscure.png", text:"Awalnya aku parno & minder banget pas menstruasi pertama, takut ada apa-apa pas di sekolah — sekarang aku udah lebih siap & nggak secemas dulu."},
   mimpibasah:   {name:"Arga", img:"images/sprite_arga_kutubuku.png", text:"Aku sempat cari-cari referensi buku pas ngalamin mimpi basah pertama biar nggak bingung sendirian — ternyata itu wajar kok, tanda tubuh lagi tumbuh."},
   consent:      {name:"Aldo", img:"images/sprite_aldo_tunarungu.png", text:"Aku komunikasi pakai bahasa isyarat, tapi hak buat bilang 'tidak' tetap sama kayak orang lain."},
   relasi:       {name:"Vira", img:"images/sprite_vira_disabilitas.png", text:"Pertemanan yang sehat itu nggak lihat aku pakai kursi roda atau nggak — yang penting saling menghargai."},
   medsos:       {name:"Rama", img:"images/sprite_rama_nerd.png", text:"Sebelum ikut share apapun, aku selalu cek dulu — sekali jadi kebiasaan, jadi kebal hoaks."},
-  gizi:         {name:"Rama", img:"images/sprite_rama_nerd.png", text:"Sama kayak aku cek fakta sebelum percaya, aku juga sekarang mulai cek label makanan sebelum asal makan."},
+  gizi:         {name:"Radi", img:"images/sprite_radi_boy_keren.png", text:"Aku dulu asal makan aja tanpa mikirin gizinya — sekarang aku mulai biasain cek label makanan sebelum beli."},
   konseling:    {name:"Rara", img:"images/sprite_rara_minder.png", text:"Dulu aku malu cerita perasaanku, sekarang aku belajar itu nggak apa-apa."},
-  refleksi:     {name:"Kak Hana", img:"images/sprite_hana.png", text:"Dari semua ruangan yang udah kamu jelajahi, coba renungin lagi — mana yang paling nempel di hati kamu?"},
+  refleksi:     {name:"Meilan", img:"images/sprite_meilan_gadis_tionghoa.png", text:"Aku juga sempat balik-balik ke tiap ruangan yang udah aku lewatin — ternyata banyak hal kecil yang baru aku sadar penting pas dipikir ulang."},
 };
 /* Posisi horizontal karakter teman (dalam % dari lebar foto ruangan), biar
    bisa disetel presisi nempel ke kursi/furnitur yang ada di gambar bg
@@ -4775,13 +5437,37 @@ const TEMAN_ROOM = {
 const ROOM_CHAR_LEFT = {
   pubertas: 25,
 };
+/* Posisi horizontal & vertikal Kak Hana pas scene narasi pembuka (lihat
+   showHanaGameIntro) — semua ruangan pakai model komposisi bg yang sama,
+   jadi 1 nilai (hasil tuning di ruang Menstruasi) dipakai rata buat
+   semua, bukan per-ruangan lagi. Kalau nanti ternyata ada 1-2 ruangan
+   yang fotonya beda komposisi, tinggal isi override-nya di sini (mis.
+   `pubertas: 27`) — nilai default di showHanaGameIntro yang dipakai
+   kalau ruangan nggak ada di map ini. */
+const ROOM_HANA_RIGHT = {};
+const ROOM_HANA_BOTTOM = {};
 function roomCompanion(roomId){
   const t = TEMAN_ROOM[roomId];
   if(!t) return "";
   const leftPct = ROOM_CHAR_LEFT[roomId] != null ? ROOM_CHAR_LEFT[roomId] : 25;
-  return `<div class="room-char-wrap" style="left:${leftPct}%">
+  return `<div class="room-char-wrap" id="roomCharWrap" style="left:${leftPct}%">
     <div class="room-char-bubble"><b>${t.name.toUpperCase()}</b><span id="roomCharBubbleText"></span><span class="room-char-typecursor" id="roomCharTypeCursor"></span></div>
     <img class="room-char-standing" src="${t.img}" alt="${t.name}" onerror="this.style.display='none'">
+  </div>`;
+}
+/* Kak Hana versi "berdiri redup" — dipasang bareng companion sejak ruangan
+   pertama kali dibuka (lihat renderRoomHome), tapi belum ngomong apa-apa
+   (bubble kosong, chip disembunyikan). Baru pas "MULAI GAME" diklik,
+   showHanaGameIntro() nyalain dia (cabut .dimmed + isi teks) dan meredupkan
+   companion — jadi kayak spotlight pindah, bukan karakter pop in/out. */
+function heroHanaMarkup(roomId){
+  if(!LEVEL_ROOM_IDS.includes(roomId)) return ""; // cuma ruangan level yang punya scene "Mulai Game" ala Kak Hana
+  const rightPct = ROOM_HANA_RIGHT[roomId] != null ? ROOM_HANA_RIGHT[roomId] : 26;
+  const bottomPx = ROOM_HANA_BOTTOM[roomId] != null ? ROOM_HANA_BOTTOM[roomId] : 40;
+  return `<div class="hana-intro-wrap dimmed" id="heroHanaWrap" style="right:${rightPct}%;bottom:${bottomPx}px;">
+    <div class="hana-intro-bubble" id="hanaIntroBubble" style="display:none;"><b>KAK HANA</b><span id="hanaIntroText"></span><span class="room-char-typecursor" id="hanaIntroCursor"></span></div>
+    <img class="hana-intro-standing" src="images/sprite_hana.png" alt="Kak Hana" onerror="this.style.display='none'">
+    <button class="hana-reply-chip" id="hanaReplyChip" onclick="dismissHanaGameIntro()">Siap, yuk! →</button>
   </div>`;
 }
 // Efek ketik: teks bubble teman muncul huruf demi huruf tiap kali ruangan
@@ -4828,14 +5514,28 @@ function openRoom(id, doorEl){
 }
 function renderRoomHome(){
   const c = document.getElementById("roomContent");
+  // Reset Kak Hana versi pojok kiri tiap kali masuk/balik ke layar utama
+  // ruangan (sebelum "Mulai Misi" dsb dipencet) — biar nggak nyisain
+  // gelembung teks dari ruangan/fase SEBELUMNYA yang keliatan nyangkut.
+  const cornerBubbleReset = document.getElementById("roomHanaCornerBubble");
+  if(cornerBubbleReset){
+    cornerBubbleReset.style.display = "none";
+    cornerBubbleReset.dataset.lastLine = "";
+  }
+  // Layar depan ruangan ini masih nampilin Arka/teman ruangan (roomCompanion)
+  // yang lagi ngobrol — Kak Hana pojok kiri baru muncul pas fase MAIN beneran
+  // dimulai (lihat hideRoomHero()), biar nggak numpuk dua karakter sekaligus.
+  const cornerEl = document.getElementById("roomHanaCorner");
+  if(cornerEl) cornerEl.classList.remove("showing");
   c.innerHTML = `
     <div class="room-hero" id="roomHero" style="background-image:url('${currentRoom.bg||''}')">
       <div class="room-hero-scrim"></div>
       ${roomCompanion(currentRoom.id)}
+      ${heroHanaMarkup(currentRoom.id)}
       <div class="room-hero-actions">
-        <button class="room-hero-btn room-hero-btn--side" onclick="showMateri()">MATERI</button>
+        <button class="room-hero-btn room-hero-btn--side" onclick="showMateri()">📖 MATERI</button>
         <button class="room-hero-btn room-hero-btn--primary" onclick="startMechanic('${currentRoom.id}')">MULAI<br>GAME</button>
-        <button class="room-hero-btn room-hero-btn--side" onclick="showTarget()">TARGET</button>
+        <button class="room-hero-btn room-hero-btn--side" onclick="showTarget()">🎯 TARGET</button>
       </div>
     </div>
     <div class="room-wrap">
@@ -5083,9 +5783,9 @@ function renderMateriPoints(){
   body.innerHTML = `
     <div class="materi-points-page">🌿 ${entry.points[materiPointsIdx]}</div>
     <div class="materi-points-nav">
-      <button type="button" onclick="materiPointsIdx=Math.max(0,materiPointsIdx-1);renderMateriPoints();" ${materiPointsIdx===0?"disabled":""}>‹</button>
+      <button type="button" class="sfx-custom" onclick="playClickSfx('pageTurn');materiPointsIdx=Math.max(0,materiPointsIdx-1);renderMateriPoints();" ${materiPointsIdx===0?"disabled":""}>‹</button>
       <div class="materi-points-dots">${entry.points.map((_,i)=>`<span class="${i===materiPointsIdx?"active":""}"></span>`).join("")}</div>
-      <button type="button" onclick="materiPointsIdx=Math.min(${total-1},materiPointsIdx+1);renderMateriPoints();" ${materiPointsIdx===total-1?"disabled":""}>›</button>
+      <button type="button" class="sfx-custom" onclick="playClickSfx('pageTurn');materiPointsIdx=Math.min(${total-1},materiPointsIdx+1);renderMateriPoints();" ${materiPointsIdx===total-1?"disabled":""}>›</button>
     </div>
   `;
 }
@@ -5130,25 +5830,111 @@ const QUIZBANK = {
 
 /* ---------- MINI-GAME ENGINE (quiz-based rooms) ---------- */
 let quizIdx = 0, quizScore = 0;
+/* Streak jawaban benar beruntun DALAM 1 level — direset tiap level mulai
+   (lihat beginLevelPhases()). Dipakai buat munculin ekspresi "tertawa" +
+   badge kecil pas siswa lagi on-fire (>=3 jawaban benar berturut-turut),
+   bukan cuma "bangga" datar terus tiap kali benar. */
+let answerStreak = 0;
+function registerAnswerStreak(correct){
+  answerStreak = correct ? answerStreak + 1 : 0;
+  return answerStreak;
+}
+function answerExpr(correct){
+  if(!correct) return "sedih";
+  return answerStreak >= 3 ? "tertawa" : "bangga";
+}
+function streakBadgeHTML(){
+  if(answerStreak < 3) return "";
+  return `<div class="streak-badge"><span class="flame">🔥</span> ${answerStreak} jawaban benar beruntun!</div>`;
+}
 // Begitu game/mekanik ruangan dimulai, foto ruangan (yang tingginya 70vh)
 // disembunyikan supaya kontennya (#roomBody) langsung mengisi layar dari atas
 // persis di bawah topbar — berasa pindah ke "halaman" baru, bukan nambah
 // konten yang harus di-scroll ke bawah lagi. Foto muncul lagi otomatis saat
 // ruangan dibuka ulang lewat openRoom() (renderRoomHome() membangun ulang).
 function hideRoomHero(){
+  // Foto ruangan TETAP tampil (jadi backdrop blur) — nggak di-display:none
+  // lagi — biar tema visual ruangan nyambung terus sepanjang main.
   const heroEl = document.getElementById("roomHero");
-  if(heroEl) heroEl.style.display = "none";
+  if(heroEl){ heroEl.classList.remove("hero-in-transition"); heroEl.classList.add("backdrop-mode"); }
   const screenEl = document.getElementById("screen-room");
   if(screenEl) screenEl.scrollTop = 0;
+  // Fase main beneran dimulai (kuis/level/mini-game/konseling/dst) — baru di
+  // titik ini Kak Hana pojok kiri boleh nongol (lihat renderRoomHome yang
+  // nyembunyiinnya balik pas kembali ke layar depan ruangan).
+  const cornerEl = document.getElementById("roomHanaCorner");
+  if(cornerEl) cornerEl.classList.add("showing");
 }
+const LEVEL_ROOM_IDS = ["menstruasi","mimpibasah","pubertas","consent","relasi","medsos","gizi"];
 function startMechanic(roomId){
+  if(LEVEL_ROOM_IDS.includes(roomId)){
+    showHanaGameIntro(roomId, ()=>{
+      // Kalau ruangan ini udah ada histori level, munculin modal "Pilih
+      // Level" DI SINI (sesudah "Siap, yuk!" diklik) — bukan lewat tombol
+      // terpisah di room-hero-actions lagi (biar nggak numpuk 4 tombol &
+      // MULAI GAME tetap kegambar di tengah). Ruangan yang belum pernah
+      // disentuh langsung lanjut ke Level 1 seperti biasa.
+      if(roomHasLevelHistory(roomId)){
+        renderRoomHome(); // reset hero (companion/Kak Hana dim state) balik normal sebelum modal dibuka
+        openLevelSelect(roomId);
+      } else {
+        hideRoomHero();
+        startLevelRoom(roomId);
+      }
+    });
+    return;
+  }
   hideRoomHero();
   if(roomId === "konseling"){ renderKonseling(); return; }
   if(roomId === "perpustakaan"){ renderPerpustakaan(); return; }
   if(roomId === "refleksi"){ renderRefleksi(); return; }
-  if(roomId === "menstruasi" || roomId === "mimpibasah" || roomId === "pubertas" || roomId === "consent" || roomId === "relasi" || roomId === "medsos" || roomId === "gizi"){ startLevelRoom(roomId); return; }
   quizIdx = 0; quizScore = 0;
   renderQuiz(roomId);
+}
+/* Scene narasi pembuka: Kak Hana yang dari awal ruangan dibuka udah berdiri
+   redup di kanan (lihat heroHanaMarkup) sekarang "dinyalain" — spotlight
+   pindah dari teman ruangan ke dia, bukan karakter baru yang pop-in tiba².
+   Nggak ada sprite khusus buat pemain (belum ada asetnya), jadi sisi pemain
+   diwakilin lewat reply chip teks aja. Teks diambil dari TARGET_DETAIL
+   (udah ditulis per-ruangan sebelumnya buat modal Target). */
+function showHanaGameIntro(roomId, onContinue){
+  const heroEl = document.getElementById("roomHero");
+  const hanaWrap = document.getElementById("heroHanaWrap");
+  if(!heroEl || !hanaWrap){ onContinue(); return; }
+  heroEl.classList.add("hero-in-transition");
+  const companionWrap = document.getElementById("roomCharWrap");
+  if(companionWrap) companionWrap.classList.add("dimmed");
+  hanaWrap.classList.remove("dimmed");
+  const detail = (TARGET_DETAIL[roomId] || {}).hana || {expr:"semangat", text:"Yuk mulai bagian ini bareng-bareng, aku temenin dari sini."};
+  window._hanaGameIntroContinue = onContinue;
+  const full = detail.text;
+  const bubbleEl = document.getElementById("hanaIntroBubble");
+  const textEl = document.getElementById("hanaIntroText");
+  const cursorEl = document.getElementById("hanaIntroCursor");
+  const chipEl = document.getElementById("hanaReplyChip");
+  bubbleEl.style.display = "";
+  cursorEl.style.display = "inline-block";
+  chipEl.style.visibility = "hidden";
+  chipEl.classList.remove("btn-pop");
+  let i = 0;
+  textEl.textContent = "";
+  const timer = setInterval(()=>{
+    i++;
+    textEl.textContent = full.slice(0, i);
+    if(i >= full.length){
+      clearInterval(timer);
+      cursorEl.style.display = "none";
+      chipEl.style.visibility = "visible";
+      chipEl.classList.add("btn-pop");
+    }
+  }, 22);
+}
+function dismissHanaGameIntro(){
+  const heroEl = document.getElementById("roomHero");
+  if(heroEl) heroEl.classList.remove("hero-in-transition");
+  const cont = window._hanaGameIntroContinue;
+  window._hanaGameIntroContinue = null;
+  if(cont) cont();
 }
 function renderQuiz(roomId){
   const bank = QUIZBANK[roomId];
@@ -5174,7 +5960,7 @@ function answerQuiz(roomId, chosen, correct){
   playClickSfx(chosen===correct ? "correct" : "wrong");
   if(chosen===correct) quizScore++;
   document.getElementById("quizFeedback").innerHTML =
-    hanaLine(chosen===correct ? "bangga" : "semangat", chosen===correct ? "Pilihan yang lebih sehat! Kamu memahaminya dengan baik." : "Tidak apa — yuk lihat pilihan yang lebih sehat, dan ingat ini untuk ke depannya.") +
+    hanaLine(chosen===correct ? "bangga" : "sedih", chosen===correct ? "Pilihan yang lebih sehat! Kamu memahaminya dengan baik." : "Tidak apa — yuk lihat pilihan yang lebih sehat, dan ingat ini untuk ke depannya.") +
     `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="quizIdx++;renderQuiz('${roomId}')">Lanjut →</button>`;
 }
 /* ---------- RUANG MENSTRUASI & RUANG MIMPI BASAH: STRUKTUR 3-LEVEL ----------
@@ -5569,7 +6355,19 @@ const LEVEL_CONTENT = {
 };
 
 let levelRoomId = null, levelIdx = 1, levelMitosIdx = 0, levelQuizIdx = 0, levelKategoriIdx = 0, levelExtraDone = {};
-let packingSelected = new Set(), stepOrderPicked = [];
+let packingSelected = new Set(), stepOrderState = [];
+let levelScoreStart = 0;
+/* true kalau siswa masuk level lewat layar "Pilih Level" (openLevelSelect) buat
+   ngulang level yang UDAH LAMA dilewati (bukan level yang lagi berjalan/baru
+   diselesaikan). Beda dengan retryLevel() biasa (yang tetep di alur normal
+   lanjut-ke-level-berikutnya / selesaikan-ruangan), practice mode ini SELALU
+   berhenti balik ke layar Pilih Level sesudah 1 level kelar — nggak pernah
+   otomatis lanjut ke level lain atau manggil completeRoom(), supaya nggak
+   numpuk ulang poin +10 / badge / status ruangan yang mungkin udah tuntas
+   sebelumnya. Skor & progres selama practice juga sengaja NNGAK ditulis ke
+   STATE.levelProgress (lihat saveLevelCheckpoint), biar titik "resume"
+   alur normal nggak ke-geser gara-gara sesi latihan ini. */
+let levelPracticeMode = false;
 
 function getLevelKey(roomId){
   if(roomId === "menstruasi") return "menstruasi_cewek";
@@ -5578,17 +6376,159 @@ function getLevelKey(roomId){
 }
 function startLevelRoom(roomId){
   levelRoomId = roomId;
-  levelIdx = 1;
-  quizScore = 0;
+  levelPracticeMode = false; // alur normal (via tombol "MULAI GAME"), bukan latihan dari Pilih Level
+  const saved = STATE.levelProgress[roomId];
+  levelIdx = (saved && saved.levelIdx) ? saved.levelIdx : 1;
+  quizScore = (saved && typeof saved.score === "number") ? saved.score : 0;
+  if(saved && saved.started){
+    // Ada progres tersimpan DI TENGAH level ini (bukan cuma level yang mana) —
+    // lanjut persis di fase yang belum dijawab, bukan dari kartu pertama lagi.
+    levelMitosIdx = saved.mitosIdx || 0;
+    levelKategoriIdx = saved.kategoriIdx || 0;
+    levelQuizIdx = saved.quizIdx || 0;
+    levelExtraDone = saved.extraDone || {};
+    levelScoreStart = typeof saved.scoreStart === "number" ? saved.scoreStart : quizScore;
+    answerStreak = 0;
+    runLevelPhase();
+  } else {
+    renderLevel();
+  }
+}
+/* Dipanggil pas klik "Lanjut ke Level X" di reward-reveal — simpen levelIdx
+   & skor sejauh ini ke STATE.levelProgress SEBELUM pindah level, supaya
+   kalau siswa keluar ke lobby terus balik lagi, dia lanjut dari level
+   berikutnya (bukan main dari Level 1 lagi). started:false karena level
+   baru ini belum "Mulai Misi" — jadi tampil briefing dulu, bukan lompat
+   ke fase tengah. */
+function advanceLevel(){
+  levelIdx++;
+  STATE.levelProgress[levelRoomId] = {levelIdx, score: quizScore, started:false};
+  saveState();
   renderLevel();
+}
+/* Klik "Ulangi Level" di reward-reveal — buang skor attempt sebelumnya di
+   level ini (balikin quizScore ke sebelum level ini dimulai) terus mulai
+   lagi dari kartu pertama, biar attempt baru yang dihitung buat bintang
+   (bukan numpuk sama attempt lama). */
+function retryLevel(){
+  quizScore = levelScoreStart;
+  bumpScoreDisplay();
+  beginLevelPhases();
+}
+/* ---------- Pilih Level: balik ngulang level yang UDAH JAUH di belakang ----------
+   Beda dari "Ulangi Level" di reward-reveal (yang cuma buat level yang BARU
+   aja diselesaikan), ini layar terpisah yang bisa dibuka kapan saja siswa
+   lagi di ruangan (roomHero) — nampilin ketiga level & bintang terbaik yang
+   pernah dicapai, dan biarin milih level mana pun yang udah pernah "dibuka"
+   buat dimainkan ulang sebagai LATIHAN (lihat levelPracticeMode). */
+/* Tombol "📋 Pilih Level" di room-hero cuma muncul kalau ruangan ini emang
+   pakai sistem level DAN siswa udah pernah mulai mainnya (ada progres
+   tersimpan atau minimal 1 level pernah dinilai) — kalau belum pernah
+   disentuh sama sekali, nggak ada gunanya nampilin layar pilih level yang
+   isinya cuma Level 1 kebuka & Level 2-3 kekunci semua. */
+function roomHasLevelHistory(roomId){
+  if(!LEVEL_ROOM_IDS.includes(roomId)) return false;
+  const hasStars = STATE.levelStars[roomId] && Object.keys(STATE.levelStars[roomId]).length > 0;
+  const hasProgress = !!STATE.levelProgress[roomId];
+  return !!(hasStars || hasProgress || STATE.roomsDone[roomId]);
+}
+function getHighestLevelReached(roomId){
+  const stars = STATE.levelStars[roomId] || {};
+  const starLevels = Object.keys(stars).map(Number);
+  const progress = STATE.levelProgress[roomId];
+  let highest = starLevels.length ? Math.max(...starLevels) : 0;
+  if(progress && progress.levelIdx) highest = Math.max(highest, progress.levelIdx);
+  return highest;
+}
+function openLevelSelect(roomId){
+  const room = getRooms().find(r=>r.id===roomId);
+  const levelKey = getLevelKey(roomId);
+  const done = !!STATE.roomsDone[roomId];
+  const highest = getHighestLevelReached(roomId);
+  const stars = STATE.levelStars[roomId] || {};
+  const rows = [1,2,3].map(lvl=>{
+    const level = LEVEL_CONTENT[levelKey][lvl];
+    // Terbuka kalau: ruangan udah tuntas total (semua level boleh diulang),
+    // ATAU level ini <= level tertinggi yang pernah "dibuka" siswa (levelIdx
+    // yang lagi berjalan / pernah dapat bintang), ATAU dia level 1 (selalu terbuka).
+    const unlocked = done || lvl === 1 || lvl <= highest;
+    const st = stars[lvl] || 0;
+    const starHTML = unlocked
+      ? `<div class="reward-stars" style="margin:2px 0;">${[1,2,3].map(n=>`<span class="reward-star ${n<=st?'filled':''}" style="font-size:16px;">★</span>`).join("")}</div>`
+      : `<p style="font-size:12px;opacity:.7;margin:2px 0;">🔒 Selesaikan level sebelumnya dulu</p>`;
+    return `
+      <div class="card">
+        <p style="font-weight:800;margin:0 0 2px;">${level.title}</p>
+        ${starHTML}
+        <button class="btn-primary btn-block" style="margin-top:6px;" ${unlocked ? "" : "disabled"} onclick="closeModal('modalLevelSelect'); startLevelPractice('${roomId}', ${lvl})">${unlocked ? "▶️ Mainkan Level Ini" : "🔒 Terkunci"}</button>
+      </div>`;
+  }).join("");
+  document.getElementById("levelSelectModalTitle").textContent = `📋 Pilih Level — ${room.name}`;
+  document.getElementById("levelSelectModalBody").innerHTML = `
+    <p style="font-size:12.5px;color:var(--grey);margin:0 0 12px;">Mau latihan ulang di level mana? Skor latihan di sini nggak ganggu progres utamamu kok.</p>
+    <div class="level-select-grid">${rows}</div>
+  `;
+  openModal("modalLevelSelect");
+}
+/* Masuk ke 1 level tertentu dalam mode LATIHAN (bukan alur normal) — lompat
+   langsung ke kartu pertama level itu, quizScore TIDAK direset ke 0 (biar
+   angka skor yang tampil di layar tetap masuk akal buat siswa), tapi karena
+   levelScoreStart di-set ke nilai SAAT INI, hitungan bintang di finishLevel()
+   tetap murni dari performa level ini aja (lihat komentar di beginLevelPhases). */
+function startLevelPractice(roomId, lvl){
+  levelRoomId = roomId;
+  levelIdx = lvl;
+  levelPracticeMode = true;
+  hideRoomHero();
+  // Lewat renderLevel() dulu (layar briefing "Mulai Misi"), BUKAN langsung
+  // beginLevelPhases() — soalnya renderLevel() itu yang manggil hanaLine()
+  // buat ngisi bubble Kak Hana pojok kiri. Kalau di-skip, siswa masuk
+  // langsung ke kartu Mitos/Fakta dengan Kak Hana berdiri diam tanpa
+  // bubble sama sekali (keliatan kayak elemen nyasar/glitch).
+  renderLevel();
+}
+function finishRoomFromLevel(){
+  completeRoom(levelRoomId);
+}
+/* Daftar "misi" tiap level — dihasilkan otomatis dari isi LEVEL_CONTENT
+   (bukan ditulis manual per level), jadi selalu sinkron kalau kontennya
+   berubah. Tiap baris = 1 jenis fase yang bakal ditemui di level ini. */
+function getLevelMissionList(level){
+  const list = [];
+  if(level.mitos && level.mitos.length) list.push({icon:"🧠", label:`${level.mitos.length} kartu Mitos atau Fakta`});
+  if(level.kategori && level.kategori.items.length) list.push({icon:"🧩", label:`Puzzle kategori (${level.kategori.items.length} item)`});
+  if(level.packingTas) list.push({icon:"🎒", label:"Mini-Game Packing Tas Siaga"});
+  if(level.kalkulator) list.push({icon:"🧮", label:"Mini-Game Hitung Siklus"});
+  if(level.stepOrder) list.push({icon:"📋", label:"Mini-Game Urutkan Langkah"});
+  if(level.quiz && level.quiz.length) list.push({icon:"❓", label:`${level.quiz.length} pertanyaan skenario`});
+  if(level.info) list.push({icon:"📖", label:"Materi singkat"});
+  return list;
+}
+/* Jumlah fase yang BENERAN dinilai benar/salah (buat hitung bintang reward
+   di akhir level) — kartu info/materi sengaja nggak dihitung karena nggak
+   ada jawaban benar/salah di situ. */
+function getLevelGradableCount(level){
+  let n = 0;
+  if(level.mitos) n += level.mitos.length;
+  if(level.kategori) n += level.kategori.items.length;
+  if(level.packingTas) n += 1;
+  if(level.kalkulator) n += 1;
+  if(level.stepOrder) n += 1;
+  if(level.quiz) n += level.quiz.length;
+  return n;
 }
 function renderLevel(){
   const level = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx];
+  const mission = getLevelMissionList(level);
   document.getElementById("roomBody").innerHTML = `
     <span class="badge-pill">${level.title}</span>
     <div class="card">
       ${hanaLine("semangat", "Yuk mulai bagian ini bareng-bareng.")}
-      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="beginLevelPhases()">Mulai</button>
+      <div class="mission-brief">
+        <p class="mission-brief-label">Di misi ini kamu akan ketemu:</p>
+        ${mission.map((m,i)=>`<div class="mission-brief-row" style="animation-delay:${i*70}ms;"><span class="mb-icon">${m.icon}</span><span>${m.label}</span></div>`).join("")}
+      </div>
+      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="beginLevelPhases()">Mulai Misi</button>
     </div>
   `;
 }
@@ -5597,13 +6537,34 @@ function beginLevelPhases(){
   levelQuizIdx = 0;
   levelKategoriIdx = 0;
   levelExtraDone = {};
+  levelScoreStart = quizScore;
+  answerStreak = 0;
   runLevelPhase();
+}
+/* Snapshot progres tengah-level ke STATE.levelProgress — dipanggil tiap
+   runLevelPhase() (yaitu tiap kali 1 fase kelar & pindah ke fase berikutnya),
+   jadi selalu ke-save di titik "abis jawab fase ini", bukan cuma pas ganti
+   level. started:true nandain level ini udah dimulai (lewat "Mulai Misi"),
+   dipakai startLevelRoom() buat mutusin lompat ke fase tengah atau nampilin
+   briefing lagi dari awal. */
+function saveLevelCheckpoint(){
+  // Sesi latihan dari "Pilih Level" (ngulang level lama) sengaja NGGAK nulis
+  // titik resume — biar progres "beneran" siswa di alur normal (level yang
+  // memang lagi berjalan) nggak ke-timpa gara-gara dia mampir latihan.
+  if(levelPracticeMode) return;
+  STATE.levelProgress[levelRoomId] = {
+    levelIdx, score: quizScore, started: true,
+    mitosIdx: levelMitosIdx, kategoriIdx: levelKategoriIdx, quizIdx: levelQuizIdx,
+    extraDone: {...levelExtraDone}, scoreStart: levelScoreStart,
+  };
+  saveState();
 }
 /* Urutan fase dalam 1 level: kartu mitos/fakta -> kartu info umum (kalau ada)
    -> puzzle kategori (kalau ada) -> mini-game (packing tas / kalkulator
    siklus / urutkan langkah, kalau ada) -> kuis skenario (kalau ada) -> info
    netral (kalau ada, khusus level yg nyantumin fiqh) -> selesai. */
 function runLevelPhase(){
+  saveLevelCheckpoint();
   const level = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx];
   if(level.mitos && levelMitosIdx < level.mitos.length){ renderMitosCard(level.mitos[levelMitosIdx]); return; }
   if(level.info && !levelExtraDone.info){ renderInfoCard(level.info); return; }
@@ -5615,34 +6576,159 @@ function runLevelPhase(){
   if(level.infoNetral && !STATE.infoNetral.menstruasi_cewek){ showInfoNetralPhase(); return; }
   finishLevel();
 }
+/* ---------- Progress bar level: "Soal X dari Y" + skor jalan ----------
+   Dihitung dari gabungan semua fase (mitos + info + kategori + mini-game +
+   kuis + infoNetral) yang ada di level ini, supaya siswa selalu kerasa
+   progresnya jalan walau mekaniknya beda-beda tiap fase. */
+function computeLevelProgress(){
+  const level = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx];
+  let total = 0, done = 0;
+  const mitosLen = level.mitos ? level.mitos.length : 0;
+  total += mitosLen; done += Math.min(levelMitosIdx, mitosLen);
+  if(level.info){ total += 1; if(levelExtraDone.info) done += 1; }
+  const katLen = level.kategori ? level.kategori.items.length : 0;
+  total += katLen; done += Math.min(levelKategoriIdx, katLen);
+  if(level.packingTas){ total += 1; if(levelExtraDone.packingTas) done += 1; }
+  if(level.kalkulator){ total += 1; if(levelExtraDone.kalkulator) done += 1; }
+  if(level.stepOrder){ total += 1; if(levelExtraDone.stepOrder) done += 1; }
+  const quizLen = level.quiz ? level.quiz.length : 0;
+  total += quizLen; done += Math.min(levelQuizIdx, quizLen);
+  if(level.infoNetral){ total += 1; if(STATE.infoNetral.menstruasi_cewek) done += 1; }
+  total = Math.max(total, 1);
+  return {current: Math.min(done + 1, total), total};
+}
+function renderLevelProgressBar(){
+  const {current, total} = computeLevelProgress();
+  const pct = Math.round(((current - 1) / total) * 100);
+  return `<div class="level-progress">
+    <span class="lp-label">Soal ${current} dari ${total}</span>
+    <div class="lp-track"><div class="lp-fill" style="width:${pct}%"></div></div>
+    <span class="lp-score" id="lpScore">⭐ ${quizScore}</span>
+  </div>`;
+}
+/* Panggil ini pas jawaban BENAR biar angka skor di progress bar kerasa
+   'hidup' (bump) tanpa nunggu render ulang fase berikutnya. */
+function bumpScoreDisplay(){
+  const el = document.getElementById("lpScore");
+  if(!el) return;
+  el.textContent = "⭐ " + quizScore;
+  el.classList.remove("bump");
+  void el.offsetWidth;
+  el.classList.add("bump");
+}
+/* Tambahin kelas .pop ke tombol correct/wrong biar animasi keyframe kepicu
+   (dipanggil sesaat setelah class correct/wrong ditambahin di tiap fungsi
+   answer*). */
+function popQuizOpts(container){
+  if(!container) return;
+  container.querySelectorAll(".correct, .wrong").forEach(el=>el.classList.add("pop"));
+}
 function renderMitosCard(item){
   document.getElementById("roomBody").innerHTML = `
     <span class="badge-pill">Mitos atau Fakta?</span>
     <div class="card">
-      <div class="quiz-q">${item.q}</div>
-      <div class="row" style="margin-top:10px;">
-        <button class="quiz-opt btn-block" onclick="answerMitos(false)">Mitos</button>
-        <button class="quiz-opt btn-block" onclick="answerMitos(true)">Fakta</button>
+      ${renderLevelProgressBar()}
+      <div class="swipe-stage">
+        <div class="swipe-card" id="mitosSwipeCard">
+          <span class="swipe-stamp left" id="mitosStampLeft">Mitos</span>
+          <span class="swipe-stamp right" id="mitosStampRight">Fakta</span>
+          <div class="quiz-q">${item.q}</div>
+        </div>
+      </div>
+      <p class="swipe-hint">← Geser kiri = Mitos &nbsp;·&nbsp; Geser kanan = Fakta →</p>
+      <div class="row" id="mitosOpts">
+        <button class="quiz-opt btn-block" data-val="0" onclick="answerMitos(false)">Mitos</button>
+        <button class="quiz-opt btn-block" data-val="1" onclick="answerMitos(true)">Fakta</button>
       </div>
       <div id="quizFeedback"></div>
     </div>
   `;
+  initMitosSwipe();
+}
+/* Drag kartu pertanyaan kiri/kanan buat jawab Mitos/Fakta. Kalau jarak
+   geser lewat SWIPE_THRESHOLD, kartu "terbang" keluar layar lalu
+   answerMitos() dipanggil — kalau nggak nyampe threshold, kartu balik ke
+   tengah. Tombol Mitos/Fakta tetap berfungsi normal sebagai alternatif. */
+function initMitosSwipe(){
+  const card = document.getElementById("mitosSwipeCard");
+  if(!card) return;
+  const SWIPE_THRESHOLD = 90;
+  let startX = 0, dx = 0, dragging = false, decided = false;
+  const stampL = document.getElementById("mitosStampLeft");
+  const stampR = document.getElementById("mitosStampRight");
+
+  card.addEventListener("pointerdown", e=>{
+    if(decided) return;
+    dragging = true;
+    startX = e.clientX;
+    card.classList.add("dragging");
+    card.setPointerCapture(e.pointerId);
+  });
+  card.addEventListener("pointermove", e=>{
+    if(!dragging || decided) return;
+    dx = e.clientX - startX;
+    card.style.transform = `translateX(${dx}px) rotate(${dx/18}deg)`;
+    const pull = Math.min(Math.abs(dx) / SWIPE_THRESHOLD, 1);
+    stampL.style.opacity = dx < 0 ? pull : 0;
+    stampR.style.opacity = dx > 0 ? pull : 0;
+  });
+  function endDrag(){
+    if(!dragging || decided) return;
+    dragging = false;
+    card.classList.remove("dragging");
+    if(Math.abs(dx) > SWIPE_THRESHOLD){
+      decided = true;
+      card.classList.add(dx < 0 ? "fly-left" : "fly-right");
+      setTimeout(()=>answerMitos(dx > 0), 180);
+    } else {
+      card.style.transform = "";
+      stampL.style.opacity = 0;
+      stampR.style.opacity = 0;
+    }
+    dx = 0;
+  }
+  card.addEventListener("pointerup", endDrag);
+  card.addEventListener("pointercancel", endDrag);
 }
 function answerMitos(chosen){
   const level = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx];
   const item = level.mitos[levelMitosIdx];
   const correct = chosen === item.answer;
+  // sama kayak answerKategori/answerQuiz: tombol yang bener dikasih hijau,
+  // yang dipilih tapi salah dikasih merah, dan dua-duanya di-nonaktifin —
+  // sebelumnya cuma teks Kak Hana yang berubah, gampang kelewat kalau nggak
+  // dibaca teliti.
+  document.querySelectorAll("#mitosOpts .quiz-opt").forEach(el=>{
+    el.onclick = null;
+    const val = el.dataset.val === "1";
+    if(val === item.answer) el.classList.add("correct");
+    else if(val === chosen) el.classList.add("wrong");
+  });
+  popQuizOpts(document.getElementById("mitosOpts"));
   playClickSfx(correct ? "correct" : "wrong");
-  if(correct) quizScore++;
+  if(correct){ quizScore++; bumpScoreDisplay(); }
+  registerAnswerStreak(correct);
   document.getElementById("quizFeedback").innerHTML =
-    hanaLine(correct ? "bangga" : "semangat", item.explain) +
-    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelMitosIdx++;runLevelPhase();">Lanjut →</button>`;
+    hanaLine(answerExpr(correct), item.explain) + streakBadgeHTML() +
+    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="advanceMitos();">Lanjut →</button>`;
+}
+/* Naikin index mitos, lalu cek: kalau ini item TERAKHIR di fase mitos, kasih
+   burst checkpoint dulu sebelum lanjut ke fase berikutnya (lihat
+   showPhaseCompleteBurst di dekat confettiHTML). Kalau bukan item terakhir,
+   lanjut biasa tanpa jeda. */
+function advanceMitos(){
+  levelMitosIdx++;
+  const level = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx];
+  const done = !level.mitos || levelMitosIdx >= level.mitos.length;
+  if(done) showPhaseCompleteBurst("Sesi Mitos atau Fakta selesai! 🎉", runLevelPhase);
+  else runLevelPhase();
 }
 /* Kartu info umum, non-kuis — dipakai buat materi yang perlu dijelaskan
    utuh (misal tata cara mandi wajib), bukan format tanya-jawab. */
 function renderInfoCard(text){
   document.getElementById("roomBody").innerHTML = `
     <div class="card">
+      ${renderLevelProgressBar()}
       ${hanaLine("idle", text.replace(/\n/g,"<br>"))}
       <button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelExtraDone.info=true;runLevelPhase();">Lanjut →</button>
     </div>
@@ -5653,6 +6739,7 @@ function renderKategoriCard(data){
   document.getElementById("roomBody").innerHTML = `
     <span class="badge-pill">Puzzle Perubahan Tubuh (${levelKategoriIdx+1}/${data.items.length})</span>
     <div class="card">
+      ${renderLevelProgressBar()}
       <p>${data.prompt}</p>
       <div class="quiz-q">${item.label}</div>
       <div class="col" id="kategoriOpts">${data.categories.map((c,i)=>`<button class="quiz-opt btn-block" data-cat="${i}" onclick="answerKategori(${i})">${c}</button>`).join("")}</div>
@@ -5668,46 +6755,137 @@ function answerKategori(chosenIdx){
   const correct = chosen === item.category;
   document.querySelectorAll("#kategoriOpts .quiz-opt").forEach(el=>{
     el.onclick = null;
+    el.disabled = true;
     if(data.categories[+el.dataset.cat] === item.category) el.classList.add("correct");
     else if(+el.dataset.cat === chosenIdx) el.classList.add("wrong");
   });
+  popQuizOpts(document.getElementById("kategoriOpts"));
   playClickSfx(correct ? "correct" : "wrong");
-  if(correct) quizScore++;
+  if(correct){ quizScore++; bumpScoreDisplay(); }
+  registerAnswerStreak(correct);
   document.getElementById("quizFeedback").innerHTML =
-    hanaLine(correct ? "bangga" : "semangat", correct ? "Tepat! Masuk kategori \u201C"+item.category+"\u201D." : "Yang lebih pas: \u201C"+item.category+"\u201D.") +
-    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelKategoriIdx++;runLevelPhase();">Lanjut →</button>`;
+    hanaLine(answerExpr(correct), correct ? "Tepat! Masuk kategori \u201C"+item.category+"\u201D." : "Yang lebih pas: \u201C"+item.category+"\u201D.") + streakBadgeHTML() +
+    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="advanceKategori();">Lanjut →</button>`;
 }
+/* Sama pola-nya kayak advanceMitos() — cek dulu apa ini item terakhir puzzle
+   kategori sebelum kasih burst checkpoint. */
+function advanceKategori(){
+  levelKategoriIdx++;
+  const level = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx];
+  const done = !level.kategori || levelKategoriIdx >= level.kategori.items.length;
+  if(done) showPhaseCompleteBurst("Puzzle selesai! 🎉", runLevelPhase);
+  else runLevelPhase();
+}
+/* ===== Packing Tas: drag-ke-tas (ganti dari klik-pilih) =====
+   Barang mulai di "rak" (packingPool). Seret barang ke kotak "Tas Siaga"
+   buat masukin (Pointer Events, sama polanya kayak Urutkan Langkah) —
+   drop di luar kotak tas balikin barang ke rak lagi. Tap singkat (nggak
+   ada gerakan berarti) tetap dianggap toggle, buat jaga-jaga kalau drag-nya
+   meleset di layar kecil. */
+let packingLocked = false;
 function renderPackingTas(data){
   packingSelected = new Set();
+  packingLocked = false;
   document.getElementById("roomBody").innerHTML = `
     <span class="badge-pill">Mini-Game: Packing Tas Siaga</span>
     <div class="card">
+      ${renderLevelProgressBar()}
       <p>${data.prompt}</p>
-      <div class="col" id="packingList">${data.items.map((it,i)=>`<button class="quiz-opt btn-block" id="pack-${i}" onclick="togglePackItem(${i})">${it.label}</button>`).join("")}</div>
+      <p class="swipe-hint" style="margin-top:-4px;">Seret barang ke dalam tas (atau tap barangnya).</p>
+      <div class="packing-bag" id="packingBag">
+        <div class="packing-bag-label">🎒 Tas Siaga</div>
+        <div class="packing-bag-items" id="packingBagItems">
+          <span class="packing-bag-empty" id="packingBagEmpty">Belum ada barang</span>
+        </div>
+      </div>
+      <div class="packing-pool" id="packingPool">${data.items.map((it,i)=>`
+        <div class="packing-item" id="pack-${i}" data-idx="${i}"><span class="pi-text">${it.label}</span></div>`).join("")}</div>
       <button class="btn-primary btn-block" style="margin-top:10px;" onclick="submitPacking()">Selesai Packing</button>
       <div id="packingFeedback"></div>
     </div>
   `;
+  initPackingDrag();
 }
-function togglePackItem(i){
-  const el = document.getElementById("pack-"+i);
-  if(packingSelected.has(i)){ packingSelected.delete(i); el.classList.remove("selected"); }
-  else { packingSelected.add(i); el.classList.add("selected"); }
+function movePackItem(idx, toBag){
+  const el = document.getElementById("pack-"+idx);
+  const bagItems = document.getElementById("packingBagItems");
+  const pool = document.getElementById("packingPool");
+  const emptyLabel = document.getElementById("packingBagEmpty");
+  if(!el) return;
+  el.classList.toggle("packed", toBag);
+  (toBag ? bagItems : pool).appendChild(el);
+  if(emptyLabel) emptyLabel.style.display = packingSelected.size ? "none" : "";
   playClickSfx("tap");
+}
+function togglePackItem(idx){
+  if(packingLocked) return;
+  if(packingSelected.has(idx)){ packingSelected.delete(idx); movePackItem(idx, false); }
+  else { packingSelected.add(idx); movePackItem(idx, true); }
+}
+function initPackingDrag(){
+  const bag = document.getElementById("packingBag");
+  if(!bag) return;
+  let dragEl = null, startX = 0, startY = 0, moved = false;
+  function onDown(e){
+    if(packingLocked) return;
+    dragEl = e.currentTarget;
+    dragEl.setPointerCapture(e.pointerId);
+    startX = e.clientX; startY = e.clientY; moved = false;
+    dragEl.classList.add("dragging");
+    dragEl.addEventListener("pointermove", onMove);
+    dragEl.addEventListener("pointerup", onUp, {once:true});
+    dragEl.addEventListener("pointercancel", onUp, {once:true});
+  }
+  function onMove(e){
+    if(!dragEl) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    if(Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+    dragEl.style.transform = `translate(${dx}px,${dy}px)`;
+    bag.classList.toggle("drag-over", moved && isOverBag(dragEl));
+  }
+  function isOverBag(el){
+    const bagRect = bag.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width/2, cy = r.top + r.height/2;
+    return cx >= bagRect.left && cx <= bagRect.right && cy >= bagRect.top && cy <= bagRect.bottom;
+  }
+  function onUp(e){
+    if(!dragEl) return;
+    const el = dragEl;
+    dragEl.removeEventListener("pointermove", onMove);
+    dragEl = null;
+    el.classList.remove("dragging");
+    const overBag = isOverBag(el);
+    el.style.transform = "";
+    bag.classList.remove("drag-over");
+    const idx = Number(el.dataset.idx);
+    if(!moved){ togglePackItem(idx); return; }
+    if(overBag && !packingSelected.has(idx)){ packingSelected.add(idx); movePackItem(idx, true); }
+    else if(!overBag && packingSelected.has(idx)){ packingSelected.delete(idx); movePackItem(idx, false); }
+  }
+  document.querySelectorAll(".packing-item").forEach(el=>el.addEventListener("pointerdown", onDown));
 }
 function submitPacking(){
   const data = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx].packingTas;
   const correct = data.items.every((it,i) => packingSelected.has(i) === it.correct);
+  packingLocked = true;
+  document.querySelectorAll(".packing-item").forEach(el=>{
+    const idx = Number(el.dataset.idx);
+    el.classList.add(data.items[idx].correct === packingSelected.has(idx) ? "correct" : "wrong");
+    el.style.touchAction = "auto";
+  });
   playClickSfx(correct ? "correct" : "wrong");
-  if(correct) quizScore++;
+  if(correct){ quizScore++; bumpScoreDisplay(); }
+  registerAnswerStreak(correct);
   document.getElementById("packingFeedback").innerHTML =
-    hanaLine(correct ? "bangga" : "semangat", correct ? "Pas! Itu barang-barang paling penting buat tas siaga." : "Hampir! Fokusnya ke barang kebersihan yang bakal kepakai kalau haid datang tiba-tiba — coba cek lagi ya.") +
+    hanaLine(answerExpr(correct), correct ? "Pas! Itu barang-barang paling penting buat tas siaga." : "Hampir! Fokusnya ke barang kebersihan yang bakal kepakai kalau haid datang tiba-tiba — coba cek lagi ya.") + streakBadgeHTML() +
     `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelExtraDone.packingTas=true;runLevelPhase();">Lanjut →</button>`;
 }
 function renderKalkulator(data){
   document.getElementById("roomBody").innerHTML = `
     <span class="badge-pill">Mini-Game: Hitung Siklus</span>
     <div class="card">
+      ${renderLevelProgressBar()}
       <p>${data.prompt}</p>
       <div class="col" id="kalkOpts">${data.opts.map((o,i)=>`<button class="quiz-opt btn-block" onclick="answerKalkulator(${i})">${o}</button>`).join("")}</div>
       <div id="kalkFeedback"></div>
@@ -5717,47 +6895,117 @@ function renderKalkulator(data){
 function answerKalkulator(chosen){
   const data = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx].kalkulator;
   const correct = chosen === data.correct;
+  document.querySelectorAll("#kalkOpts .quiz-opt").forEach((el,i)=>{
+    el.onclick = null;
+    if(i===data.correct) el.classList.add("correct");
+    else if(i===chosen) el.classList.add("wrong");
+  });
+  popQuizOpts(document.getElementById("kalkOpts"));
   playClickSfx(correct ? "correct" : "wrong");
-  if(correct) quizScore++;
+  if(correct){ quizScore++; bumpScoreDisplay(); }
+  registerAnswerStreak(correct);
   document.getElementById("kalkFeedback").innerHTML =
-    hanaLine(correct ? "bangga" : "semangat", data.explain) +
+    hanaLine(answerExpr(correct), data.explain) + streakBadgeHTML() +
     `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelExtraDone.kalkulator=true;runLevelPhase();">Lanjut →</button>`;
 }
 function renderStepOrder(data){
-  stepOrderPicked = [];
+  // FIX: sebelumnya data.steps ditampilin apa adanya (urutan array = urutan
+  // benar), jadi klik atas-ke-bawah SELALU benar — soal ini efektif nggak
+  // pernah nge-tes apa-apa. Sekarang urutan tampil diacak tiap render, dan
+  // data-orig nyimpen indeks aslinya (indeks asli = urutan yang benar).
+  stepOrderState = data.steps.map((_,i)=>i);
+  for(let i=stepOrderState.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [stepOrderState[i],stepOrderState[j]] = [stepOrderState[j],stepOrderState[i]];
+  }
   document.getElementById("roomBody").innerHTML = `
     <span class="badge-pill">Mini-Game: Urutkan Langkah</span>
     <div class="card">
+      ${renderLevelProgressBar()}
       <p>${data.prompt}</p>
-      <div class="col" id="stepList">${data.steps.map((s,i)=>`<button class="quiz-opt btn-block" id="step-${i}" onclick="pickStep(${i})">${s}</button>`).join("")}</div>
-      <p id="stepOrderResult" style="font-size:12px;color:var(--grey);"></p>
+      <p class="swipe-hint" style="margin-top:-4px;">Seret (drag) kartu buat mengurutkan — paling atas = paling awal.</p>
+      <div class="step-draggable-list" id="stepList">${stepOrderState.map((origIdx,pos)=>`
+        <div class="step-drag-item" data-orig="${origIdx}">
+          <span class="sdi-num">${pos+1}</span><span class="sdi-handle">⠿⠿</span><span class="sdi-text">${data.steps[origIdx]}</span>
+        </div>`).join("")}</div>
+      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="submitStepOrder()">Cek Urutan</button>
       <div id="stepFeedback"></div>
     </div>
   `;
+  initStepDrag();
 }
-function pickStep(i){
-  if(stepOrderPicked.includes(i)) return;
-  stepOrderPicked.push(i);
-  const btn = document.getElementById("step-"+i);
-  btn.disabled = true; btn.classList.add("selected");
-  playClickSfx("tap");
-  const data = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx].stepOrder;
-  document.getElementById("stepOrderResult").textContent = "Urutanmu: " + stepOrderPicked.map(idx=>idx+1).join(" → ");
-  if(stepOrderPicked.length === data.steps.length) submitStepOrder();
+function renumberStepList(){
+  document.querySelectorAll("#stepList .step-drag-item").forEach((el,i)=>{
+    el.querySelector(".sdi-num").textContent = i+1;
+  });
+}
+/* Seret kartu naik/turun (Pointer Events, jalan buat mouse & touch).
+   Kartu lain BARU pindah posisi pas kartu yang diseret DILEPAS (dicari
+   posisi terdekat berdasarkan titik tengahnya) — bukan geser live tiap
+   frame, biar reorder-nya stabil & gampang dikontrol di layar kecil. */
+function initStepDrag(){
+  const list = document.getElementById("stepList");
+  if(!list) return;
+  let dragEl = null, startY = 0;
+  const itemsArr = () => Array.from(list.children);
+
+  function onDown(e){
+    if(list.classList.contains("locked")) return;
+    dragEl = e.currentTarget;
+    dragEl.setPointerCapture(e.pointerId);
+    startY = e.clientY;
+    dragEl.classList.add("dragging");
+    dragEl.addEventListener("pointermove", onMove);
+    dragEl.addEventListener("pointerup", onUp, {once:true});
+    dragEl.addEventListener("pointercancel", onUp, {once:true});
+  }
+  function onMove(e){
+    if(!dragEl) return;
+    dragEl.style.transform = `translateY(${e.clientY - startY}px)`;
+  }
+  function onUp(){
+    if(!dragEl) return;
+    dragEl.removeEventListener("pointermove", onMove);
+    const rect = dragEl.getBoundingClientRect();
+    const centerY = rect.top + rect.height/2;
+    dragEl.style.transform = "";
+    dragEl.classList.remove("dragging");
+    let insertBefore = null;
+    for(const sib of itemsArr()){
+      if(sib === dragEl) continue;
+      const r = sib.getBoundingClientRect();
+      if(centerY < r.top + r.height/2){ insertBefore = sib; break; }
+    }
+    if(insertBefore) list.insertBefore(dragEl, insertBefore);
+    else list.appendChild(dragEl);
+    renumberStepList();
+    playClickSfx("tap");
+    stepOrderState = itemsArr().map(el=>Number(el.dataset.orig));
+    dragEl = null;
+  }
+  itemsArr().forEach(item=>item.addEventListener("pointerdown", onDown));
 }
 function submitStepOrder(){
   const data = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx].stepOrder;
-  const correct = stepOrderPicked.every((v,i) => v === i);
+  const correct = stepOrderState.every((v,i) => v === i);
+  const list = document.getElementById("stepList");
+  list.classList.add("locked");
+  Array.from(list.children).forEach((el,i)=>{
+    el.classList.add(Number(el.dataset.orig) === i ? "correct" : "wrong");
+  });
+  popQuizOpts(list);
   playClickSfx(correct ? "correct" : "wrong");
-  if(correct) quizScore++;
+  if(correct){ quizScore++; bumpScoreDisplay(); }
+  registerAnswerStreak(correct);
   document.getElementById("stepFeedback").innerHTML =
-    hanaLine(correct ? "bangga" : "semangat", correct ? "Urutan yang tepat!" : "Urutan yang lebih pas: " + data.steps.join(" → ") + ".") +
+    hanaLine(answerExpr(correct), correct ? "Urutan yang tepat!" : "Urutan yang lebih pas: " + data.steps.join(" → ") + ".") + streakBadgeHTML() +
     `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelExtraDone.stepOrder=true;runLevelPhase();">Lanjut →</button>`;
 }
 function renderLevelQuiz(item){
   document.getElementById("roomBody").innerHTML = `
     <span class="badge-pill">Pertanyaan</span>
     <div class="card">
+      ${renderLevelProgressBar()}
       <div class="quiz-q">${item.q}</div>
       <div id="quizOpts">${item.opts.map((o,i)=>`<button class="quiz-opt btn-block" onclick="answerLevelQuiz(${i},${item.correct})">${o}</button>`).join("")}</div>
       <div id="quizFeedback"></div>
@@ -5770,11 +7018,21 @@ function answerLevelQuiz(chosen, correct){
     if(i===correct) el.classList.add("correct");
     else if(i===chosen) el.classList.add("wrong");
   });
+  popQuizOpts(document.getElementById("quizOpts"));
   playClickSfx(chosen===correct ? "correct" : "wrong");
-  if(chosen===correct) quizScore++;
+  if(chosen===correct){ quizScore++; bumpScoreDisplay(); }
+  registerAnswerStreak(chosen===correct);
   document.getElementById("quizFeedback").innerHTML =
-    hanaLine(chosen===correct ? "bangga" : "semangat", chosen===correct ? "Pilihan yang lebih sehat! Kamu memahaminya dengan baik." : "Tidak apa — yuk lihat pilihan yang lebih sehat, dan ingat ini untuk ke depannya.") +
-    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="levelQuizIdx++;runLevelPhase();">Lanjut →</button>`;
+    hanaLine(answerExpr(chosen===correct), chosen===correct ? "Pilihan yang lebih sehat! Kamu memahaminya dengan baik." : "Tidak apa — yuk lihat pilihan yang lebih sehat, dan ingat ini untuk ke depannya.") + streakBadgeHTML() +
+    `<button class="btn-primary btn-block" style="margin-top:10px;" onclick="advanceLevelQuiz();">Lanjut →</button>`;
+}
+/* Sama pola-nya kayak advanceMitos()/advanceKategori(). */
+function advanceLevelQuiz(){
+  levelQuizIdx++;
+  const level = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx];
+  const done = !level.quiz || levelQuizIdx >= level.quiz.length;
+  if(done) showPhaseCompleteBurst("Kuis selesai! 🎉", runLevelPhase);
+  else runLevelPhase();
 }
 function showInfoNetralPhase(){
   const info = INFO_NETRAL.menstruasi_cewek;
@@ -5787,18 +7045,97 @@ function showInfoNetralPhase(){
     </div>
   `;
 }
+/* Confetti buat reward-reveal — potongan warna-warni yang jatuh & muter
+   dari atas kartu pas Level/Ruangan Selesai. Jumlahnya nyesuain jumlah
+   bintang (makin banyak bintang, makin rame confetti-nya). Murni CSS/JS,
+   nggak butuh asset gambar. */
+const CONFETTI_COLORS = ["#e0b23c","#3f8f6c","#e2725b","#5b8fd9","#c96fb3"];
+function confettiHTML(stars){
+  const count = stars >= 3 ? 26 : stars === 2 ? 16 : 8;
+  let pieces = "";
+  for(let i=0;i<count;i++){
+    const left = Math.round(Math.random()*100);
+    const delay = (Math.random()*0.35).toFixed(2);
+    const dur = (0.9+Math.random()*0.7).toFixed(2);
+    const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+    const rot = Math.floor(Math.random()*360);
+    pieces += `<span class="confetti-piece" style="left:${left}%;animation-delay:${delay}s;animation-duration:${dur}s;background:${color};--rot:${rot}deg;"></span>`;
+  }
+  return `<div class="confetti-wrap">${pieces}</div>`;
+}
+/* Checkpoint mini pas satu fase (mitos/kategori/kuis) kelar — bukan reward
+   akhir level (itu tetap lewat finishLevel(), confetti lebih besar).
+   Confetti versi kecil (confettiHTML(1) = 8 keping) + badge nama fase,
+   numpang tampil ~900ms di atas kartu terakhir, BARU lanjut ke fase
+   berikutnya lewat callback `next` — biar transisi kerasa nandain sesuatu
+   kelar, bukan lompat diam-diam ke soal berikutnya. */
+function showPhaseCompleteBurst(label, next){
+  const card = document.querySelector("#roomBody .card");
+  if(!card){ next(); return; }
+  playClickSfx("success");
+  card.classList.add("phase-burst-card");
+  const burst = document.createElement("div");
+  burst.className = "phase-burst";
+  burst.innerHTML = confettiHTML(1) + `<div class="phase-burst-badge">${label}</div>`;
+  card.appendChild(burst);
+  setTimeout(next, 900);
+}
 function finishLevel(){
-  if(levelIdx < 3){
+  const level = LEVEL_CONTENT[getLevelKey(levelRoomId)][levelIdx];
+  const gained = quizScore - levelScoreStart;
+  const gradable = getLevelGradableCount(level);
+  const ratio = gradable > 0 ? gained / gradable : 1;
+  const stars = ratio >= 0.99 ? 3 : ratio >= 0.5 ? 2 : 1;
+  const rewardLine = stars === 3
+    ? "Mantap, hampir semua tepat! Kamu paham betul bagian ini."
+    : stars === 2
+    ? "Bagus, sebagian besar udah tepat. Sisanya bisa dibaca ulang pas Ruang Perpustakaan."
+    : "Nggak apa, ini bagian yang emang baru buatmu — pelan-pelan aja.";
+  playClickSfx("levelComplete");
+  // Catat bintang TERBAIK yang pernah dicapai level ini (dipakai layar Pilih
+  // Level) — tetap disimpan walau ruangan udah tuntas, jadi beda dari
+  // levelProgress yang dihapus pas completeRoom().
+  STATE.levelStars[levelRoomId] = STATE.levelStars[levelRoomId] || {};
+  STATE.levelStars[levelRoomId][levelIdx] = Math.max(STATE.levelStars[levelRoomId][levelIdx] || 0, stars);
+  saveState();
+  // Sesi LATIHAN dari layar "Pilih Level" (ngulang level lama) — selalu
+  // berhenti di sini, nggak pernah lanjut otomatis ke level lain atau
+  // manggil completeRoom(), supaya poin/badge/status ruangan yang mungkin
+  // udah tuntas sebelumnya nggak ke-hitung ulang.
+  if(levelPracticeMode){
     document.getElementById("roomBody").innerHTML = `
-      <div class="card center">
-        <div style="font-size:30px;">✅</div>
-        <h3>Level ${levelIdx} Selesai!</h3>
-        <button class="btn-primary btn-block" onclick="levelIdx++;renderLevel();">Lanjut ke Level ${levelIdx+1} →</button>
+      <div class="card center reward-reveal">
+        ${confettiHTML(stars)}
+        <div class="reward-trophy">✅</div>
+        <h3>Level ${levelIdx} Selesai! (Latihan)</h3>
+        <div class="reward-stars">
+          ${[1,2,3].map(n=>`<span class="reward-star ${n<=stars?'filled':''}" style="animation-delay:${n*140}ms;">★</span>`).join("")}
+        </div>
+        ${hanaLine(stars===3?"tertawa":stars===2?"semangat":"sedih", rewardLine)}
+        ${stars < 3 ? `<button class="btn-outline btn-block" style="margin-top:8px;" onclick="retryLevel();">🔁 Ulangi Level ${levelIdx} (kejar bintang lebih)</button>` : ""}
+        <button class="btn-primary btn-block" style="margin-top:8px;" onclick="openLevelSelect('${levelRoomId}');">📋 Pilih Level Lain</button>
+        <button class="btn-outline btn-block" style="margin-top:8px;" onclick="levelPracticeMode=false; renderRoomHome();">🚪 Kembali ke Ruangan</button>
       </div>
     `;
-  } else {
-    completeRoom(levelRoomId);
+    return;
   }
+  // Selalu tampil reward-reveal dulu (termasuk di level 3) — biar ada
+  // kesempatan "Ulangi Level" buat perbaiki bintang SEBELUM ruangan
+  // ditutup lewat completeRoom(), bukan langsung ketutup otomatis.
+  const isLastLevel = levelIdx >= 3;
+  document.getElementById("roomBody").innerHTML = `
+    <div class="card center reward-reveal">
+      ${confettiHTML(stars)}
+      <div class="reward-trophy">✅</div>
+      <h3>Level ${levelIdx} Selesai!</h3>
+      <div class="reward-stars">
+        ${[1,2,3].map(n=>`<span class="reward-star ${n<=stars?'filled':''}" style="animation-delay:${n*140}ms;">★</span>`).join("")}
+      </div>
+      ${hanaLine(stars===3?"tertawa":stars===2?"semangat":"sedih", rewardLine)}
+      ${stars < 3 ? `<button class="btn-outline btn-block" style="margin-top:8px;" onclick="retryLevel();">🔁 Ulangi Level ${levelIdx} (kejar bintang lebih)</button>` : ""}
+      <button class="btn-primary btn-block" style="margin-top:8px;" onclick="${isLastLevel ? 'finishRoomFromLevel()' : 'advanceLevel()'}">${isLastLevel ? 'Selesaikan Ruangan →' : `Lanjut ke Level ${levelIdx+1} →`}</button>
+    </div>
+  `;
 }
 
 /* Render 1 quote (islam atau umum) jadi HTML — otomatis nambahin baris
@@ -5823,19 +7160,51 @@ function completeRoom(roomId){
   STATE.points += 10;
   if(room.badge) STATE.badges[roomId] = true;
   if(room.kunci) STATE.kunciNilai[roomId] = true;
+  delete STATE.levelProgress[roomId]; // ruangan tuntas semua level, nggak perlu resume lagi
   saveState();
   logToSheet("selesai_ruangan", {ruangan: roomId, skor: quizScore});
+  // Badge baru didapat: kilau ✨ duluan, sebelum sfx lain numpuk barengan
+  let celebrationSfxPlayed = false;
+  if(room.badge){ playClickSfx("badge"); celebrationSfxPlayed = true; }
   const hikmah = HIKMAH[roomId];
   if(hikmah && hikmah.length && !STATE.hikmah[roomId]){
     STATE.hikmah[roomId] = true; saveState();
     showHikmahModal(hikmah);
-    playClickSfx("success");
+    if(!celebrationSfxPlayed) playClickSfx("success");
+    celebrationSfxPlayed = true;
   }
   let infoNetralBlock = "";
+  /* Ruangan yang pakai sistem level (LEVEL_CONTENT) dapet reward-reveal yang
+     sama kayak finishLevel() — trofi + bintang, tapi dihitung dari skor
+     GABUNGAN 3 level di ruangan ini (bukan cuma level terakhir), biar
+     "Ruangan Selesai" kerasa jadi puncak, bukan cuma level ke-4. */
+  const levelKey = getLevelKey(roomId);
+  let roomStars = null, roomRewardLine = "";
+  if(LEVEL_CONTENT[levelKey]){
+    let gradable = 0;
+    [1,2,3].forEach(i=>{ gradable += getLevelGradableCount(LEVEL_CONTENT[levelKey][i]); });
+    const ratio = gradable > 0 ? quizScore / gradable : 1;
+    roomStars = ratio >= 0.99 ? 3 : ratio >= 0.5 ? 2 : 1;
+    roomRewardLine = roomStars === 3
+      ? "Mantap, kamu paham betul seluruh ruangan ini!"
+      : roomStars === 2
+      ? "Bagus, sebagian besar udah tepat. Sisanya bisa dibaca ulang pas Ruang Perpustakaan."
+      : "Nggak apa, ruangan ini emang baru buatmu — pelan-pelan aja, ya.";
+    // Reward (bintang ruangan) ✨✨ — kalau badge/hikmah udah bunyi duluan, kasih jeda dikit biar nggak numpuk
+    if(celebrationSfxPlayed) setTimeout(()=>playClickSfx("reward"), 260);
+    else playClickSfx("reward");
+  }
   document.getElementById("roomBody").innerHTML = `
-    <div class="card center">
-      <div style="font-size:34px;">${room.badge || "💬"}</div>
+    <div class="card center${roomStars!==null ? ' reward-reveal':''}">
+      ${roomStars!==null ? confettiHTML(roomStars) : ""}
+      <div class="${roomStars!==null?'reward-trophy':''}" style="font-size:34px;">${room.badge || "💬"}</div>
       <h3>Ruangan Selesai!</h3>
+      ${roomStars!==null ? `
+        <div class="reward-stars">
+          ${[1,2,3].map(n=>`<span class="reward-star ${n<=roomStars?'filled':''}" style="animation-delay:${n*140}ms;">★</span>`).join("")}
+        </div>
+        ${hanaLine(roomStars===3?"tertawa":roomStars===2?"semangat":"sedih", roomRewardLine)}
+      ` : ""}
       <p>${room.badge ? "Kamu mendapat Badge "+room.badgeLabel+"." : "Terima kasih sudah berbagi cerita."}</p>
     </div>
     ${infoNetralBlock}
@@ -6067,11 +7436,12 @@ function showCompareAndJournal(){
       <h3>Jurnal Refleksi</h3>
       <p style="font-size:13px;">Apa yang kamu pelajari hari ini? Apa yang masih membingungkan?</p>
       <textarea id="journalInput" placeholder="Tulis di sini...">${STATE.journal||""}</textarea>
-      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="submitJournal()">Simpan & Selesai</button>
+      <button class="btn-primary btn-block sfx-custom" style="margin-top:10px;" onclick="submitJournal()">Simpan & Selesai</button>
     </div>
   `;
 }
 function submitJournal(){
+  playClickSfx("reflectionBell");
   STATE.journal = document.getElementById("journalInput").value;
   STATE.roomsDone["refleksi"] = true;
   saveState();
