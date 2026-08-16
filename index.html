@@ -89,30 +89,74 @@
   .tagline{color:var(--gold);font-style:italic;font-size:14px;margin-bottom:18px;}
 
   /* ===== Ruangan — hero bergambar (bg disiapkan per ruangan lewat ROOMS[].bg) ===== */
-  #screen-room{padding-top:18px;}
+  #screen-room{padding:0;}
+  #roomContent{display:flex;flex-direction:column;flex:1;min-height:0;}
   .room-hero{
-    position:relative;min-height:300px;border-radius:var(--radius);overflow:hidden;
+    position:relative;width:100%;min-height:100%;flex:1 0 auto;
     background-size:cover;background-position:center;background-color:var(--green-deep);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    box-shadow:var(--shadow);margin-bottom:18px;
   }
   .room-hero-scrim{
     position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(180deg, rgba(15,20,15,.05) 0%, rgba(15,20,15,.12) 45%, rgba(10,14,10,.72) 100%);
+    background:linear-gradient(180deg, rgba(15,20,15,0) 55%, rgba(10,14,10,.75) 100%);
   }
-  .room-hero-card{
-    position:relative;z-index:1;text-align:center;color:#fff;
-    background:rgba(15,20,15,.5);backdrop-filter:blur(3px);
-    border-radius:14px;padding:16px 26px;max-width:80%;
-    box-shadow:0 8px 22px rgba(0,0,0,.25);
+  /* kontrol atas (← Lobby / judul / ikon) nempel di ATAS foto ruangan itu
+     sendiri — bukan bar hijau solid terpisah yang makan tinggi layar &
+     bikin dobel-bar + scroll. Cukup gradient tipis di paling atas biar ikon
+     tetap kebaca di foto apa pun. */
+  .room-topbar-overlay{
+    position:absolute;top:0;left:0;right:0;z-index:10;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:14px 14px 30px;pointer-events:none;
+    background:linear-gradient(180deg, rgba(8,12,8,.6) 0%, rgba(8,12,8,.32) 55%, transparent 100%);
   }
-  .room-hero-eyebrow{font-size:11px;letter-spacing:3px;font-weight:800;color:var(--gold);}
-  .room-hero-title{font-family:'Georgia','Iowan Old Style',serif;font-size:23px;margin:2px 0 4px;color:#fff;}
-  .room-hero-tagline{font-style:italic;color:#ece4cc;font-size:13.5px;margin:0;}
+  .room-topbar-overlay > *{pointer-events:auto;}
+  .room-topbar-overlay .who{font-size:13px;font-weight:700;color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.5);}
+  /* karakter teman berdiri penuh di dalam ruangan (sprite yang sama dipakai di
+     adegan cerita) — dipasang persis seperti Kak Hana di lobby, BUKAN avatar
+     bulat kecil + kotak chat. Bubble krem sama gayanya (lihat .lobby-char-bubble).
+     flex-column: bubble & karakter jadi satu grup yang selalu nempel rapat,
+     nggak perlu tebak-tebak posisi manual kayak versi absolute sebelumnya. */
+  .room-char-wrap{
+    position:absolute;left:10%;bottom:84px;width:36%;max-width:220px;z-index:1;
+    display:flex;flex-direction:column;align-items:flex-start;pointer-events:none;
+  }
+  .room-char-bubble{
+    flex:none;margin-left:8px;margin-bottom:6px;
+    max-width:calc(100% - 8px);background:var(--card);color:var(--ink);
+    border-radius:16px;border-left:4px solid var(--gold);padding:9px 13px;
+    font-size:12px;line-height:1.42;box-shadow:0 6px 14px rgba(0,0,0,.35);
+    position:relative;
+  }
+  .room-char-bubble b{display:block;color:var(--text-accent);font-size:10.5px;letter-spacing:.3px;margin-bottom:2px;}
+  .room-char-bubble::after{
+    content:'';position:absolute;left:14px;bottom:-7px;
+    width:0;height:0;border:7px solid transparent;
+    border-top-color:var(--card);border-bottom:0;
+  }
+  /* kedip kursor kecil selama efek ketik jalan */
+  .room-char-typecursor{display:inline-block;width:2px;height:.95em;vertical-align:-2px;margin-left:1px;background:var(--ink);animation:roomCharCursorBlink .8s steps(1) infinite;}
+  @keyframes roomCharCursorBlink{0%,49%{opacity:1;}50%,100%{opacity:0;}}
+  /* tinggi gambar ngikutin rasio asli (bukan dipaksa isi kotak tinggi penuh
+     lagi) — jadi bubble nempel persis di atas kepala, bukan ngambang jauh di
+     atas, dan kaki tetap presisi di garis bottom karena grup ini di-anchor
+     lewat bottom pada .room-char-wrap. */
+  /* napas beneran: cuma "mengembang" dari bawah (scaleY tipis, transform-origin
+     di kaki), TANPA translateY — jadi kaki tetap diam nempel lantai, yang
+     kelihatan gerak cuma bagian dada/badan ke atas kayak orang narik napas. */
+  .room-char-standing{
+    display:block;width:100%;height:auto;max-height:50vh;
+    object-fit:contain;object-position:bottom left;
+    filter:drop-shadow(0 8px 10px rgba(0,0,0,.5));
+    animation:roomCharBreathe 3.6s ease-in-out infinite;transform-origin:bottom center;
+  }
+  @keyframes roomCharBreathe{
+    0%,100%{transform:scaleY(1);}
+    50%{transform:scaleY(1.018);}
+  }
   .room-hero-actions{
-    position:absolute;left:0;right:0;bottom:16px;z-index:1;
-    display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 16px;
-    flex-wrap:wrap;row-gap:8px;
+    position:absolute;left:0;right:0;bottom:0;z-index:1;box-sizing:border-box;
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:0 16px 22px;flex-wrap:wrap;row-gap:8px;
   }
   .room-hero-btn{
     border-radius:999px;font-weight:800;font-size:12px;line-height:1.2;
@@ -128,14 +172,12 @@
   @media (hover:hover) and (pointer:fine){
     .room-hero-btn:hover{transform:translateY(-2px);filter:brightness(1.1);}
   }
-  .room-wrap{max-width:640px;margin:0 auto;}
-  @media (min-width:700px){
-    .room-hero{min-height:400px;}
-    .room-hero-title{font-size:27px;}
-    .room-hero-card{padding:20px 34px;}
-  }
+  .room-wrap{max-width:640px;margin:0 auto;padding:18px 22px 22px;}
+  /* Sebelum "Mulai Game" diklik, #roomBody masih kosong — biar nggak nyisain
+     celah cream (padding doang, nggak ada isi) di bawah foto yang bikin harus
+     scroll, wrapper-nya diciutkan total selama masih kosong. */
+  .room-wrap:has(> #roomBody:empty){padding:0;margin:0;max-width:none;}
   @media (min-width:900px){
-    .room-hero{min-height:460px;max-width:900px;margin-left:auto;margin-right:auto;}
     .room-wrap{max-width:900px;}
   }
   .center{text-align:center;}
@@ -232,8 +274,8 @@
     filter:drop-shadow(0 6px 12px rgba(0,0,0,.2));
   }
   @keyframes charBreathe{
-    0%,100%{transform:translateX(-50%) translateY(0) scale(1);}
-    50%{transform:translateX(-50%) translateY(-1px) scale(1.006);}
+    0%,100%{transform:translateX(-50%) scaleY(1);}
+    50%{transform:translateX(-50%) scaleY(1.012);}
   }
   .btn-masuk{
     position:relative;z-index:3;background:none;border:none;padding:0;cursor:pointer;
@@ -309,14 +351,18 @@
     position:absolute;bottom:0;object-fit:contain;z-index:4;
     filter:drop-shadow(0 14px 22px rgba(0,0,0,.45));
     opacity:0;transition:opacity .25s ease, filter .25s ease;
+    transform-origin:bottom center;
   }
   .vn-portrait.pos-solo{left:50%;height:94%;max-height:min(94%,860px);width:auto;max-width:92%;animation:vnCharInCenter .38s ease .05s forwards;}
   .vn-portrait.pos-left{left:2%;height:80%;max-height:min(80%,700px);width:auto;max-width:54%;animation:vnCharInSide .38s ease .05s forwards;}
   .vn-portrait.pos-right{right:2%;left:auto;height:80%;max-height:min(80%,700px);width:auto;max-width:54%;animation:vnCharInSide .38s ease .05s forwards;}
   @keyframes vnCharInCenter{from{opacity:0;transform:translate(-50%,26px);}to{opacity:1;transform:translate(-50%,0);}}
   @keyframes vnCharInSide{from{opacity:0;transform:translateY(26px);}to{opacity:1;transform:translateY(0);}}
-  @keyframes vnBreatheCenter{0%,100%{transform:translate(-50%,0) scale(1);}50%{transform:translate(-50%,-4px) scale(1.008);}}
-  @keyframes vnBreatheSide{0%,100%{transform:translateY(0) scale(1);}50%{transform:translateY(-4px) scale(1.008);}}
+  /* napas beneran: cuma scaleY dari bawah, tanpa translateY, biar kaki nggak
+     ikut naik-turun/ngambang. pos-solo tetap butuh translateX(-50%) buat
+     centering horizontal (posisinya dari left:50%). */
+  @keyframes vnBreatheCenter{0%,100%{transform:translate(-50%,0) scaleY(1);}50%{transform:translate(-50%,0) scaleY(1.012);}}
+  @keyframes vnBreatheSide{0%,100%{transform:scaleY(1);}50%{transform:scaleY(1.012);}}
   .vn-portrait.pos-solo.breathing{animation:vnBreatheCenter 3.6s ease-in-out infinite;}
   .vn-portrait.pos-left.breathing,.vn-portrait.pos-right.breathing{animation:vnBreatheSide 3.6s ease-in-out infinite;}
   .vn-portrait.idle.breathing{animation-play-state:paused;}
@@ -540,8 +586,8 @@
   .ss-sprite img{width:clamp(96px,17vh,160px);height:clamp(96px,17vh,160px);object-fit:contain;filter:drop-shadow(0 8px 10px rgba(0,0,0,.4));
     animation:ssBreathe 2.6s ease-in-out infinite;transform-origin:bottom center;}
   @keyframes ssBreathe{
-    0%,100%{transform:translateY(0) scale(1,1) scaleX(var(--ssfx,1));}
-    50%{transform:translateY(-3px) scale(1.02,1.03) scaleX(var(--ssfx,1));}
+    0%,100%{transform:scaleY(1) scaleX(var(--ssfx,1));}
+    50%{transform:scaleY(1.02) scaleX(var(--ssfx,1));}
   }
   .ss-npc-name{margin-top:2px;font-size:10.5px;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.75);}
   /* tanda "bisa diajak ngobrol" — bubble mengambang di atas kepala NPC, ada animasi
@@ -934,11 +980,15 @@
   .lobby-char-standing{height:100%;width:100%;object-fit:contain;object-position:bottom left;
     filter:drop-shadow(0 8px 10px rgba(0,0,0,.5));
     animation:charBreatheLobby 2.6s ease-in-out infinite;transform-origin:bottom center;
-    pointer-events:auto;cursor:pointer;}
-  .lobby-char-standing:active{transform:scale(.97);}
+    pointer-events:none;}
+  .lobby-char-hitzone{
+    position:absolute;left:0;bottom:0;width:130px;max-width:55%;height:62%;
+    pointer-events:auto;cursor:pointer;
+  }
+  .lobby-char-hitzone:active ~ .lobby-char-standing{transform:scale(.97);}
   @keyframes charBreatheLobby{
-    0%,100%{transform:translateY(0) scale(1);}
-    50%{transform:translateY(-1px) scale(1.006);}
+    0%,100%{transform:scaleY(1);}
+    50%{transform:scaleY(1.012);}
   }
   .lobby-char-fallback{display:none;align-items:flex-end;justify-content:center;
     height:55%;font-size:72px;filter:drop-shadow(0 8px 10px rgba(0,0,0,.5));}
@@ -1134,6 +1184,48 @@
     .tentang-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:22px;align-items:start;}
     .tentang-grid .tentang-col-right{margin-top:0;border-left:1px dashed #d8cba0;padding-left:20px;}
   }
+  /* Materi/Target modal — horizontal: teks di kiri, kolom kanan (video utk
+     Materi / kartu narasi Kak Hana utk Target) di kanan. Sama pola kayak
+     .tentang-grid (stack di HP sempit, side-by-side mulai 640px). */
+  .materi-card{max-width:400px;}
+  .materi-grid{display:block;}
+  .materi-grid .materi-col-video{margin-top:16px;}
+  @media (min-width:640px){
+    .materi-card{max-width:760px;}
+    .materi-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:24px;align-items:stretch;}
+    .materi-grid .materi-col-video{margin-top:0;}
+  }
+  .materi-intro{font-size:14px;line-height:1.6;margin:2px 0 12px;}
+  .materi-video-box{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:linear-gradient(160deg,#25392f,#152018);box-shadow:0 8px 20px rgba(0,0,0,.28);}
+  .materi-video-box video,.materi-video-box iframe{width:100%;height:100%;object-fit:cover;display:block;background:#000;border:0;}
+  .materi-video-box--empty{cursor:pointer;}
+  .materi-video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:14px;background-size:cover;background-position:center;}
+  .materi-video-placeholder::before{content:'';position:absolute;inset:0;background:rgba(15,25,18,.55);}
+  .materi-video-play{position:relative;width:46px;height:46px;border-radius:50%;background:rgba(251,248,239,.92);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--green-deep);box-shadow:0 4px 10px rgba(0,0,0,.3);transition:transform .15s ease;}
+  .materi-video-box--empty:hover .materi-video-play{transform:scale(1.08);}
+  .materi-video-caption{position:relative;color:#fff;font-size:11.5px;font-weight:700;letter-spacing:.2px;}
+  .materi-video-note{position:relative;color:rgba(255,255,255,.75);font-size:10.5px;}
+  .materi-video-edit{position:absolute;top:8px;right:8px;z-index:2;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;border:none;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .materi-video-edit:hover{background:rgba(0,0,0,.65);}
+  /* poin materi: satu poin per halaman (bukan list panjang) biar modal
+     nggak perlu discroll — dinavigasi lewat tombol ‹ › + titik halaman. */
+  .materi-points-page{background:var(--green-soft);color:var(--text-accent);border-radius:12px;padding:14px;min-height:104px;display:flex;align-items:center;gap:8px;font-size:13.5px;line-height:1.55;}
+  .materi-points-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;}
+  .materi-points-nav button{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:var(--card);border:2px solid var(--green-mid);color:var(--green-deep);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .materi-points-nav button:disabled{opacity:.35;cursor:default;}
+  .materi-points-dots{display:flex;gap:6px;}
+  .materi-points-dots span{width:7px;height:7px;border-radius:50%;background:#d8cba0;}
+  .materi-points-dots span.active{background:var(--gold);}
+  /* ---- Target modal: goal box + checklist milestone + kartu narasi Kak Hana ---- */
+  .target-goal-box{display:flex;gap:10px;align-items:flex-start;background:var(--green-soft);color:var(--text-accent);border-radius:12px;padding:14px;font-size:13.5px;line-height:1.55;font-weight:600;}
+  .target-goal-box .icon{font-size:17px;flex:0 0 auto;line-height:1.5;}
+  .target-checklist{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:7px;}
+  .target-checklist li{display:flex;gap:8px;font-size:12.5px;line-height:1.45;color:var(--ink);}
+  .target-checklist li .chk{flex:0 0 auto;width:18px;height:18px;border-radius:50%;background:var(--green-mid);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+  .target-hana{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;height:100%;background:linear-gradient(180deg,var(--card) 0%,#f2e9cf 100%);border:2px solid var(--gold);border-radius:16px;padding:18px 14px;justify-content:center;}
+  .target-hana img{width:64px;height:64px;border-radius:50%;object-fit:cover;object-position:top center;border:3px solid var(--gold);box-shadow:0 6px 14px rgba(0,0,0,.25);background:#f2e9cf;}
+  .target-hana .name{font-weight:800;color:var(--text-accent);font-size:12px;letter-spacing:.3px;}
+  .target-hana .bubble{background:var(--green-soft);border-radius:2px 12px 12px 12px;padding:10px 12px;font-size:12.5px;line-height:1.5;color:var(--ink);text-align:left;}
   .modal-plaque{
     display:inline-block;background:var(--green-deep);color:#fff;
     border-radius:999px;padding:9px 22px;font-size:14px;font-weight:800;
@@ -1608,9 +1700,11 @@ if("serviceWorker" in navigator){
       <div class="lobby-doors-row" id="doorsGrid"></div>
       <div class="lobby-hall-floor">
         <div class="lobby-char-wrap">
+          <!-- Zona klik sengaja dibikin kecil & nempel di kaki karakter (bukan
+               di seluruh kotak gambar 40%-lebar yang isinya banyak transparan) —
+               supaya nggak numpuk sama hitbox pintu di sebelahnya (lihat DOOR_POSITIONS). -->
+          <div class="lobby-char-hitzone" title="Ketuk Kak Hana buat semangat hari ini" onclick="tapLobbyHana()"></div>
           <img class="lobby-char-standing" id="lobbyCharStanding" src="images/lobby_char_idle.png" alt="Kak Hana"
-               title="Ketuk Kak Hana buat semangat hari ini"
-               onclick="tapLobbyHana()"
                onerror="lobbyCharImgError(this)"
                onload="this.style.display='block';document.getElementById('lobbyCharFallback').style.display='none';positionLobbyCharBubble();">
           <div class="lobby-char-fallback" id="lobbyCharFallback">🧕</div>
@@ -1628,10 +1722,12 @@ if("serviceWorker" in navigator){
     <div id="corridorContent"></div>
   </section>
 
-  <!-- 7. ROOM (dynamic) -->
+  <!-- 7. ROOM (dynamic) — kontrol atas nempel LANGSUNG di foto ruangan (overlay
+       transparan + gradient tipis), BUKAN bar hijau solid terpisah, biar nggak
+       makan tinggi layar & nggak numpuk jadi scroll. -->
   <section class="screen" id="screen-room">
-    <div class="topbar">
-      <button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button>
+    <div class="room-topbar-overlay">
+      <button class="icon-btn" onclick="goTo('screen-lobby');renderLobby();">← Lobby</button>
       <div class="who" id="roomTitleTop">Ruangan</div>
       <div style="display:flex;align-items:center;gap:6px;">
         <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
@@ -1645,7 +1741,7 @@ if("serviceWorker" in navigator){
 
   <!-- PROGRESS -->
   <section class="screen" id="screen-progress">
-    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button><div class="who">Progress</div>
+    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby');renderLobby();">← Lobby</button><div class="who">Progress</div>
       <div style="display:flex;align-items:center;gap:6px;">
         <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
         <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
@@ -1658,7 +1754,7 @@ if("serviceWorker" in navigator){
 
   <!-- TROPHY -->
   <section class="screen" id="screen-trophy">
-    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button><div class="who">Trophy</div>
+    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby');renderLobby();">← Lobby</button><div class="who">Trophy</div>
       <div style="display:flex;align-items:center;gap:6px;">
         <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
         <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
@@ -1671,7 +1767,7 @@ if("serviceWorker" in navigator){
 
   <!-- HIKMAH -->
   <section class="screen" id="screen-hikmah">
-    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby')">← Lobby</button><div class="who">Koleksi Hikmah</div>
+    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby');renderLobby();">← Lobby</button><div class="who">Koleksi Hikmah</div>
       <div style="display:flex;align-items:center;gap:6px;">
         <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
         <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
@@ -1765,6 +1861,22 @@ if("serviceWorker" in navigator){
       <p style="font-size:13.5px;line-height:1.5;">Poin ini nunjukin seberapa jauh kamu udah menjelajah &amp; belajar di rumah ini — nambah tiap kamu menyelesaikan sebuah ruangan atau aktivitas refleksi.</p>
       <p style="font-size:13.5px;line-height:1.5;">Poin bukan buat dibelanjakan — anggap aja ini catatan perjalananmu, sama kayak lencana di Trophy.</p>
       <button class="btn-primary btn-block" onclick="closeModal('modalPoin')">Oke, ngerti</button>
+    </div>
+  </div>
+
+  <!-- Materi & Target ruangan — dibuka dari tombol di atas foto ruangan.
+       Sengaja jadi modal (bukan nambah konten di bawah foto) biar nggak perlu
+       scroll panjang tiap mau baca materi/target sebelum mulai game. -->
+  <div class="modal-backdrop" id="modalRoomInfo">
+    <div class="modal-card materi-card" id="roomInfoModalCard" style="text-align:left;max-height:78vh;overflow-y:auto;">
+      <h3 id="roomInfoModalTitle" style="margin-top:0;">Materi</h3>
+      <div class="materi-grid" id="roomInfoModalGrid">
+        <div class="materi-col-text">
+          <div id="roomInfoModalBody" style="font-size:13.5px;line-height:1.55;"></div>
+        </div>
+        <div class="materi-col-video" id="roomInfoModalVideo"></div>
+      </div>
+      <button class="btn-primary btn-block" style="margin-top:16px;" onclick="closeModal('modalRoomInfo')">Tutup</button>
     </div>
   </div>
 
@@ -2433,7 +2545,7 @@ function confirmExit(){
 }
 
 /* ---------- NAVIGATION ---------- */
-const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading","screen-story","screen-mood","screen-corridor","screen-lobby"];
+const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading","screen-story","screen-mood","screen-corridor","screen-lobby","screen-room"];
 function goTo(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -4640,20 +4752,60 @@ let currentRoom = null;
    Aset yang dipakai: sprite_arga_kutubuku.png, sprite_arka_kakicacat.png, sprite_aldo_tunarungu.png,
    sprite_vira_disabilitas.png, sprite_rara_minder.png, sprite_rama_nerd.png (semua di images/) */
 const TEMAN_ROOM = {
-  perpustakaan: {name:"Arga", img:"images/sprite_arga_kutubuku.png", text:"Aku suka banget baca buku di sini, tenang dan banyak yang bisa dipelajari."},
+  // 8 sprite teman yang ada: aldo_tunarungu, amel_inscure, arga_kutubuku,
+  // arka_kakicacat, hana, rama_nerd, rara_minder, vira_disabilitas.
+  // 10 ruangan -> Hana & Rama kepakai 2x, sisanya masing-masing unik.
+  perpustakaan: {name:"Kak Hana", img:"images/sprite_hana.png", text:"Yuk mampir baca-baca dulu di sini — banyak bacaan ringan yang bisa nambah wawasanmu."},
   pubertas:     {name:"Arka", img:"images/sprite_arka_kakicacat.png", text:"Tubuhku beda dari kebanyakan, tapi perubahan yang aku alami tetap sama kok — itu bikin aku makin paham diriku."},
+  menstruasi:   {name:"Amel", img:"images/sprite_amel_inscure.png", text:"Awalnya aku parno & minder banget pas menstruasi pertama, takut ada apa-apa pas di sekolah — sekarang aku udah lebih siap & nggak secemas dulu."},
+  mimpibasah:   {name:"Arga", img:"images/sprite_arga_kutubuku.png", text:"Aku sempat cari-cari referensi buku pas ngalamin mimpi basah pertama biar nggak bingung sendirian — ternyata itu wajar kok, tanda tubuh lagi tumbuh."},
   consent:      {name:"Aldo", img:"images/sprite_aldo_tunarungu.png", text:"Aku komunikasi pakai bahasa isyarat, tapi hak buat bilang 'tidak' tetap sama kayak orang lain."},
   relasi:       {name:"Vira", img:"images/sprite_vira_disabilitas.png", text:"Pertemanan yang sehat itu nggak lihat aku pakai kursi roda atau nggak — yang penting saling menghargai."},
-  konseling:    {name:"Rara", img:"images/sprite_rara_minder.png", text:"Dulu aku malu cerita perasaanku, sekarang aku belajar itu nggak apa-apa."},
   medsos:       {name:"Rama", img:"images/sprite_rama_nerd.png", text:"Sebelum ikut share apapun, aku selalu cek dulu — sekali jadi kebiasaan, jadi kebal hoaks."},
+  gizi:         {name:"Rama", img:"images/sprite_rama_nerd.png", text:"Sama kayak aku cek fakta sebelum percaya, aku juga sekarang mulai cek label makanan sebelum asal makan."},
+  konseling:    {name:"Rara", img:"images/sprite_rara_minder.png", text:"Dulu aku malu cerita perasaanku, sekarang aku belajar itu nggak apa-apa."},
+  refleksi:     {name:"Kak Hana", img:"images/sprite_hana.png", text:"Dari semua ruangan yang udah kamu jelajahi, coba renungin lagi — mana yang paling nempel di hati kamu?"},
 };
-function temanCard(roomId){
+/* Posisi horizontal karakter teman (dalam % dari lebar foto ruangan), biar
+   bisa disetel presisi nempel ke kursi/furnitur yang ada di gambar bg
+   masing-masing ruangan (posisinya beda-beda tiap gambar). Default 25%
+   (posisi yang sama kayak ruang Pubertas) kalau ruangannya belum diisi
+   manual di sini. Contoh: menstruasi:18 kalau kursi/bantalnya ada di sekitar
+   18% dari kiri gambar ruang itu. */
+const ROOM_CHAR_LEFT = {
+  pubertas: 25,
+};
+function roomCompanion(roomId){
   const t = TEMAN_ROOM[roomId];
   if(!t) return "";
-  return `<div class="hana-line" style="margin-bottom:14px;">
-    <img src="${t.img}" alt="${t.name}" onerror="this.remove()">
-    <div class="bubble"><b>KATA ${t.name.toUpperCase()}</b>${t.text}</div>
+  const leftPct = ROOM_CHAR_LEFT[roomId] != null ? ROOM_CHAR_LEFT[roomId] : 25;
+  return `<div class="room-char-wrap" style="left:${leftPct}%">
+    <div class="room-char-bubble"><b>${t.name.toUpperCase()}</b><span id="roomCharBubbleText"></span><span class="room-char-typecursor" id="roomCharTypeCursor"></span></div>
+    <img class="room-char-standing" src="${t.img}" alt="${t.name}" onerror="this.style.display='none'">
   </div>`;
+}
+// Efek ketik: teks bubble teman muncul huruf demi huruf tiap kali ruangan
+// dibuka, biar kerasa lagi "ngomong", bukan teks statis nongol sekali jadi.
+let roomCharTypeTimer = null;
+function startRoomCharTyping(roomId){
+  if(roomCharTypeTimer){ clearInterval(roomCharTypeTimer); roomCharTypeTimer = null; }
+  const t = TEMAN_ROOM[roomId];
+  const textEl = document.getElementById("roomCharBubbleText");
+  const cursorEl = document.getElementById("roomCharTypeCursor");
+  if(!t || !textEl) return;
+  const full = t.text;
+  let i = 0;
+  textEl.textContent = "";
+  if(cursorEl) cursorEl.style.display = "inline-block";
+  roomCharTypeTimer = setInterval(()=>{
+    i++;
+    textEl.textContent = full.slice(0, i);
+    if(i >= full.length){
+      clearInterval(roomCharTypeTimer);
+      roomCharTypeTimer = null;
+      if(cursorEl) cursorEl.style.display = "none";
+    }
+  }, 26);
 }
 function openRoom(id, doorEl){
   if(typeof playClickSfx === "function") playClickSfx("door");
@@ -4677,13 +4829,9 @@ function openRoom(id, doorEl){
 function renderRoomHome(){
   const c = document.getElementById("roomContent");
   c.innerHTML = `
-    <div class="room-hero" style="background-image:url('${currentRoom.bg||''}')">
+    <div class="room-hero" id="roomHero" style="background-image:url('${currentRoom.bg||''}')">
       <div class="room-hero-scrim"></div>
-      <div class="room-hero-card">
-        <div class="room-hero-eyebrow">RUANG</div>
-        <h2 class="room-hero-title">${currentRoom.icon} ${currentRoom.name}</h2>
-        <p class="room-hero-tagline">${currentRoom.tema}</p>
-      </div>
+      ${roomCompanion(currentRoom.id)}
       <div class="room-hero-actions">
         <button class="room-hero-btn room-hero-btn--side" onclick="showMateri()">MATERI</button>
         <button class="room-hero-btn room-hero-btn--primary" onclick="startMechanic('${currentRoom.id}')">MULAI<br>GAME</button>
@@ -4691,23 +4839,116 @@ function renderRoomHome(){
       </div>
     </div>
     <div class="room-wrap">
-      ${temanCard(currentRoom.id)}
       <div id="roomBody"></div>
     </div>
   `;
+  startRoomCharTyping(currentRoom.id);
 }
-const MATERI_TEXT = {
-  pubertas:"Pubertas adalah masa perubahan fisik & emosi yang wajar dialami setiap remaja, waktunya berbeda-beda pada tiap orang.",
-  menstruasi:"Menstruasi adalah proses biologis normal tanda tubuh mulai matang — bukan sesuatu yang perlu ditakuti atau disembunyikan.",
-  mimpibasah:"Mimpi basah adalah proses biologis normal tanda tubuh mulai matang — bukan sesuatu yang perlu ditakuti atau disembunyikan.",
-  consent:"Consent berarti persetujuan yang diberikan dengan sadar, tanpa paksaan. Kamu berhak menolak hal yang membuatmu tidak nyaman.",
-  relasi:"Relasi yang sehat dibangun atas rasa saling menghargai, tanpa paksaan maupun kontrol berlebihan dari salah satu pihak.",
-  medsos:"KBGO (Kekerasan Berbasis Gender Online) bisa berupa penyebaran foto tanpa izin, ancaman, atau akun palsu. Kenali dan laporkan.",
-  gizi:"Remaja butuh gizi seimbang untuk mendukung pertumbuhan fisik dan konsentrasi belajar sehari-hari.",
-  konseling:"Ruang ini tanpa skor — tempat kamu boleh bercerita apa pun yang kamu rasakan, tanpa dihakimi.",
-  perpustakaan:"Kumpulan bacaan & tontonan ringan seputar kesehatan reproduksi remaja.",
-  refleksi:"Saatnya melihat kembali apa yang sudah kamu pelajari selama menjelajah Ruang Tumbuh.",
+/* MATERI_DETAIL — versi lebih detail dari materi tiap ruangan (dipakai
+   showMateri()). Tiap entri: intro (paragraf pembuka, boleh sama kayak versi
+   lama) + points (ringkasan poin-poin penting, ditarik dari isi 3-level tiap
+   ruangan di LEVEL_CONTENT/LEVEL_CONTENT_PUBERTAS biar konsisten) + video
+   (opsional — src masih kosong karena belum ada file videonya; kalau nanti
+   file videonya udah ada tinggal isi src & poster di sini, box-nya otomatis
+   jadi player beneran lewat renderMateriVideoBox()). */
+const MATERI_DETAIL = {
+  pubertas:{
+    intro:"Pubertas adalah masa transisi dari anak-anak menuju dewasa, dipicu perubahan hormon dalam tubuh. Waktunya berbeda-beda pada tiap orang — dan itu sepenuhnya normal, bukan tanda ada yang salah.",
+    points:[
+      "Perubahan fisik umum (dialami semua remaja): tinggi badan bertambah cepat, muncul jerawat, keringat & bau badan berubah, tumbuh rambut di ketiak.",
+      "Perubahan spesifik gender: suara memberat & tumbuh kumis pada laki-laki; payudara berkembang & pinggul melebar pada perempuan.",
+      "Emosi juga ikut berubah — mood naik-turun, makin ingin diakui teman sebaya, mulai tertarik pada lawan jenis. Semua itu wajar.",
+      "Kebiasaan baru yang perlu dibangun: mandi & rawat wajah teratur, ganti pakaian dalam tiap hari, tanpa perlu memencet jerawat sembarangan.",
+    ],
+    video:{src:"", poster:"", caption:"Animasi: Mengenal Tubuhku"},
+  },
+  menstruasi:{
+    intro:"Menstruasi adalah proses biologis normal yang menandakan tubuh perempuan mulai matang — bukan sesuatu yang perlu ditakuti, dianggap kotor, atau disembunyikan.",
+    points:[
+      "Siklus haid wajar bervariasi sekitar 21–35 hari tiap orang, jadi nggak perlu selalu tepat 28 hari seperti mitos yang beredar.",
+      "Ganti pembalut rutin & catat siklus itu bagian dari merawat diri, bukan hal yang perlu ditutup-tutupi ke sesama perempuan.",
+      "Waspada & cerita ke orang tua/tenaga kesehatan kalau: darah sangat banyak (ganti pembalut kurang dari 1 jam), siklus berubah drastis berbulan-bulan, atau belum haid sama sekali di atas 15 tahun.",
+      "Kamu berhak izin ke UKS saat haid tanpa harus menjelaskan detail ke siapa pun, termasuk ke teman laki-laki.",
+    ],
+    video:{src:"", poster:"", caption:"Animasi: Aku Siap Menstruasi"},
+  },
+  mimpibasah:{
+    intro:"Mimpi basah adalah proses biologis normal yang menandakan organ reproduksi mulai matang — terjadi tanpa disengaja saat tidur, bukan sesuatu yang perlu ditakuti, disembunyikan, atau dianggap 'nakal'.",
+    points:[
+      "Setiap anak laki-laki mengalaminya di rentang usia berbeda-beda — nggak ada yang 'terlambat' atau 'lebih dulu' yang jadi masalah.",
+      "Setelah mimpi basah: ganti pakaian yang terkena, lalu mandi wajib (mandi junub) sebelum salat lagi.",
+      "Urusan ini bersifat pribadi — boleh nggak diceritakan ke teman kalau nggak nyaman, dan boleh tanya ke orang tua, wali laki-laki, atau guru laki-laki yang dipercaya kalau masih bingung caranya.",
+      "Sikap dewasa: nggak menjadikan pengalaman ini bahan ledekan ke teman, dan nggak menyebarkannya sebagai gosip.",
+    ],
+    video:{src:"", poster:"", caption:"Animasi: Siap Bertumbuh"},
+  },
+  consent:{
+    intro:"Consent berarti persetujuan yang diberikan dengan sadar, tanpa paksaan — dan bisa berubah kapan saja. Kamu berhak menolak hal yang membuatmu tidak nyaman, termasuk ke kerabat sendiri.",
+    points:[
+      "Minta izin berlaku untuk hal sekecil apa pun: pinjam barang, masuk kamar orang lain, sampai memotret/merekam seseorang.",
+      "Diam bukan berarti setuju — persetujuan harus jelas diucapkan, dan boleh berubah pikiran meski sebelumnya sudah bilang 'iya'.",
+      "Kalau ada yang tetap memaksa walau sudah berkali-kali ditolak, itu tanda batasanmu dilanggar — saatnya cerita ke orang dewasa terpercaya (orang tua, wali kelas, atau guru BK).",
+      "Bagi teman dengan keterbatasan bicara/pendengaran, penolakan juga bisa lewat gestur seperti menggelengkan kepala tegas atau menyilangkan tangan membentuk huruf X.",
+    ],
+    video:{src:"", poster:"", caption:"Animasi: Izin Itu Penting"},
+  },
+  relasi:{
+    intro:"Relasi yang sehat dibangun atas rasa saling menghargai, jujur, dan menghormati waktu & keputusan masing-masing — tanpa paksaan maupun kontrol berlebihan dari salah satu pihak.",
+    points:[
+      "Ciri pertemanan sehat: saling mendukung dan menghargai, dengan circle pertemanan yang boleh beragam, nggak harus terikat satu 'geng' eksklusif.",
+      "Rasa suka/naksir ke lawan jenis saat remaja itu wajar — tapi hindari berduaan di tempat sepi, dan boleh menolak/menunda ajakan 'pacaran' kalau belum siap.",
+      "Kenali red flag: posesif (cek HP terus, larang berteman dengan orang lain), memaksa hal berisiko, atau bikin kamu merasa bersalah supaya nurut.",
+      "Kamu nggak perlu merasa bersalah untuk menjauh dari relasi yang toxic, dan boleh cerita ke orang yang dipercaya.",
+    ],
+    video:{src:"", poster:"", caption:"Animasi: Healthy Relationship"},
+  },
+  medsos:{
+    intro:"KBGO (Kekerasan Berbasis Gender Online) bisa berupa penyebaran foto/video tanpa izin, ancaman, pelecehan verbal online, atau akun palsu yang mendekati secara mencurigakan. Kenali tandanya dan berani melapor.",
+    points:[
+      "Jangan bagikan info pribadi ke publik: alamat rumah, nomor telepon, tanggal lahir lengkap, lokasi real-time, atau foto dokumen penting.",
+      "Waspadai akun yang cepat akrab, sering memuji berlebihan, atau minta obrolan dirahasiakan dari orang tua — itu pola grooming yang harus dicurigai.",
+      "Ajakan ketemuan dari kenalan online harus sepengetahuan & didampingi orang tua/wali, jangan pernah sendirian.",
+      "Kalau jadi korban atau tahu teman jadi korban KBGO: screenshot bukti, blokir pelaku, lalu lapor ke orang tua/guru BK atau lembaga resmi seperti SAPA 129.",
+    ],
+    video:{src:"", poster:"", caption:"Animasi: Aman di Dunia Maya"},
+  },
+  gizi:{
+    intro:"Remaja butuh gizi seimbang untuk mendukung pertumbuhan fisik dan konsentrasi belajar sehari-hari — bukan soal pelarangan total, tapi soal porsi & pilihan yang tepat.",
+    points:[
+      "Panduan 'Isi Piringku': setengah piring sayur & buah, seperempat karbohidrat, seperempat protein — plus jangan lewatkan sarapan.",
+      "Remaja putri butuh asupan zat besi ekstra (bayam, hati ayam, daging merah, kacang-kacangan) dan disarankan rutin minum 1 tablet tambah darah tiap minggu.",
+      "Ngemil boleh, asal porsinya wajar — pilih buah potong atau kacang-kacangan dibanding gorengan atau minuman manis berlebih.",
+      "Diet ekstrem atau sengaja melewatkan makan demi kurus itu berisiko di usia pertumbuhan — pola makan yang berantakan juga bisa memengaruhi mood & energi belajar.",
+    ],
+    video:{src:"", poster:"", caption:"Animasi: Tubuh Sehat"},
+  },
+  konseling:{
+    intro:"Ruang ini tanpa skor & tanpa penilaian — tempat kamu boleh bercerita apa pun yang kamu rasakan, tanpa dihakimi.",
+    points:[
+      "Cerita di sini bersifat pribadi dan aman — nggak ada jawaban benar/salah yang dinilai.",
+      "Kalau butuh bantuan lebih lanjut, kamu bisa terhubung ke fasilitator/guru BK lewat ruang ini.",
+      "Berani meminta bantuan itu bukan tanda lemah, justru bagian dari merawat diri.",
+    ],
+    video:{src:"", poster:"", caption:"Tentang Ruang Konseling"},
+  },
+  perpustakaan:{
+    intro:"Kumpulan bacaan & tontonan ringan seputar kesehatan reproduksi remaja, buat kamu yang mau menambah wawasan di luar mini-game.",
+    points:[
+      "Isinya pelengkap materi dari tiap ruangan — boleh dibaca kapan pun, nggak memengaruhi skor.",
+      "Beberapa koleksi (termasuk video) masih terus ditambah seiring waktu.",
+    ],
+    video:{src:"", poster:"", caption:"Koleksi Perpustakaan"},
+  },
+  refleksi:{
+    intro:"Saatnya melihat kembali apa yang sudah kamu pelajari selama menjelajah Ruang Tumbuh.",
+    points:[
+      "Bandingkan pemahaman awal vs akhir kamu tentang topik-topik yang sudah dijelajahi.",
+      "Tuliskan jurnal reflektif singkat sebagai penutup perjalanan di rumah ini.",
+    ],
+    video:{src:"", poster:"", caption:"Tentang Ruang Refleksi"},
+  },
 };
+
 const TARGET_TEXT = {
   pubertas:"Memahami perubahan fisik & emosi pubertas secara akurat dan tidak menghakimi diri sendiri.",
   menstruasi:"Mampu mengelola perubahan tubuh (menstruasi) dengan tenang dan penuh perawatan diri.",
@@ -4720,11 +4961,163 @@ const TARGET_TEXT = {
   perpustakaan:"Memperluas wawasan lewat bacaan tambahan di luar mini-game.",
   refleksi:"Merefleksikan pemahaman awal vs akhir serta menuliskan jurnal reflektif.",
 };
+// TARGET_DETAIL — versi lebih lengkap dari modal Target: goal utama (dari
+// TARGET_TEXT) + checklist milestone (buat ruangan yang punya struktur
+// 3-level, checklist-nya diambil dari judul Level 1/2/3 biar konsisten sama
+// LEVEL_CONTENT/LEVEL_CONTENT_PUBERTAS, bukan ngarang baru) + narasi singkat
+// dari Kak Hana (expr = nama file images/hana_<expr>.png) buat nemenin
+// pemain sebelum mulai, ditaruh di kolom kanan modal (kartu vertikal).
+const TARGET_DETAIL = {
+  pubertas:{
+    checklist:["Level 1 — Tubuhku Berubah","Level 2 — Emosi & Kebiasaan Baru","Level 3 — Menerima Diri"],
+    hana:{expr:"semangat", text:"Nggak apa kalau kamu ngerasa canggung sama perubahan yang lagi terjadi — semua orang di sini juga pernah ngerasainnya. Yuk pelajari pelan-pelan bareng aku."},
+  },
+  menstruasi:{
+    checklist:["Level 1 — Apa Itu Menstruasi","Level 2 — Mengelola Menstruasi","Level 3 — Kapan Harus Waspada"],
+    hana:{expr:"semangat", text:"Menstruasi itu bagian dari cerita tumbuhmu, bukan sesuatu yang perlu ditutup-tutupi. Aku temenin kamu ngerti cara rawat dirinya, ya."},
+  },
+  mimpibasah:{
+    checklist:["Level 1 — Apa Itu Mimpi Basah","Level 2 — Kebersihan Diri","Level 3 — Sikap Dewasa"],
+    hana:{expr:"semangat", text:"Ini topik yang kadang bikin canggung buat dibahas, tapi wajar banget kok. Yuk kita bahas pelan-pelan biar kamu makin paham cara jaga diri."},
+  },
+  consent:{
+    checklist:["Level 1 — Izin Itu Penting","Level 2 — Berani Bilang Tidak","Level 3 — Mengenali & Melapor"],
+    hana:{expr:"bangga", text:"Berani jaga batasan diri sendiri itu nggak gampang, lho. Aku bangga kamu mau belajar soal ini."},
+  },
+  relasi:{
+    checklist:["Level 1 — Pertemanan Sehat","Level 2 — Rasa Suka yang Wajar","Level 3 — Mengenali Red Flag"],
+    hana:{expr:"semangat", text:"Nggak semua relasi itu sehat, dan itu boleh banget dipelajari pelan-pelan. Yuk cari tahu ciri-cirinya bareng aku."},
+  },
+  medsos:{
+    checklist:["Level 1 — Aman di Dunia Maya","Level 2 — Mengenali Tanda Bahaya","Level 3 — KBGO & Cara Melapor"],
+    hana:{expr:"semangat", text:"Dunia maya emang seru, tapi tetap perlu hati-hati. Aku bantu kamu kenali tanda bahayanya, ya."},
+  },
+  gizi:{
+    checklist:["Level 1 — Isi Piringku","Level 2 — Kebutuhan Gizi Remaja","Level 3 — Pola Makan Seimbang & Sehat Mental"],
+    hana:{expr:"semangat", text:"Badan yang sehat dimulai dari piring makan yang seimbang. Yuk cari tahu caranya bareng-bareng."},
+  },
+  konseling:{
+    checklist:["Cerita apa pun yang kamu rasain, tanpa dihakimi","Nggak ada skor atau jawaban benar/salah di sini"],
+    hana:{expr:"idle", text:"Di sini nggak ada nilai benar-salah. Cerita aja apa yang kamu rasain, aku dengerin kok."},
+  },
+  perpustakaan:{
+    checklist:["Bacaan & tontonan ringan pelengkap tiap ruangan","Boleh dibaca kapan pun, nggak memengaruhi skor"],
+    hana:{expr:"idle", text:"Kalau masih penasaran soal topik-topik di rumah ini, boleh banget mampir baca-baca dulu di sini."},
+  },
+  refleksi:{
+    checklist:["Bandingkan pemahaman awal vs akhir kamu","Tulis jurnal reflektif singkat sebagai penutup"],
+    hana:{expr:"bangga", text:"Kamu udah menjelajah cukup jauh sampai di sini. Yuk lihat lagi apa aja yang udah kamu pelajari."},
+  },
+};
+// Kolom video di modal Materi.
+// - Kalau belum ada link video (video.src kosong & belum ada override),
+//   box-nya jadi placeholder yang BISA DIKLIK buat langsung isi link
+//   (YouTube atau file .mp4 langsung) — nggak perlu edit kode.
+// - Link yang diisi disimpan di localStorage per ruangan (materiVideoOverrides),
+//   jadi nempel terus di browser itu sampai diganti/dihapus lagi.
+// - Kalau videonya udah ada (baik dari kode lewat video.src, atau dari link
+//   yang diisi manual), tetap ada tombol ✏️ kecil di pojok buat ganti/hapus.
+function getMateriVideoUrl(roomId, fallbackSrc){
+  try{
+    const overrides = JSON.parse(localStorage.getItem("materiVideoOverrides")||"{}");
+    if(overrides[roomId]) return overrides[roomId];
+  }catch(e){}
+  return fallbackSrc || "";
+}
+function setMateriVideoUrl(roomId, url){
+  try{
+    const overrides = JSON.parse(localStorage.getItem("materiVideoOverrides")||"{}");
+    if(url) overrides[roomId] = url; else delete overrides[roomId];
+    localStorage.setItem("materiVideoOverrides", JSON.stringify(overrides));
+  }catch(e){}
+}
+// Deteksi link YouTube (watch?v=, youtu.be/, shorts/) dan ubah jadi bentuk
+// embed; kalau bukan YouTube, dianggap link video langsung (.mp4 dll).
+function toEmbeddableVideo(url){
+  const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+  if(yt) return {type:"iframe", src:`https://www.youtube.com/embed/${yt[1]}`};
+  return {type:"video", src:url};
+}
+function promptMateriVideo(roomId){
+  const current = getMateriVideoUrl(roomId, "");
+  const input = window.prompt("Tempel link video (YouTube atau link .mp4 langsung). Kosongkan lalu OK untuk hapus:", current);
+  if(input === null) return; // batal
+  setMateriVideoUrl(roomId, input.trim());
+  showMateri();
+}
+function renderMateriVideoBox(roomId, video, posterFallback){
+  if(!video) return "";
+  const poster = video.poster || posterFallback || "";
+  const url = getMateriVideoUrl(roomId, video.src);
+  if(url){
+    const embed = toEmbeddableVideo(url);
+    const player = embed.type === "iframe"
+      ? `<iframe src="${embed.src}" title="Video Materi" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
+      : `<video controls playsinline preload="metadata" ${poster?`poster="${poster}"`:""}><source src="${embed.src}"></video>`;
+    return `
+      <div class="materi-video-box">
+        ${player}
+        <button type="button" class="materi-video-edit" onclick="promptMateriVideo('${roomId}')" title="Ganti video">✏️</button>
+      </div>
+    `;
+  }
+  return `
+    <div class="materi-video-box materi-video-box--empty" onclick="promptMateriVideo('${roomId}')">
+      <div class="materi-video-placeholder" style="${poster?`background-image:url('${poster}');`:""}">
+        <div class="materi-video-play">▶</div>
+        <div class="materi-video-caption">${video.caption||"Video Materi"}</div>
+        <div class="materi-video-note">Ketuk untuk isi link video</div>
+      </div>
+    </div>
+  `;
+}
+// Poin materi ditampilkan satu per satu (paging) pakai tombol ‹ › + titik
+// halaman, biar tingginya nggak nambah-nambah terus dan modal nggak perlu
+// discroll — beda dari versi list panjang sebelumnya.
+let materiPointsIdx = 0;
+function renderMateriPoints(){
+  const entry = MATERI_DETAIL[currentRoom.id];
+  const total = entry.points.length;
+  const body = document.getElementById("materiPointsBody");
+  if(!body) return;
+  body.innerHTML = `
+    <div class="materi-points-page">🌿 ${entry.points[materiPointsIdx]}</div>
+    <div class="materi-points-nav">
+      <button type="button" onclick="materiPointsIdx=Math.max(0,materiPointsIdx-1);renderMateriPoints();" ${materiPointsIdx===0?"disabled":""}>‹</button>
+      <div class="materi-points-dots">${entry.points.map((_,i)=>`<span class="${i===materiPointsIdx?"active":""}"></span>`).join("")}</div>
+      <button type="button" onclick="materiPointsIdx=Math.min(${total-1},materiPointsIdx+1);renderMateriPoints();" ${materiPointsIdx===total-1?"disabled":""}>›</button>
+    </div>
+  `;
+}
 function showMateri(){
-  document.getElementById("roomBody").innerHTML = `<div class="card">${MATERI_TEXT[currentRoom.id]}</div>`;
+  const entry = MATERI_DETAIL[currentRoom.id];
+  materiPointsIdx = 0;
+  document.getElementById("roomInfoModalTitle").textContent = "📖 Materi";
+  document.getElementById("roomInfoModalGrid").classList.remove("materi-grid--single");
+  document.getElementById("roomInfoModalBody").innerHTML = `
+    <p class="materi-intro">${entry.intro}</p>
+    <div id="materiPointsBody"></div>
+  `;
+  renderMateriPoints();
+  document.getElementById("roomInfoModalVideo").innerHTML = renderMateriVideoBox(currentRoom.id, entry.video, currentRoom.bg);
+  openModal("modalRoomInfo");
 }
 function showTarget(){
-  document.getElementById("roomBody").innerHTML = `<div class="card"><b>Tujuan:</b><br>${TARGET_TEXT[currentRoom.id]}</div>`;
+  const entry = TARGET_DETAIL[currentRoom.id] || {checklist:[], hana:{expr:"idle", text:""}};
+  document.getElementById("roomInfoModalTitle").textContent = "🎯 Target";
+  document.getElementById("roomInfoModalGrid").classList.remove("materi-grid--single");
+  document.getElementById("roomInfoModalBody").innerHTML = `
+    <div class="target-goal-box"><span class="icon">🎯</span><div>${TARGET_TEXT[currentRoom.id]||""}</div></div>
+    ${entry.checklist.length ? `<ul class="target-checklist">${entry.checklist.map(c=>`<li><span class="chk">✓</span>${c}</li>`).join("")}</ul>` : ""}
+  `;
+  document.getElementById("roomInfoModalVideo").innerHTML = `
+    <div class="target-hana">
+      <img src="images/hana_${entry.hana.expr}.png" alt="Kak Hana" onerror="this.remove()">
+      <div class="name">Kak Hana</div>
+      <div class="bubble">${entry.hana.text}</div>
+    </div>
+  `;
+  openModal("modalRoomInfo");
 }
 
 /* ---------- MINI-GAME DATA ---------- */
@@ -4737,7 +5130,19 @@ const QUIZBANK = {
 
 /* ---------- MINI-GAME ENGINE (quiz-based rooms) ---------- */
 let quizIdx = 0, quizScore = 0;
+// Begitu game/mekanik ruangan dimulai, foto ruangan (yang tingginya 70vh)
+// disembunyikan supaya kontennya (#roomBody) langsung mengisi layar dari atas
+// persis di bawah topbar — berasa pindah ke "halaman" baru, bukan nambah
+// konten yang harus di-scroll ke bawah lagi. Foto muncul lagi otomatis saat
+// ruangan dibuka ulang lewat openRoom() (renderRoomHome() membangun ulang).
+function hideRoomHero(){
+  const heroEl = document.getElementById("roomHero");
+  if(heroEl) heroEl.style.display = "none";
+  const screenEl = document.getElementById("screen-room");
+  if(screenEl) screenEl.scrollTop = 0;
+}
 function startMechanic(roomId){
+  hideRoomHero();
   if(roomId === "konseling"){ renderKonseling(); return; }
   if(roomId === "perpustakaan"){ renderPerpustakaan(); return; }
   if(roomId === "refleksi"){ renderRefleksi(); return; }
