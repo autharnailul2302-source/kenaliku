@@ -6,7 +6,6 @@
 <title>KenaliKu — Karena Setiap Remaja Berharga</title>
 <link rel="icon" type="image/png" href="images/favicon.png">
 <style>
-<style>
   /* Deterrent ringan: bukan proteksi beneran (lihat catatan di JS bawah),
      cuma biar orang awam nggak iseng klik-kanan save gambar / select teks.
      Dikecualikan buat input/textarea/[contenteditable] biar nggak ganggu
@@ -1682,6 +1681,217 @@
   .materi-points-dots{display:flex;gap:6px;}
   .materi-points-dots span{width:7px;height:7px;border-radius:50%;background:#d8cba0;}
   .materi-points-dots span.active{background:var(--gold);}
+
+  /* ===== Trophy / Prestasi — background ruangan full sama kayak ruangan lain
+     (bg cover 1 layar penuh, topbar overlay transparan — lihat markup HTML,
+     BUKAN .topbar hijau solid lagi). Nggak perlu position:relative sendiri
+     di sini karena .screen di atas udah position:absolute (jadi konteks
+     posisi buat anak absolute-nya), nambahin position:relative disini malah
+     bikin tinggi layar cuma ngikut isi konten (itu penyebab bg kepotong). */
+  #screen-trophy{
+    padding:0;overflow-y:auto;
+    background-image:linear-gradient(180deg, rgba(20,12,6,.3), rgba(20,12,6,.6)), url('images/bg_ruang_prestasi.png');
+    background-size:cover;background-position:center;background-repeat:no-repeat;
+  }
+  /* Dulu Mala di Koleksi Hikmah cuma <img class="room-corner-sprite"> polos
+     (position:absolute;right:8px;bottom:0 tanpa wrapper) — makanya kelihatan
+     "ngambang" (nggak ada bubble, kaki nggak napak pas ke-crop background).
+     Sekarang dipindah ke pola .mala-wrap yang sama kayak Kak Rizka di Trophy
+     (lihat blok ".mala-wrap" di bawah) biar ada bubble ngomong + gampang
+     digeser posisinya. Class .room-corner-sprite udah nggak dipakai lagi. */
+  #screen-hikmah #hikmahContent{position:relative;z-index:2;flex:1;min-width:0;}
+
+  /* Bungkus konten Trophy dibatasi lebar (nggak ngestretch full layar lebar)
+     supaya kartu-kartunya nggak kekecilan/berjejer kebanyakan kolom, dan
+     nyisain ruang kosong di kanan-bawah buat Kak Rizka berdiri (nggak numpuk
+     kartu). padding-top ngasih jarak dari topbar overlay yang transparan;
+     padding-bottom nyisain ruang di bawah buat Kak Rizka + bubble-nya. */
+  .trophy-wrap{
+    position:relative;z-index:2;max-width:720px;margin:0 auto;
+    padding:88px 22px 28vh;
+    min-height:calc(100vh - 88px);display:flex;flex-direction:column;
+  }
+  @media (min-width:900px){ .trophy-wrap{max-width:760px;padding-right:170px;padding-bottom:40px;min-height:0;} }
+
+  /* ===== Ringkasan progres Trophy — panel hijau di atas grid ===== */
+  .trophy-summary{
+    position:relative;z-index:2;display:flex;align-items:center;gap:12px;
+    background:linear-gradient(135deg, rgba(31,94,74,.94), rgba(62,142,110,.88));
+    border-radius:16px;padding:14px 16px;margin-bottom:14px;color:#fff;
+    box-shadow:0 10px 24px rgba(0,0,0,.35);
+  }
+  .trophy-summary .ts-icon{font-size:30px;flex:0 0 auto;filter:drop-shadow(0 3px 4px rgba(0,0,0,.3));}
+  .trophy-summary .ts-text{flex:1;min-width:0;}
+  .trophy-summary .ts-text b{display:block;font-size:14px;}
+  .trophy-summary .ts-text small{display:block;font-size:11px;opacity:.85;margin-top:1px;}
+  .trophy-summary .ts-bar-track{height:7px;border-radius:999px;background:rgba(255,255,255,.25);overflow:hidden;margin-top:7px;}
+  .trophy-summary .ts-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#F2B84A,#C08A2E);transition:width .4s ease;}
+
+  /* ===== Grid trophy — 10 pencapaian, kartu gelap+emas biar kontras di atas
+     foto rak trofi (bukan kartu krem transparan lagi, biar nggak nyampur sama
+     ornamen background). auto-fit biar rapi dari layar HP sampai layar lebar. ===== */
+  .trophy-grid{
+    position:relative;z-index:2;
+    display:grid;grid-template-columns:1fr 1fr;gap:10px;
+  }
+  .trophy-cell{
+    position:relative;border-radius:16px;padding:14px 8px 12px;text-align:center;overflow:hidden;
+    background:linear-gradient(160deg, rgba(40,28,12,.85), rgba(18,13,6,.85));
+    border:1.5px solid rgba(212,175,110,.55);
+    box-shadow:0 8px 18px rgba(0,0,0,.35);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  }
+  .trophy-cell .emoji{font-size:27px;display:block;filter:drop-shadow(0 3px 5px rgba(0,0,0,.4));}
+  .trophy-cell .label{font-size:11px;font-weight:800;color:#F6E7C4;margin-top:6px;letter-spacing:.2px;line-height:1.25;}
+  .trophy-cell.locked{
+    background:linear-gradient(160deg, rgba(45,45,45,.55), rgba(20,20,20,.55));
+    border-color:rgba(255,255,255,.18);
+  }
+  .trophy-cell.locked .emoji{filter:grayscale(1) opacity(.5);}
+  .trophy-cell.locked .label{color:rgba(255,255,255,.5);}
+  .trophy-cell.locked::after{content:'🔒';position:absolute;top:6px;right:8px;font-size:11px;opacity:.75;}
+
+  /* ===== Navigasi paging Trophy — biar grid nggak usah discroll pas fullscreen,
+     kartu dibagi per halaman (liat TROPHY_PER_PAGE di JS) trus tinggal klik ‹ › ===== */
+  .trophy-page-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px;flex:0 0 auto;}
+  .trophy-page-nav button{flex:0 0 auto;width:36px;height:36px;border-radius:50%;background:rgba(20,13,6,.85);border:2px solid var(--gold);color:#F6E7C4;font-size:16px;display:flex;align-items:center;justify-content:center;}
+  .trophy-page-nav button:disabled{opacity:.35;}
+  .trophy-page-dots{display:flex;gap:7px;}
+  .trophy-page-dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);}
+  .trophy-page-dots span.active{background:var(--gold);width:20px;border-radius:5px;transition:width .2s,border-radius .2s;}
+
+  /* ===== Kak Rizka — sprite + bubble ngomong di Ruang Prestasi =====
+     GESER POSISI KAK RIZKA: cara paling gampang tinggal ubah nilai di bawah ini.
+     - --rizka-right / --rizka-bottom : jarak dari kanan/bawah layar (px), dipakai kalau posisi default (kanan)
+     - --rizka-left                   : jarak dari kiri layar (px), dipakai kalau div #trophyRizkaWrap dikasih class "pos-left" di HTML
+     Ukuran sprite SENGAJA disamain sama formula sprite teman di ruangan lain
+     (lihat .room-char-wrap/.room-char-standing): kotak lebar 36% (maks 220px),
+     gambar width:100% height:auto max-height:50vh — biar Kak Rizka nggak
+     keliatan beda skala sama NPC di Ruang Pubertas dkk.
+     Contoh: mau taruh Rizka di kiri -> tambah class="rizka-wrap pos-left" di HTML. */
+  .rizka-wrap{
+    --rizka-right:-6px; --rizka-bottom:-6px; --rizka-left:-6px;
+    position:absolute;z-index:3;bottom:var(--rizka-bottom);right:var(--rizka-right);
+    width:36%;max-width:220px;
+    display:flex;flex-direction:column-reverse;align-items:center;gap:6px;pointer-events:none;
+  }
+  .rizka-wrap.pos-left{right:auto;left:var(--rizka-left);}
+  .rizka-sprite{
+    display:block;width:100%;height:auto;max-height:50vh;object-fit:contain;object-position:bottom;
+    filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));
+    animation:charBreatheLobby 2.6s ease-in-out infinite;transform-origin:bottom center;
+  }
+  .rizka-bubble{
+    pointer-events:auto;max-width:200px;background:var(--card);color:var(--ink);
+    border-radius:16px;border-left:4px solid var(--gold);padding:10px 14px 10px 12px;
+    font-size:12.5px;line-height:1.45;box-shadow:0 6px 14px rgba(0,0,0,.35);
+    position:relative;animation:bubblePopIn .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .rizka-bubble b{display:block;color:var(--text-accent);font-size:10.5px;letter-spacing:.3px;margin-bottom:2px;}
+  .rizka-bubble::after{
+    content:'';position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);
+    width:0;height:0;border:7px solid transparent;border-top-color:var(--card);border-bottom:0;
+  }
+  @media (max-width:380px){
+    .rizka-wrap{width:44%;}
+    .rizka-bubble{max-width:150px;font-size:11.5px;}
+  }
+
+  /* ===== Kak Mala — sprite + bubble ngomong di Koleksi Hikmah =====
+     Dulu Kak Mala di-absolute-in ke pojok layar (kayak Kak Rizka di Trophy),
+     tapi ternyata bikin dia "lepas" dari kartu piagam (jauh di pojok kanan-
+     bawah, nutupin bingkai lain di background) dan riskan bikin overflow
+     kalau tinggi konten berubah-ubah. Sekarang .mala-wrap jadi flex item
+     BIASA (bukan position:absolute), ditaruh sejajar/di samping grid piagam
+     lewat wrapper ".hikmah-main-row" (lihat markup HTML #screen-hikmah) —
+     jadi dia beneran nempel di pinggir piagam, ikut alur layout, dan nggak
+     ada lagi elemen yang "keluar" dari batas layar bikin scrollbar nongol. */
+  .hikmah-main-row{display:flex;align-items:flex-end;gap:18px;}
+  @media (max-width:760px){ .hikmah-main-row{flex-direction:column;align-items:center;gap:10px;} }
+  .mala-wrap{
+    --mala-nudge-down:55px; /* geser Kak Mala turun dari garis flex-end;
+      tinggal ubah angka ini kalau mau naik/turunin lagi (0px = rata sama
+      bawah grid piagam) */
+    flex:none;width:36%;max-width:220px;position:relative;top:var(--mala-nudge-down);
+    display:flex;flex-direction:column-reverse;align-items:center;gap:6px;
+  }
+  .mala-sprite{
+    display:block;width:100%;height:auto;max-height:50vh;object-fit:contain;object-position:bottom;
+    filter:drop-shadow(0 10px 14px rgba(0,0,0,.45));
+    animation:charBreatheLobby 2.6s ease-in-out infinite;transform-origin:bottom center;
+  }
+  .mala-bubble{
+    max-width:200px;background:var(--card);color:var(--ink);
+    border-radius:16px;border-left:4px solid var(--gold);padding:10px 14px 10px 12px;
+    font-size:12.5px;line-height:1.45;box-shadow:0 6px 14px rgba(0,0,0,.35);
+    position:relative;animation:bubblePopIn .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  .mala-bubble b{display:block;color:var(--text-accent);font-size:10.5px;letter-spacing:.3px;margin-bottom:2px;}
+  .mala-bubble::after{
+    content:'';position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);
+    width:0;height:0;border:7px solid transparent;border-top-color:var(--card);border-bottom:0;
+  }
+  @media (max-width:380px){
+    .mala-bubble{max-width:160px;font-size:11.5px;}
+  }
+
+  /* ===================== PROGRESS SCREEN (redesign: grid + paging, no scroll) ===================== */
+  #screen-progress{overflow-y:hidden;}
+  #screen-progress.active{display:flex;flex-direction:column;}
+  .progress-summary{
+    background:linear-gradient(135deg,var(--green-deep),var(--green-mid));
+    border-radius:var(--radius);padding:16px 18px;margin-bottom:14px;color:#fff;
+    display:flex;align-items:center;gap:16px;box-shadow:var(--shadow);flex:0 0 auto;
+  }
+  .progress-ring{position:relative;width:58px;height:58px;flex:0 0 auto;}
+  .progress-ring svg{width:100%;height:100%;transform:rotate(-90deg);}
+  .progress-ring circle{fill:none;stroke-width:6;}
+  .progress-ring .ring-bg{stroke:rgba(255,255,255,.25);}
+  .progress-ring .ring-fill{stroke:var(--gold);stroke-linecap:round;transition:stroke-dashoffset .5s ease;}
+  .progress-ring .ring-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;}
+  .progress-summary-text b{display:block;font-size:15px;margin-bottom:2px;}
+  .progress-summary-text span{font-size:12px;opacity:.9;}
+  .progress-page-wrap{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;}
+  .progress-grid{
+    flex:1 1 auto;min-height:0;display:grid;grid-template-columns:1fr 1fr;
+    grid-auto-rows:1fr;gap:10px;
+  }
+  .progress-card{
+    background:var(--card);border-radius:14px;padding:0;box-shadow:var(--shadow);
+    display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;
+    border:2px solid transparent;transition:transform .15s,border-color .15s;
+    background-size:cover;background-position:center;isolation:isolate;
+  }
+  .progress-card::before{
+    content:"";position:absolute;inset:0;z-index:0;
+    background:linear-gradient(180deg,rgba(20,30,24,.12) 0%,rgba(20,30,24,.15) 40%,rgba(15,25,19,.82) 100%);
+  }
+  .progress-card:not(.done){filter:grayscale(.55) brightness(.82);}
+  .progress-card.done{border-color:var(--gold);}
+  .progress-card .p-body{position:relative;z-index:1;padding:10px 12px;display:flex;flex-direction:column;gap:5px;}
+  .progress-card .p-icon{
+    font-size:18px;line-height:1;width:30px;height:30px;border-radius:50%;
+    background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;
+    position:absolute;top:9px;left:9px;z-index:1;box-shadow:0 2px 6px rgba(0,0,0,.2);
+  }
+  .progress-card .p-name{font-size:13.5px;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5);}
+  .progress-card .p-status{
+    align-self:flex-start;font-size:10.5px;font-weight:800;border-radius:999px;padding:3px 10px;
+    background:rgba(255,255,255,.85);color:#7A6FA8;
+  }
+  .progress-card.done .p-status{background:var(--gold);color:#fff;}
+  .progress-card.done .p-icon{box-shadow:0 0 0 2px var(--gold),0 2px 6px rgba(0,0,0,.25);}
+  .progress-card.done::after{
+    content:"✓";position:absolute;top:9px;right:9px;z-index:1;font-size:12px;font-weight:900;
+    color:#fff;background:var(--green-mid);width:22px;height:22px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.25);
+  }
+  .progress-page-nav{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;flex:0 0 auto;}
+  .progress-page-nav button{flex:0 0 auto;width:36px;height:36px;border-radius:50%;background:var(--card);border:2px solid var(--green-mid);color:var(--green-deep);font-size:16px;display:flex;align-items:center;justify-content:center;}
+  .progress-page-nav button:disabled{opacity:.35;}
+  .progress-page-dots{display:flex;gap:7px;}
+  .progress-page-dots span{width:8px;height:8px;border-radius:50%;background:#d8cba0;}
+  .progress-page-dots span.active{background:var(--gold);width:20px;border-radius:5px;transition:width .2s,border-radius .2s;}
   /* ---- Target modal: goal box + checklist milestone + kartu narasi Kak Hana ---- */
   .target-goal-box{display:flex;gap:10px;align-items:flex-start;background:var(--green-soft);color:var(--text-accent);border-radius:12px;padding:14px;font-size:13.5px;line-height:1.55;font-weight:600;}
   .target-goal-box .icon{font-size:17px;flex:0 0 auto;line-height:1.5;}
@@ -1856,6 +2066,121 @@
   .hikmah-quote{font-style:italic;color:var(--text-accent);font-size:15px;margin:10px 0;}
   .hikmah-source{font-size:12px;color:var(--grey);margin-bottom:14px;}
 
+  /* ===== Koleksi Hikmah: kartu "pigora" (bingkai foto) per tokoh =====
+     Sekarang fullbleed & dipaging kayak Ruang Trophy: topbar transparan
+     overlay (bukan bar hijau solid lagi, lihat markup HTML pakai
+     .room-topbar-overlay), 1 ruangan/tokoh ditampilin per halaman biar muat
+     1 layar tanpa scroll pas fullscreen — lihat renderHikmahPage() di JS. */
+  #screen-hikmah{
+    padding:0;overflow-y:auto;
+    background-image:linear-gradient(180deg, rgba(20,12,6,.25), rgba(20,12,6,.55)), url('images/bg_ruang_hikmah.png');
+    background-size:cover;background-position:center;background-repeat:no-repeat;
+  }
+  .hikmah-wrap{
+    position:relative;z-index:2;max-width:900px;margin:0 auto;
+    padding:88px 22px 28px;
+    min-height:calc(100vh - 88px);display:flex;flex-direction:column;justify-content:flex-end;
+  }
+  .hikmah-room-block{margin-bottom:18px;}
+  /* Dulu cuma teks polos tanpa background, jadi ketiban tulisan dekorasi di
+     background art (mis. "Ilmu tanpa Amal...") dan susah kebaca. Sekarang
+     dikasih plakat gold kecil biar kontras & jelas di atas foto ruangan. */
+  .hikmah-room-title{
+    display:inline-flex;align-items:center;gap:7px;font-weight:800;color:#3a2a12;
+    font-size:12.5px;letter-spacing:.2px;margin-bottom:12px;
+    background:linear-gradient(135deg,#f2dfa8,var(--gold));
+    border-radius:999px;padding:7px 16px 7px 10px;
+    box-shadow:0 6px 14px rgba(0,0,0,.3);
+  }
+  .hikmah-room-title .r-icon{font-size:17px;}
+  .hikmah-frame-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media (max-width:420px){ .hikmah-frame-grid{grid-template-columns:1fr;} }
+  .hikmah-frame{
+    position:relative;background:var(--card);border-radius:18px;padding:22px 16px 16px;
+    text-align:center;box-shadow:var(--shadow);
+    border:3px solid var(--gold);
+    background-image:
+      linear-gradient(var(--card),var(--card)),
+      linear-gradient(135deg,var(--gold),#e9c874 45%,var(--gold));
+    background-origin:border-box;background-clip:padding-box,border-box;
+  }
+  .hikmah-frame::before,.hikmah-frame::after{
+    content:"🌿";position:absolute;top:-8px;font-size:14px;opacity:.9;
+  }
+  .hikmah-frame::before{left:-6px;transform:scaleX(-1);}
+  .hikmah-frame::after{right:-6px;}
+  .hikmah-avatar{
+    width:74px;height:74px;border-radius:50%;margin:0 auto 12px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:24px;font-weight:800;color:#fff;letter-spacing:.5px;
+    box-shadow:0 0 0 3px var(--card),0 0 0 5px var(--gold),0 4px 10px rgba(0,0,0,.15);
+  }
+  .hikmah-frame .h-name{font-weight:800;font-size:15.5px;color:var(--ink);margin-bottom:2px;}
+  .hikmah-frame .h-role{font-size:11.5px;color:var(--grey);margin-bottom:12px;line-height:1.3;}
+  .hikmah-frame .hikmah-quote{font-size:14px;margin:0 0 5px;line-height:1.55;}
+  .hikmah-frame .hikmah-translation{font-size:12px;opacity:.75;margin:-2px 0 7px;}
+  .hikmah-frame .hikmah-source{font-size:11.5px;margin-bottom:0;}
+  /* Redesign kartu locked: dulu abu-abu grayscale+opacity(.6) datar banget,
+     "belum ditemukan" jadi kesannya cuma placeholder mati. Sekarang tetap
+     kebaca "belum kebuka" (dashed border, warna diredupin, tanpa kutipan)
+     tapi lock-nya dikasih cincin gold yang pulse pelan biar kerasa masih
+     "hidup" — bukan cuma kotak nonaktif. */
+  .hikmah-frame.locked{
+    border-color:#d8cba0;border-style:dashed;
+    background-image:none;opacity:1;
+  }
+  .hikmah-frame.locked .hikmah-avatar{
+    background:radial-gradient(circle, rgba(212,175,110,.32), rgba(212,175,110,.1));
+    box-shadow:0 0 0 3px var(--card),0 0 0 5px rgba(212,175,110,.55);
+    animation:hikmahLockPulse 2.4s ease-in-out infinite;
+  }
+  .hikmah-frame.locked::before,.hikmah-frame.locked::after{opacity:.4;filter:grayscale(1);}
+  .hikmah-frame.locked .h-name{color:var(--grey);}
+  @keyframes hikmahLockPulse{
+    0%,100%{box-shadow:0 0 0 3px var(--card),0 0 0 5px rgba(212,175,110,.55);}
+    50%{box-shadow:0 0 0 3px var(--card),0 0 0 9px rgba(212,175,110,.22);}
+  }
+  /* ===== Animasi Ruang Hikmah =====
+     3 animasi ditambah, semua CSS-only (nggak nambah beban JS):
+     1) Kartu piagam pop-in bertahap (stagger) tiap kali halaman/paging ganti
+        — nth-child ngasih delay biar nggak muncul bareng-bareng kaku.
+     2) Kartu yang UDAH kebuka (bukan .locked) dikasih kilau emas nyapu
+        (shimmer) sekali muncul, biar berasa spesial/"achievement".
+     3) Daun kecil melayang pelan di belakang konten (dekoratif, low-key,
+        z-index di bawah kartu) biar ruangan kerasa "hidup". */
+  .hikmah-frame{animation:hikmahFrameIn .5s cubic-bezier(.34,1.56,.64,1) backwards;}
+  .hikmah-frame-grid>.hikmah-frame:nth-child(1){animation-delay:.05s;}
+  .hikmah-frame-grid>.hikmah-frame:nth-child(2){animation-delay:.15s;}
+  .hikmah-frame-grid>.hikmah-frame:nth-child(3){animation-delay:.25s;}
+  .hikmah-frame-grid>.hikmah-frame:nth-child(4){animation-delay:.35s;}
+  @keyframes hikmahFrameIn{
+    from{opacity:0;transform:translateY(16px) scale(.94);}
+    to{opacity:1;transform:none;}
+  }
+  .hikmah-frame:not(.locked){position:relative;overflow:hidden;}
+  .hikmah-frame:not(.locked)::after{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.55) 50%,transparent 60%);
+    background-size:220% 100%;background-position:150% 0;
+    animation:hikmahShimmer 1.4s ease-out .5s 1;
+  }
+  @keyframes hikmahShimmer{
+    from{background-position:150% 0;}
+    to{background-position:-50% 0;}
+  }
+  .hikmah-leaf-fx{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1;}
+  .hikmah-leaf-fx span{
+    position:absolute;top:-30px;font-size:16px;opacity:.55;
+    animation:hikmahLeafFall linear infinite;
+    filter:drop-shadow(0 2px 3px rgba(0,0,0,.3));
+  }
+  @keyframes hikmahLeafFall{
+    0%{transform:translateY(-30px) translateX(0) rotate(0deg);opacity:0;}
+    10%{opacity:.55;}
+    90%{opacity:.5;}
+    100%{transform:translateY(110vh) translateX(24px) rotate(200deg);opacity:0;}
+  }
+
   /* ===== Dashboard Fasilitator ===== */
   #screen-fasilitator{padding:0;background:
       radial-gradient(circle at 15% 0%, #eaf3fb 0%, var(--cream) 55%);}
@@ -1932,11 +2257,8 @@
   .pesan-item-top{display:flex;justify-content:space-between;gap:8px;font-size:11.5px;color:var(--facil-deep);font-weight:700;margin-bottom:4px;}
   .pesan-item-text{font-size:13.5px;color:var(--ink);line-height:1.45;margin:0;}
 
-  .badge-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-  .badge-cell{background:var(--card);border-radius:14px;padding:12px 6px;text-align:center;box-shadow:var(--shadow);}
-  .badge-cell.locked{opacity:.35;}
-  .badge-cell .emoji{font-size:26px;display:block;}
-  .badge-cell .label{font-size:10px;font-weight:700;color:var(--text-accent);margin-top:4px;}
+  /* .badge-grid / .badge-cell lama sudah digantikan .trophy-grid / .trophy-cell
+     (lihat blok CSS Trophy di atas) — dihapus supaya nggak nyampur/bentrok. */
 
   textarea{
     width:100%;min-height:90px;border-radius:10px;border:2px solid #ddd0ac;
@@ -2247,33 +2569,90 @@ if("serviceWorker" in navigator){
         <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
       </div>
     </div>
-    <div id="progressContent"></div>
+    <div id="progressContent" class="progress-page-wrap"></div>
   </section>
 
   <!-- TROPHY -->
   <section class="screen" id="screen-trophy">
-    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby');renderLobby();">← Lobby</button><div class="who">Trophy</div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
-        <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
-        <button class="icon-btn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
-        <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+    <div class="room-topbar-overlay">
+      <button class="icon-btn" onclick="goTo('screen-lobby');renderLobby();">← Lobby</button>
+      <div class="who sr-only">Trophy</div>
+      <div class="room-topbar-icons">
+        <div class="room-topbar-icon-group">
+          <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan" title="Pengaturan">⚙</button>
+          <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh" title="Layar Penuh">⛶</button>
+        </div>
+        <div class="room-topbar-icon-group">
+          <button class="icon-btn js-music-btn" onclick="toggleMusic()" aria-label="Musik" title="Musik">🔊</button>
+          <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama" title="Kembali ke Menu Utama">🏠</button>
+        </div>
       </div>
     </div>
-    <div class="badge-grid" id="trophyGrid"></div>
+    <!-- Debu keemasan melayang — reuse sistem partikel Lobby (.lobby-ambient/.mote),
+         cuma dipaksa tipe "dust" terus (nggak gantian firefly) biar konsisten sama
+         nuansa "cahaya nyorot ke rak trofi". Diisi/di-refresh dari JS lewat
+         startTrophyAmbientCycle(), dipanggil sekali tiap masuk screen ini. -->
+    <div class="lobby-ambient" id="trophyAmbient" aria-hidden="true"></div>
+    <div class="trophy-wrap">
+      <div class="trophy-summary" id="trophySummary"></div>
+      <div class="trophy-grid" id="trophyGrid"></div>
+      <div class="trophy-page-nav" id="trophyPageNav"></div>
+      <!-- Kak Rizka — buat pindahin posisinya, lihat blok CSS ".rizka-wrap" (cari
+           komentar "GESER POSISI KAK RIZKA") tinggal ganti angka/nilainya di situ,
+           atau tambah class "pos-left" di div ini biar Rizka pindah ke pojok kiri.
+           Ditaruh DI DALAM .trophy-wrap (bukan lagi sibling-nya) supaya posisinya
+           relatif ke kotak konten trophy yang sempit itu sendiri — jadi dia selalu
+           nempel deket kartu-kartu, nggak ngambang jauh ke pojok layar lebar. -->
+      <div class="rizka-wrap" id="trophyRizkaWrap">
+        <img class="rizka-sprite" src="images/sprite_rizka.png" alt="Kak Rizka" onerror="this.style.display='none'">
+        <div class="rizka-bubble" id="trophyRizkaBubble">
+          <b>KAK RIZKA</b><span id="trophyRizkaBubbleText">—</span>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- HIKMAH -->
   <section class="screen" id="screen-hikmah">
-    <div class="topbar"><button class="icon-btn" onclick="goTo('screen-lobby');renderLobby();">← Lobby</button><div class="who">Koleksi Hikmah</div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan">⚙</button>
-        <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh">⛶</button>
-        <button class="icon-btn js-music-btn" onclick="toggleMusic()" aria-label="Musik">🔊</button>
-        <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama">🏠</button>
+    <div class="room-topbar-overlay">
+      <button class="icon-btn" onclick="goTo('screen-lobby');renderLobby();">← Lobby</button>
+      <div class="who sr-only">Koleksi Hikmah</div>
+      <div class="room-topbar-icons">
+        <div class="room-topbar-icon-group">
+          <button class="icon-btn" onclick="openModal('modalSettings')" aria-label="Pengaturan" title="Pengaturan">⚙</button>
+          <button class="icon-btn js-fs-btn" onclick="toggleFullscreen()" aria-label="Layar Penuh" title="Layar Penuh">⛶</button>
+        </div>
+        <div class="room-topbar-icon-group">
+          <button class="icon-btn js-music-btn" onclick="toggleMusic()" aria-label="Musik" title="Musik">🔊</button>
+          <button class="icon-btn" onclick="openModal('modalKeluar')" aria-label="Kembali ke Menu Utama" title="Kembali ke Menu Utama">🏠</button>
+        </div>
       </div>
     </div>
-    <div id="hikmahContent"></div>
+    <!-- Dekorasi daun melayang pelan (murni visual, z-index di bawah kartu) —
+         lihat CSS ".hikmah-leaf-fx" buat animasinya. -->
+    <div class="hikmah-leaf-fx" aria-hidden="true">
+      <span style="left:8%;animation-duration:13s;animation-delay:0s;">🍃</span>
+      <span style="left:22%;animation-duration:17s;animation-delay:3s;font-size:12px;">🌿</span>
+      <span style="left:40%;animation-duration:15s;animation-delay:6s;">🍃</span>
+      <span style="left:58%;animation-duration:19s;animation-delay:1s;font-size:13px;">🌿</span>
+      <span style="left:74%;animation-duration:14s;animation-delay:8s;">🍃</span>
+      <span style="left:90%;animation-duration:18s;animation-delay:4s;font-size:12px;">🌿</span>
+    </div>
+    <div class="hikmah-wrap">
+      <div class="hikmah-main-row">
+        <div id="hikmahContent"></div>
+        <!-- Kak Mala — sekarang bagian dari flex row bareng grid piagam
+             (lihat komentar "Kak Mala — sprite + bubble" di blok CSS
+             ".hikmah-main-row" / ".mala-wrap" di atas). -->
+        <div class="mala-wrap" id="hikmahMalaWrap">
+          <img class="mala-sprite" src="images/sprite_mala.png" alt="Kak Mala" onerror="this.style.display='none'">
+          <div class="mala-bubble" id="hikmahMalaBubble">
+            <b>KAK MALA</b><span id="hikmahMalaBubbleText">—</span>
+          </div>
+        </div>
+      </div>
+      <div class="trophy-page-nav" id="hikmahPageNav"></div>
+    </div>
   </section>
 
   <!-- ENDING -->
@@ -3185,7 +3564,7 @@ function confirmExit(){
 }
 
 /* ---------- NAVIGATION ---------- */
-const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading","screen-story","screen-mood","screen-corridor","screen-lobby","screen-room"];
+const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading","screen-story","screen-mood","screen-corridor","screen-lobby","screen-room","screen-trophy","screen-hikmah"];
 function goTo(id){
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
@@ -3195,6 +3574,45 @@ function goTo(id){
   else if(id === "screen-mood") startLeafRain("moodLeaves");
   else stopLeafRain();
   if(id !== "screen-loading") stopLoadingCharAnim();
+  // screen-lobby sengaja DILEWATIN di sini — track lobby tergantung area mana
+  // yang lagi dilihat (lobbyViewAreaIdx), dan itu baru final SETELAH
+  // renderLobby() jalan (lihat pemanggilan setBgmTrack() di ujung renderLobby()).
+  // Kalau dipaksa di sini juga, pas pertama kali masuk lobby (lobbyViewAreaIdx
+  // masih null) bisa salah pilih track sebelum ke-render ulang.
+  if(id !== "screen-lobby") setBgmTrack(bgmTrackForScreen(id));
+}
+/* ---------- MUSIK LATAR PER LAYAR ----------
+   lobby_ruangdiri.mp3   → lobby pas lagi lihat area "Ruang Diri"
+   lobby_ruangrelasi.mp3 → lobby pas lagi lihat area "Ruang Relasi"
+   lobby_ruangmedsos.mp3 → lobby pas lagi lihat area "Ruang Digital & Sehat"
+   lobby.mp3             → fallback lobby kalau ada area baru tanpa track sendiri
+   ruangdiri.mp3         → di dalam ruangan Pubertas, Menstruasi, Mimpi Basah
+   ruangrelasi.mp3       → di dalam ruangan Consent, Relasi Sehat, Konseling
+   ruangmediasosial.mp3  → di dalam ruangan Media Sosial
+   ruanggizi.mp3         → di dalam ruangan Gizi
+   ruangperpustakaan.mp3 → di dalam ruangan Perpustakaan
+   ruangrefleksi.mp3     → di dalam ruangan Refleksi
+   ruanglainnya.mp3      → layar "ruang lainnya" (Koleksi Trofi & Koleksi Hikmah)
+   audio/ost.mp3 (default lama) → semua layar lain, nggak diubah */
+function bgmTrackForScreen(id){
+  if(id === "screen-room" && currentRoom){
+    if(["pubertas","menstruasi","mimpibasah"].includes(currentRoom.id)) return "audio/ruangdiri.mp3";
+    if(["consent","relasi","konseling"].includes(currentRoom.id)) return "audio/ruangrelasi.mp3";
+    if(currentRoom.id === "medsos") return "audio/ruangmediasosial.mp3";
+    if(currentRoom.id === "gizi") return "audio/ruanggizi.mp3";
+    if(currentRoom.id === "perpustakaan") return "audio/ruangperpustakaan.mp3";
+    if(currentRoom.id === "refleksi") return "audio/ruangrefleksi.mp3";
+  }
+  if(id === "screen-trophy" || id === "screen-hikmah") return "audio/ruanglainnya.mp3";
+  return "audio/ost.mp3";
+}
+function setBgmTrack(src){
+  const audio = document.getElementById("bgmAudio");
+  if(!audio) return;
+  if(audio.getAttribute("src") === src) return; // udah track yang sama, jangan restart dari awal
+  const wasPlaying = musicOn && !audio.paused;
+  audio.src = src;
+  if(wasPlaying){ audio.play().catch(()=>{}); }
 }
 
 /* ---------- HUJAN DAUN (dipakai di title screen & mood check-in) ---------- */
@@ -4660,9 +5078,9 @@ const ROOMS = [
   {id:"relasi", name:"Relasi Sehat", icon:"🤝", tema:"Healthy Relationship", badge:"🤝", badgeLabel:"Relasi Sehat", kunci:"Menghargai Orang Lain", bg:"images/bg_ruang_relasi.png"},
   {id:"medsos", name:"Media Sosial", icon:"📱", tema:"KBGO", badge:"📱", badgeLabel:"Digital Hero", kunci:"Bijak Bermedia", bg:"images/bg_ruang_medsos.png"},
   {id:"gizi", name:"Gizi", icon:"🍎", tema:"Tubuh Sehat", badge:"🍎", badgeLabel:"Healthy Badge", kunci:"Menjaga Kesehatan", bg:"images/bg_ruang_gizi.png"},
-  {id:"konseling", name:"Konseling", icon:"💬", tema:"Ruang Tenang", badge:null, kunci:"Berani Meminta Bantuan", bg:"images/bg_ruang_konseling.png"},
-  {id:"perpustakaan", name:"Perpustakaan", icon:"📚", tema:"Koleksi Terbuka", badge:null, kunci:null, bg:"images/bg_ruang_perpustakaan.png"},
-  {id:"refleksi", name:"Refleksi", icon:"🪞", tema:"Ruang Terakhir", badge:null, kunci:null, bg:"images/bg_ruang_refleksi.png"},
+  {id:"konseling", name:"Konseling", icon:"💬", tema:"Ruang Tenang", badge:"💬", badgeLabel:"Berani Cerita", kunci:"Berani Meminta Bantuan", bg:"images/bg_ruang_konseling.png"},
+  {id:"perpustakaan", name:"Perpustakaan", icon:"📚", tema:"Koleksi Terbuka", badge:"📚", badgeLabel:"Cinta Ilmu", kunci:null, bg:"images/bg_ruang_perpustakaan.png"},
+  {id:"refleksi", name:"Refleksi", icon:"🪞", tema:"Ruang Terakhir", badge:"🪞", badgeLabel:"Reflektif", kunci:null, bg:"images/bg_ruang_refleksi.png"},
 ];
 function getRooms(){ return ROOMS.slice(); }
 
@@ -4699,36 +5117,36 @@ const INFO_NETRAL = {
    remaja yang belum lancar Inggris tetap paham artinya. */
 const HIKMAH = {
   pubertas: [
-    {text:"Sesungguhnya tubuhmu punya hak atas dirimu.", source:"HR. Bukhari & Muslim"},
-    {text:"You alone are enough. You have nothing to prove to anybody.", translation:"Kamu saja sudah cukup. Kamu tidak perlu membuktikan apa pun ke siapa pun.", source:"Maya Angelou"},
+    {text:"Sesungguhnya tubuhmu punya hak atas dirimu.", source:"HR. Bukhari & Muslim", isScripture:true, name:"Hadits Nabi ﷺ", role:"HR. Bukhari & Muslim"},
+    {text:"You alone are enough. You have nothing to prove to anybody.", translation:"Kamu saja sudah cukup. Kamu tidak perlu membuktikan apa pun ke siapa pun.", source:"Maya Angelou", name:"Maya Angelou", role:"Penyair & Aktivis Hak Asasi"},
   ],
   menstruasi: [
-    {text:"Wanita jangan berjiwa kerdil, tetapi berjiwa srikandi.", source:"Nyai Ahmad Dahlan (Siti Walidah), pendiri 'Aisyiyah"},
-    {text:"Habis gelap terbitlah terang.", source:"R.A. Kartini"},
+    {text:"Wanita jangan berjiwa kerdil, tetapi berjiwa srikandi.", source:"Nyai Ahmad Dahlan (Siti Walidah), pendiri 'Aisyiyah", name:"Nyai Ahmad Dahlan", role:"Siti Walidah, pendiri 'Aisyiyah"},
+    {text:"Habis gelap terbitlah terang.", source:"R.A. Kartini", name:"R.A. Kartini", role:"Pelopor emansipasi perempuan Indonesia"},
   ],
   mimpibasah: [
-    {text:"Setiap kalian adalah pemimpin, dan akan diminta pertanggungjawaban atas kepemimpinannya.", source:"HR. Bukhari & Muslim"},
-    {text:"The price of greatness is responsibility.", translation:"Harga dari sebuah kebesaran adalah tanggung jawab.", source:"Winston Churchill"},
+    {text:"Setiap kalian adalah pemimpin, dan akan diminta pertanggungjawaban atas kepemimpinannya.", source:"HR. Bukhari & Muslim", isScripture:true, name:"Hadits Nabi ﷺ", role:"HR. Bukhari & Muslim"},
+    {text:"The price of greatness is responsibility.", translation:"Harga dari sebuah kebesaran adalah tanggung jawab.", source:"Winston Churchill", name:"Winston Churchill", role:"Mantan Perdana Menteri Inggris"},
   ],
   consent: [
-    {text:"Wahai orang-orang beriman, janganlah kamu memasuki rumah yang bukan rumahmu sebelum meminta izin dan memberi salam kepada penghuninya.", source:"QS. An-Nur (24): 27"},
-    {text:"Daring to set boundaries is about having the courage to love ourselves, even when we risk disappointing others.", translation:"Berani membuat batasan adalah soal punya keberanian mencintai diri sendiri, meski itu berisiko mengecewakan orang lain.", source:"Brené Brown"},
+    {text:"Wahai orang-orang beriman, janganlah kamu memasuki rumah yang bukan rumahmu sebelum meminta izin dan memberi salam kepada penghuninya.", source:"QS. An-Nur (24): 27", isScripture:true, name:"Al-Qur'an", role:"QS. An-Nur (24): 27"},
+    {text:"Daring to set boundaries is about having the courage to love ourselves, even when we risk disappointing others.", translation:"Berani membuat batasan adalah soal punya keberanian mencintai diri sendiri, meski itu berisiko mengecewakan orang lain.", source:"Brené Brown", name:"Brené Brown", role:"Peneliti & Penulis"},
   ],
   relasi: [
-    {text:"Jangan takut salah — dari kesalahan pertama kita belajar melangkah lebih baik.", source:"Buya Hamka"},
-    {text:"People will forget what you said, but they will never forget how you made them feel.", translation:"Orang bisa lupa apa yang kamu katakan, tapi mereka tidak akan pernah lupa bagaimana perasaan mereka saat bersamamu.", source:"Maya Angelou"},
+    {text:"Jangan takut salah — dari kesalahan pertama kita belajar melangkah lebih baik.", source:"Buya Hamka", name:"Buya Hamka", role:"Ulama & Sastrawan Indonesia"},
+    {text:"People will forget what you said, but they will never forget how you made them feel.", translation:"Orang bisa lupa apa yang kamu katakan, tapi mereka tidak akan pernah lupa bagaimana perasaan mereka saat bersamamu.", source:"Maya Angelou", name:"Maya Angelou", role:"Penyair & Aktivis Hak Asasi"},
   ],
   gizi: [
-    {text:"Mukmin yang kuat lebih baik dan lebih dicintai Allah daripada mukmin yang lemah.", source:"HR. Muslim"},
-    {text:"Take care of your body. It's the only place you have to live.", translation:"Jaga tubuhmu. Itu satu-satunya tempat yang kamu punya untuk menjalani hidup.", source:"Jim Rohn"},
+    {text:"Mukmin yang kuat lebih baik dan lebih dicintai Allah daripada mukmin yang lemah.", source:"HR. Muslim", isScripture:true, name:"Hadits Nabi ﷺ", role:"HR. Muslim"},
+    {text:"Take care of your body. It's the only place you have to live.", translation:"Jaga tubuhmu. Itu satu-satunya tempat yang kamu punya untuk menjalani hidup.", source:"Jim Rohn", name:"Jim Rohn", role:"Pengusaha & Motivator"},
   ],
   konseling: [
-    {text:"Hadapi masalah tanpa wajah berkerut, agar hati tetap tenang.", source:"Buya Hamka"},
-    {text:"You don't have to see the whole staircase, just take the first step.", translation:"Kamu tidak perlu melihat seluruh anak tangga, cukup melangkah satu langkah dulu.", source:"Martin Luther King Jr."},
+    {text:"Hadapi masalah tanpa wajah berkerut, agar hati tetap tenang.", source:"Buya Hamka", name:"Buya Hamka", role:"Ulama & Sastrawan Indonesia"},
+    {text:"You don't have to see the whole staircase, just take the first step.", translation:"Kamu tidak perlu melihat seluruh anak tangga, cukup melangkah satu langkah dulu.", source:"Martin Luther King Jr.", name:"Martin Luther King Jr.", role:"Pemimpin Hak Sipil Amerika"},
   ],
   refleksi: [
-    {text:"Memaafkan diri sendiri menumbuhkan kedamaian dan kesehatan jiwa.", source:"Buya Hamka"},
-    {text:"The unexamined life is not worth living.", translation:"Hidup yang tidak pernah direnungkan tidak layak dijalani.", source:"Socrates"},
+    {text:"Memaafkan diri sendiri menumbuhkan kedamaian dan kesehatan jiwa.", source:"Buya Hamka", name:"Buya Hamka", role:"Ulama & Sastrawan Indonesia"},
+    {text:"The unexamined life is not worth living.", translation:"Hidup yang tidak pernah direnungkan tidak layak dijalani.", source:"Socrates", name:"Socrates", role:"Filsuf Yunani Kuno"},
   ],
 };
 
@@ -4893,22 +5311,30 @@ function lobbyChangeArea(delta){
 /* Efek "ngetik" buat balon Kak Hana di lobby — teks muncul huruf demi huruf
    (kayak lagi ngomong beneran), plus kursor kedip selama proses. Dipanggil
    ulang tiap renderLobby(), jadi kalau teksnya beda dari sebelumnya, animasi
-   ngetik jalan lagi dari awal. */
-let lobbyBubbleTypeTimer = null;
-function typeIntoLobbyBubble(text){
-  const el = document.getElementById("lobbyCharBubbleText");
-  if(lobbyBubbleTypeTimer){ clearInterval(lobbyBubbleTypeTimer); lobbyBubbleTypeTimer = null; }
+   ngetik jalan lagi dari awal.
+   Sekarang generic (typeIntoBubble) biar bisa dipakai balon karakter lain juga
+   (misalnya Kak Rizka di Trophy) — timer disimpan per elemen (bubbleTypeTimers)
+   biar nggak saling ganggu kalau ada beberapa balon yang ngetik bareng. */
+let lobbyBubbleTypeTimer = null; // kept for backward-compat, nggak dipakai langsung lagi
+const bubbleTypeTimers = {};
+function typeIntoBubble(elId, text){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  if(bubbleTypeTimers[elId]){ clearInterval(bubbleTypeTimers[elId]); bubbleTypeTimers[elId] = null; }
   let i = 0;
   const caret = () => `<span class="lobby-bubble-caret"></span>`;
   el.innerHTML = caret();
-  lobbyBubbleTypeTimer = setInterval(() => {
+  bubbleTypeTimers[elId] = setInterval(() => {
     i++;
     el.innerHTML = escapeHtml(text.slice(0, i)) + (i < text.length ? caret() : "");
     if(i >= text.length){
-      clearInterval(lobbyBubbleTypeTimer);
-      lobbyBubbleTypeTimer = null;
+      clearInterval(bubbleTypeTimers[elId]);
+      bubbleTypeTimers[elId] = null;
     }
   }, 20);
+}
+function typeIntoLobbyBubble(text){
+  typeIntoBubble("lobbyCharBubbleText", text);
 }
 function escapeHtml(s){
   return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
@@ -4939,8 +5365,8 @@ function pickLobbyAmbientType(){
   lobbyAmbientLastType = t;
   return t;
 }
-function renderLobbyAmbientParticles(type){
-  const container = document.getElementById("lobbyAmbient");
+function renderLobbyAmbientParticles(type, containerId){
+  const container = document.getElementById(containerId || "lobbyAmbient");
   if(!container) return;
   const counts = {dust:13, firefly:9};
   const n = counts[type] || 10;
@@ -4969,6 +5395,17 @@ function startLobbyAmbientCycle(){
   renderLobbyAmbientParticles(pickLobbyAmbientType());
   lobbyAmbientTimer = setInterval(() => {
     renderLobbyAmbientParticles(pickLobbyAmbientType());
+  }, 20000);
+}
+/* Versi debu keemasan buat Ruang Prestasi — reuse renderLobbyAmbientParticles
+   tapi dipaksa tipe "dust" terus (nggak gantian firefly kayak Lobby), container
+   beda (#trophyAmbient) biar independen dari punya Lobby. */
+let trophyAmbientTimer = null;
+function startTrophyAmbientCycle(){
+  if(trophyAmbientTimer) return; // udah jalan, nggak perlu restart tiap buka Ruang Prestasi
+  renderLobbyAmbientParticles("dust", "trophyAmbient");
+  trophyAmbientTimer = setInterval(() => {
+    renderLobbyAmbientParticles("dust", "trophyAmbient");
   }, 20000);
 }
 
@@ -5154,6 +5591,15 @@ function renderLobby(){
   }
   const viewIdx = lobbyViewAreaIdx;
   const area = LOBBY_AREAS[viewIdx];
+  // Ganti musik lobby sesuai area yang lagi dilihat: "Ruang Diri" (index 0)
+  // → lobby_ruangdiri.mp3, "Ruang Relasi" (index 1) → lobby_ruangrelasi.mp3,
+  // "Ruang Digital & Sehat" (index 2) → lobby_ruangmedsos.mp3.
+  setBgmTrack(
+    viewIdx === 0 ? "audio/lobby_ruangdiri.mp3" :
+    viewIdx === 1 ? "audio/lobby_ruangrelasi.mp3" :
+    viewIdx === 2 ? "audio/lobby_ruangmedsos.mp3" :
+    "audio/lobby.mp3"
+  );
   const isRevisit = viewIdx < maxUnlockedIdx; // lagi lihat area lama yang udah kelar
 
   document.getElementById("lobbyStageDesc").textContent =
@@ -7148,6 +7594,51 @@ function hikmahQuoteHTML(q){
     <p class="hikmah-source">— ${q.source}</p>
   `;
 }
+/* Warna monogram avatar "pigora" — dirotasi per tokoh (bukan per kutipan)
+   biar tokoh yang sama (mis. Buya Hamka muncul di 3 ruangan) selalu dapat
+   warna yang sama, bukan acak tiap render. */
+const HIKMAH_AVATAR_PALETTE = [
+  "linear-gradient(160deg,#3E8E6E,#1F5E4A)",
+  "linear-gradient(160deg,#C08A2E,#8f631c)",
+  "linear-gradient(160deg,#4C86C4,#2c5b8f)",
+  "linear-gradient(160deg,#B0508A,#7a2456)",
+  "linear-gradient(160deg,#D97757,#a8492a)",
+  "linear-gradient(160deg,#6E7F5E,#465239)",
+];
+function hikmahAvatarBg(name){
+  let hash = 0;
+  for(let i=0;i<name.length;i++) hash = (hash*31 + name.charCodeAt(i)) >>> 0;
+  return HIKMAH_AVATAR_PALETTE[hash % HIKMAH_AVATAR_PALETTE.length];
+}
+function hikmahInitials(name){
+  return name.replace(/[().ﷺ]/g,"").split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+}
+/* Kartu "pigora" (bingkai foto) satu tokoh — avatar monogram (bukan foto asli,
+   supaya nggak menampilkan wajah tokoh publik/nabi secara sembarangan), nama,
+   peran, lalu kutipannya. */
+function hikmahFrameHTML(q){
+  const avatarInner = q.isScripture
+    ? `<span style="font-size:24px;">${q.name === "Al-Qur'an" ? "📖" : "📜"}</span>`
+    : hikmahInitials(q.name);
+  return `
+    <div class="hikmah-frame">
+      <div class="hikmah-avatar" style="background:${hikmahAvatarBg(q.name)}">${avatarInner}</div>
+      <div class="h-name">${q.name}</div>
+      <div class="h-role">${q.role}</div>
+      <p class="hikmah-quote">\u201C${q.text}\u201D</p>
+      ${q.translation ? `<p class="hikmah-translation">${q.translation}</p>` : ""}
+    </div>
+  `;
+}
+function hikmahLockedFrameHTML(){
+  return `
+    <div class="hikmah-frame locked">
+      <div class="hikmah-avatar">🔒</div>
+      <div class="h-name">Belum ditemukan</div>
+      <div class="h-role">Selesaikan ruangan ini dulu, ya</div>
+    </div>
+  `;
+}
 function showHikmahModal(quotes){
   document.getElementById("hikmahModalText").style.display = "none";
   document.getElementById("hikmahModalSource").style.display = "none";
@@ -7450,33 +7941,148 @@ function submitJournal(){
 }
 
 /* ---------- PROGRESS / TROPHY / HIKMAH ---------- */
+let progressPageIdx = 0;
+const PROGRESS_PER_PAGE = 6; // grid 2 kolom x 3 baris per halaman, biar muat tanpa scroll
 function renderProgress(){
-  const rooms = getRooms();
-  document.getElementById("progressContent").innerHTML = rooms.map(r=>`
-    <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
-      <span>${r.icon} ${r.name}</span><span>${STATE.roomsDone[r.id] ? "✅ Selesai" : "⬜ Belum"}</span>
-    </div>
-  `).join("");
+  progressPageIdx = 0;
+  renderProgressPage();
 }
+function renderProgressPage(){
+  const rooms = getRooms();
+  const doneCount = rooms.filter(r=>STATE.roomsDone[r.id]).length;
+  const total = rooms.length;
+  const pct = total ? doneCount/total : 0;
+  const pageCount = Math.ceil(total / PROGRESS_PER_PAGE);
+  progressPageIdx = Math.max(0, Math.min(progressPageIdx, pageCount-1));
+  const pageRooms = rooms.slice(progressPageIdx*PROGRESS_PER_PAGE, progressPageIdx*PROGRESS_PER_PAGE + PROGRESS_PER_PAGE);
+  const R = 26, C = 2*Math.PI*R;
+  document.getElementById("progressContent").innerHTML = `
+    <div class="progress-summary">
+      <div class="progress-ring">
+        <svg viewBox="0 0 58 58">
+          <circle class="ring-bg" cx="29" cy="29" r="${R}"></circle>
+          <circle class="ring-fill" cx="29" cy="29" r="${R}" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-pct)}"></circle>
+        </svg>
+        <div class="ring-label">${Math.round(pct*100)}%</div>
+      </div>
+      <div class="progress-summary-text">
+        <b>${doneCount} dari ${total} ruangan selesai</b>
+        <span>Terus jelajahi Rumah 'Aisyiyah, ya!</span>
+      </div>
+    </div>
+    <div class="progress-grid">
+      ${pageRooms.map(r=>{
+        const done = !!STATE.roomsDone[r.id];
+        return `
+          <div class="progress-card ${done?'done':''}" style="background-image:url('${r.bg}')">
+            <span class="p-icon">${r.icon}</span>
+            <div class="p-body">
+              <span class="p-name">${r.name}</span>
+              <span class="p-status">${done ? "✅ Selesai" : "⬜ Belum"}</span>
+            </div>
+          </div>
+        `;
+      }).join("")}
+    </div>
+    ${pageCount > 1 ? `
+      <div class="progress-page-nav">
+        <button type="button" class="sfx-custom" onclick="playClickSfx('pageTurn');progressPageIdx--;renderProgressPage();" ${progressPageIdx===0?"disabled":""}>‹</button>
+        <div class="progress-page-dots">${Array.from({length:pageCount}).map((_,i)=>`<span class="${i===progressPageIdx?"active":""}"></span>`).join("")}</div>
+        <button type="button" class="sfx-custom" onclick="playClickSfx('pageTurn');progressPageIdx++;renderProgressPage();" ${progressPageIdx===pageCount-1?"disabled":""}>›</button>
+      </div>
+    ` : ""}
+  `;
+}
+let trophyPageIdx = 0;
+const TROPHY_PER_PAGE = 6; // grid 2 kolom x 3 baris per halaman, biar muat 1 layar tanpa scroll pas fullscreen
 function renderTrophy(){
+  trophyPageIdx = 0;
+  startTrophyAmbientCycle();
+  renderTrophyPage();
+}
+function renderTrophyPage(){
   const rooms = getRooms().filter(r=>r.badge);
-  document.getElementById("trophyGrid").innerHTML = rooms.map(r=>{
-    const got = STATE.badges[r.id];
-    return `<div class="badge-cell ${got?'':'locked'}">
+  const total = rooms.length;
+  const got = rooms.filter(r=>STATE.badges[r.id]).length;
+  const pct = total ? Math.round((got/total)*100) : 0;
+  const pageCount = Math.ceil(total / TROPHY_PER_PAGE) || 1;
+  trophyPageIdx = Math.max(0, Math.min(trophyPageIdx, pageCount-1));
+  const pageRooms = rooms.slice(trophyPageIdx*TROPHY_PER_PAGE, trophyPageIdx*TROPHY_PER_PAGE + TROPHY_PER_PAGE);
+  document.getElementById("trophySummary").innerHTML = `
+    <span class="ts-icon">🏆</span>
+    <div class="ts-text">
+      <b>${got} dari ${total} Prestasi Diraih</b>
+      <small>Selesaikan tiap ruangan buat kumpulin semua trophy</small>
+      <div class="ts-bar-track"><div class="ts-bar-fill" style="width:${pct}%;"></div></div>
+    </div>
+  `;
+  document.getElementById("trophyGrid").innerHTML = pageRooms.map(r=>{
+    const earned = STATE.badges[r.id];
+    return `<div class="trophy-cell ${earned?'':'locked'}">
       <span class="emoji">${r.badge}</span>
       <div class="label">${r.badgeLabel}</div>
     </div>`;
   }).join("");
+  const navEl = document.getElementById("trophyPageNav");
+  if(navEl){
+    navEl.innerHTML = pageCount > 1 ? `
+      <button type="button" class="sfx-custom" onclick="playClickSfx('pageTurn');trophyPageIdx--;renderTrophyPage();" ${trophyPageIdx===0?"disabled":""}>‹</button>
+      <div class="trophy-page-dots">${Array.from({length:pageCount}).map((_,i)=>`<span class="${i===trophyPageIdx?"active":""}"></span>`).join("")}</div>
+      <button type="button" class="sfx-custom" onclick="playClickSfx('pageTurn');trophyPageIdx++;renderTrophyPage();" ${trophyPageIdx===pageCount-1?"disabled":""}>›</button>
+    ` : "";
+  }
+  const rizkaMsg = got === 0
+    ? "Belum ada trophy nih. Yuk mulai jelajahi ruangan-ruangannya!"
+    : got === total
+    ? `Semua ${total} trophy udah lengkap! Kamu keren banget, terus dijaga ya~`
+    : `Sudah ${got} dari ${total} trophy, mantap! Ayo lanjut kumpulin sisanya.`;
+  const rizkaBubbleEl = document.getElementById("trophyRizkaBubbleText");
+  if(rizkaBubbleEl && rizkaBubbleEl.dataset.lastLine !== rizkaMsg){
+    rizkaBubbleEl.dataset.lastLine = rizkaMsg;
+    typeIntoBubble("trophyRizkaBubbleText", rizkaMsg);
+  }
 }
+let hikmahPageIdx = 0;
 function renderHikmah(){
+  hikmahPageIdx = 0;
+  renderHikmahPage();
+}
+function renderHikmahPage(){
+  const rooms = getRooms();
   const keys = Object.keys(HIKMAH).filter(k=>HIKMAH[k] && HIKMAH[k].length);
-  document.getElementById("hikmahContent").innerHTML = keys.map(k=>{
-    const got = STATE.hikmah[k];
-    const quotes = HIKMAH[k];
-    return `<div class="card ${got?'':'locked'}" style="${got?'':'opacity:.4;'}">
-      ${got ? quotes.map(hikmahQuoteHTML).join('<hr style="border:none;border-top:1px dashed #e2d9bd;margin:8px 0;">') : '<p class="hikmah-quote">🔒 Belum ditemukan</p>'}
-    </div>`;
-  }).join("");
+  const pageCount = keys.length || 1;
+  hikmahPageIdx = Math.max(0, Math.min(hikmahPageIdx, pageCount-1));
+  const k = keys[hikmahPageIdx];
+  const got = k ? STATE.hikmah[k] : false;
+  const quotes = k ? HIKMAH[k] : [];
+  const room = rooms.find(r=>r.id===k);
+  document.getElementById("hikmahContent").innerHTML = k ? `
+    <div class="hikmah-room-block">
+      <div class="hikmah-room-title"><span class="r-icon">${room ? room.icon : "🌿"}</span>${room ? room.name : k}</div>
+      <div class="hikmah-frame-grid">
+        ${got ? quotes.map(hikmahFrameHTML).join("") : quotes.map(hikmahLockedFrameHTML).join("")}
+      </div>
+    </div>
+  ` : "";
+  const navEl = document.getElementById("hikmahPageNav");
+  if(navEl){
+    navEl.innerHTML = pageCount > 1 ? `
+      <button type="button" class="sfx-custom" onclick="playClickSfx('pageTurn');hikmahPageIdx--;renderHikmahPage();" ${hikmahPageIdx===0?"disabled":""}>‹</button>
+      <div class="trophy-page-dots">${Array.from({length:pageCount}).map((_,i)=>`<span class="${i===hikmahPageIdx?"active":""}"></span>`).join("")}</div>
+      <button type="button" class="sfx-custom" onclick="playClickSfx('pageTurn');hikmahPageIdx++;renderHikmahPage();" ${hikmahPageIdx===pageCount-1?"disabled":""}>›</button>
+    ` : "";
+  }
+  const roomName = room ? room.name : k;
+  const malaMsg = !k
+    ? "Belum ada hikmah yang tersimpan. Yuk selesaikan ruangannya dulu!"
+    : got
+    ? `Ini hikmah dari ${roomName}. Semoga jadi renungan buat kamu ya~`
+    : `Selesaikan ruangan ${roomName} dulu buat buka hikmah di sini.`;
+  const malaBubbleEl = document.getElementById("hikmahMalaBubbleText");
+  if(malaBubbleEl && malaBubbleEl.dataset.lastLine !== malaMsg){
+    malaBubbleEl.dataset.lastLine = malaMsg;
+    typeIntoBubble("hikmahMalaBubbleText", malaMsg);
+  }
 }
 
 /* ---------- ENDING ---------- */
