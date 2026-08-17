@@ -3593,7 +3593,10 @@ function goTo(id){
    ruangperpustakaan.mp3 → di dalam ruangan Perpustakaan
    ruangrefleksi.mp3     → di dalam ruangan Refleksi
    ruanglainnya.mp3      → layar "ruang lainnya" (Koleksi Trofi & Koleksi Hikmah)
-   audio/ost.mp3 (default lama) → semua layar lain, nggak diubah */
+   lobby.mp3             → dashboard Admin & Fasilitator (+ fallback lobby kalau ada area baru)
+   ost.mp3               → screen-loading (layar loading awal)
+   narasi.mp3            → sisa layar non-ruangan (title, char-select, cerita
+                            pembuka, mood check-in, corridor, progress, ending) */
 function bgmTrackForScreen(id){
   if(id === "screen-room" && currentRoom){
     if(["pubertas","menstruasi","mimpibasah"].includes(currentRoom.id)) return "audio/ruangdiri.mp3";
@@ -3604,6 +3607,12 @@ function bgmTrackForScreen(id){
     if(currentRoom.id === "refleksi") return "audio/ruangrefleksi.mp3";
   }
   if(id === "screen-trophy" || id === "screen-hikmah") return "audio/ruanglainnya.mp3";
+  if(id === "screen-admin" || id === "screen-fasilitator") return "audio/lobby.mp3";
+  if(id === "screen-loading") return "audio/ost.mp3";
+  if([
+    "screen-title","screen-charselect","screen-story","screen-mood",
+    "screen-corridor","screen-progress","screen-ending"
+  ].includes(id)) return "audio/narasi.mp3";
   return "audio/ost.mp3";
 }
 function setBgmTrack(src){
