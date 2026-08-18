@@ -342,9 +342,16 @@
      seukuran lebar Kak Hana (padding-left), jadi kartu (yang masih margin:
      auto di dalamnya) otomatis nge-center di sisa ruang SETELAH Kak Hana,
      bukan di tengah layar penuh — bikin grup "Kak Hana + kartu" kerasa
-     seimbang sebagai satu komposisi. */
+     seimbang sebagai satu komposisi.
+     PENTING: jatah ruang ini HARUS ngikutin Kak Hana beneran nongol
+     (#roomHanaCorner.showing), BUKAN cuma .backdrop-mode — soalnya di
+     Perpustakaan .backdrop-mode tetap aktif tapi Kak Hana sengaja
+     disembunyikan (lihat hideRoomHero(showCorner=false)), jadi kalau
+     syaratnya cuma .backdrop-mode, kartu Perpustakaan ikut kegeser kanan
+     padahal gak ada apa-apa buat diimbangin di kiri → nyisa gurun kosong
+     gede kayak dilaporin ("kiri kosong"). */
   @media (min-width:1101px){
-    #roomContent:has(> .room-hero.backdrop-mode){
+    #screen-room:has(#roomHanaCorner.showing) #roomContent{
       padding-left:var(--hana-corner-w);box-sizing:border-box;
     }
   }
@@ -373,11 +380,14 @@
     background:radial-gradient(ellipse 55% 50% at 50% 42%, rgba(244,238,221,.16) 0%, rgba(244,238,221,0) 70%);
   }
   @media (min-width:1101px){
-    /* Di layar lebar kartu udah digeser kanan (lihat #roomContent:has(...)
+    /* Di layar lebar kartu udah digeser kanan (lihat #screen-room:has(...)
        di atas) buat ngimbangin Kak Hana — glow-nya ikut digeser sejauh
        yang sama biar tetap pas nempel di bawah kartu, bukan nyorot titik
-       kosong di tengah layar penuh. */
-    .room-hero.backdrop-mode + .room-wrap::before{
+       kosong di tengah layar penuh. SAMA kayak fix di atas: cuma jalan
+       kalau Kak Hana beneran nongol, biar konsisten sama posisi kartu
+       (kalau kartu nggak digeser krn Hana disembunyikan, glow-nya juga
+       jangan ikut digeser — kalau enggak, malah nyorot titik kosong). */
+    #screen-room:has(#roomHanaCorner.showing) .room-hero.backdrop-mode + .room-wrap::before{
       background:radial-gradient(ellipse 42% 55% at calc(50% + var(--hana-corner-w)/2) 42%, rgba(244,238,221,.18) 0%, rgba(244,238,221,0) 70%);
     }
   }
@@ -1681,6 +1691,62 @@
   .materi-points-dots{display:flex;gap:6px;}
   .materi-points-dots span{width:7px;height:7px;border-radius:50%;background:#d8cba0;}
   .materi-points-dots span.active{background:var(--gold);}
+  /* ===== Perpustakaan — layar 1-viewport, tab Komik/Video =====
+     Nggak pakai trik height:100% (parent #roomBody auto-height, nggak bisa
+     dipercaya buat itu) — sebagai gantinya area gambar/video DIBATASI pakai
+     vh langsung (lihat max-height di bawah), jadi total tinggi kartu selalu
+     muat di 1 layar berapa pun tinggi device-nya, tanpa perlu scroll. */
+  .perpus-shell{display:flex;flex-direction:column;}
+  .perpus-card{display:flex;flex-direction:column;padding:14px 14px 12px;gap:8px;}
+  .perpus-head{display:flex;align-items:center;gap:8px;}
+  .perpus-head-icon{font-size:20px;line-height:1;}
+  .perpus-head h3{margin:0;font-size:16px;}
+  .perpus-tabs{display:flex;gap:8px;}
+  .perpus-tab{flex:1;padding:8px 6px;border-radius:10px;border:2px solid var(--green-mid);background:var(--card);color:var(--text-accent);font-weight:700;font-size:12.5px;cursor:pointer;}
+  .perpus-tab.active{background:var(--green-deep);color:#fff;border-color:var(--green-deep);}
+  .perpus-stage{display:flex;}
+  .perpus-komik-box{position:relative;width:100%;height:min(56vh,480px);border-radius:14px;overflow:hidden;background:linear-gradient(160deg,#25392f,#152018);}
+  /* position:absolute + inset:0 + margin:auto = gambar SELALU center di kedua
+     sumbu apa pun rasio aspeknya, gak kayak width/height:100% yang gampang
+     kepeleset ke kiri/atas kalau box & gambar beda rasio. */
+  .perpus-komik-box img{position:absolute;inset:0;margin:auto;width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain;display:block;cursor:zoom-in;}
+  .perpus-komik-arrow{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:none;background:rgba(20,25,18,.55);color:#f2ecd9;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;}
+  .perpus-komik-arrow:disabled{opacity:.25;cursor:default;}
+  .perpus-komik-arrow.left{left:8px;}
+  .perpus-komik-arrow.right{right:8px;}
+  .perpus-komik-dots{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:6px;z-index:2;}
+  .perpus-komik-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);}
+  .perpus-komik-dots span.active{background:#fff;}
+  .perpus-zoom-hint{position:absolute;top:8px;right:8px;z-index:2;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+  .perpus-video-box{position:relative;width:100%;height:min(56vh,480px);border-radius:14px;overflow:hidden;background:linear-gradient(160deg,#25392f,#152018);}
+  .perpus-video-box video,.perpus-video-box iframe{width:100%;height:100%;object-fit:contain;display:block;background:#000;border:0;}
+  .perpus-video-box--empty{cursor:pointer;}
+  .perpus-video-fs{position:absolute;bottom:8px;right:8px;z-index:2;width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,.5);color:#fff;border:none;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+
+  /* ===== Lightbox komik — dibuka pas gambar/tombol kaca pembesar dipencet.
+     Fixed ke viewport (bukan ke card), jadi bisa segede layar penuh buat
+     baca detail teks di panel komik. ===== */
+  .perpus-lightbox{position:fixed;inset:0;background:rgba(8,12,8,.94);z-index:999;display:none;align-items:center;justify-content:center;padding:18px;}
+  .perpus-lightbox.active{display:flex;}
+  .perpus-lightbox-inner{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+  .perpus-lightbox-inner img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);touch-action:pinch-zoom;}
+  .perpus-lightbox-close{position:absolute;top:0;right:0;width:40px;height:40px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.6);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.45);z-index:3;}
+  .perpus-lightbox-close:hover{background:rgba(0,0,0,.8);}
+  .perpus-lightbox-arrow{position:absolute;top:50%;transform:translateY(-50%);width:48px;height:48px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.6);color:#fff;font-size:24px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.45);z-index:3;}
+  .perpus-lightbox-arrow:hover:not(:disabled){background:rgba(0,0,0,.8);}
+  .perpus-lightbox-arrow:disabled{opacity:.2;cursor:default;}
+  .perpus-lightbox-arrow.left{left:6px;}
+  .perpus-lightbox-arrow.right{right:6px;}
+  @media (min-width:640px){
+    .perpus-lightbox-arrow.left{left:16px;}
+    .perpus-lightbox-arrow.right{right:16px;}
+  }
+  .perpus-lightbox-counter{position:absolute;bottom:0;left:0;right:0;text-align:center;color:rgba(255,255,255,.75);font-size:12px;}
+  .perpus-locked{padding:22px 14px;}
+  .perpus-item-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;}
+  .perpus-item-nav button{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:var(--card);border:2px solid var(--green-mid);color:var(--green-deep);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .perpus-item-nav button:disabled{opacity:.35;cursor:default;}
+  .perpus-counter{font-size:11px;color:var(--grey);text-align:center;margin:4px 0 0;}
 
   /* ===== Trophy / Prestasi — background ruangan full sama kayak ruangan lain
      (bg cover 1 layar penuh, topbar overlay transparan — lihat markup HTML,
@@ -5915,8 +5981,14 @@ function roomCompanion(roomId){
    (bubble kosong, chip disembunyikan). Baru pas "MULAI GAME" diklik,
    showHanaGameIntro() nyalain dia (cabut .dimmed + isi teks) dan meredupkan
    companion — jadi kayak spotlight pindah, bukan karakter pop in/out. */
+const HERO_HANA_ROOM_IDS = ["menstruasi","mimpibasah","pubertas","consent","relasi","medsos","gizi","perpustakaan","refleksi"];
 function heroHanaMarkup(roomId){
-  if(!LEVEL_ROOM_IDS.includes(roomId)) return ""; // cuma ruangan level yang punya scene "Mulai Game" ala Kak Hana
+  // Ruangan level + Perpustakaan + Refleksi sama-sama nampilin Kak Hana versi
+  // redup "standby" di layar depan ruangan (biar konsisten kayak ruangan
+  // lain) — TAPI cuma Perpustakaan/Refleksi doang, dia nggak pernah "nyala"
+  // (nggak ada showHanaGameIntro buat 2 ruangan ini, lihat startMechanic),
+  // jadi tetap kelihatan diem di kanan, bukan mulai ngobrol.
+  if(!HERO_HANA_ROOM_IDS.includes(roomId)) return "";
   const rightPct = ROOM_HANA_RIGHT[roomId] != null ? ROOM_HANA_RIGHT[roomId] : 26;
   const bottomPx = ROOM_HANA_BOTTOM[roomId] != null ? ROOM_HANA_BOTTOM[roomId] : 40;
   return `<div class="hana-intro-wrap dimmed" id="heroHanaWrap" style="right:${rightPct}%;bottom:${bottomPx}px;">
@@ -5967,6 +6039,13 @@ function openRoom(id, doorEl){
     proceed();
   }
 }
+// Label tombol utama beda-beda sesuai jenis ruangan — Perpustakaan bukan
+// kuis/level jadi "MULAI GAME" kurang pas, mestinya "MULAI BACA".
+const ROOM_START_LABEL = {
+  perpustakaan: "MULAI<br>BACA",
+  konseling: "MULAI<br>CERITA",
+  refleksi: "MULAI<br>REFLEKSI",
+};
 function renderRoomHome(){
   const c = document.getElementById("roomContent");
   // Reset Kak Hana versi pojok kiri tiap kali masuk/balik ke layar utama
@@ -5989,7 +6068,7 @@ function renderRoomHome(){
       ${heroHanaMarkup(currentRoom.id)}
       <div class="room-hero-actions">
         <button class="room-hero-btn room-hero-btn--side" onclick="showMateri()">📖 MATERI</button>
-        <button class="room-hero-btn room-hero-btn--primary" onclick="startMechanic('${currentRoom.id}')">MULAI<br>GAME</button>
+        <button class="room-hero-btn room-hero-btn--primary" onclick="startMechanic('${currentRoom.id}')">${ROOM_START_LABEL[currentRoom.id] || "MULAI<br>GAME"}</button>
         <button class="room-hero-btn room-hero-btn--side" onclick="showTarget()">🎯 TARGET</button>
       </div>
     </div>
@@ -6307,7 +6386,7 @@ function streakBadgeHTML(){
 // persis di bawah topbar — berasa pindah ke "halaman" baru, bukan nambah
 // konten yang harus di-scroll ke bawah lagi. Foto muncul lagi otomatis saat
 // ruangan dibuka ulang lewat openRoom() (renderRoomHome() membangun ulang).
-function hideRoomHero(){
+function hideRoomHero(showCorner){
   // Foto ruangan TETAP tampil (jadi backdrop blur) — nggak di-display:none
   // lagi — biar tema visual ruangan nyambung terus sepanjang main.
   const heroEl = document.getElementById("roomHero");
@@ -6316,7 +6395,10 @@ function hideRoomHero(){
   if(screenEl) screenEl.scrollTop = 0;
   // Fase main beneran dimulai (kuis/level/mini-game/konseling/dst) — baru di
   // titik ini Kak Hana pojok kiri boleh nongol (lihat renderRoomHome yang
-  // nyembunyiinnya balik pas kembali ke layar depan ruangan).
+  // nyembunyiinnya balik pas kembali ke layar depan ruangan). Perpustakaan
+  // sengaja LEWAT (showCorner=false) — nggak butuh pendamping nongkrong pas
+  // lagi baca komik/nonton video, biar layarnya bersih & fokus ke konten.
+  if(showCorner === false) return;
   const cornerEl = document.getElementById("roomHanaCorner");
   if(cornerEl) cornerEl.classList.add("showing");
 }
@@ -6339,10 +6421,16 @@ function startMechanic(roomId){
     });
     return;
   }
+  if(roomId === "perpustakaan"){
+    showHanaGameIntro(roomId, ()=>{ hideRoomHero(false); renderPerpustakaan(); });
+    return;
+  }
+  if(roomId === "refleksi"){
+    showHanaGameIntro(roomId, ()=>{ hideRoomHero(false); renderRefleksi(); });
+    return;
+  }
   hideRoomHero();
   if(roomId === "konseling"){ renderKonseling(); return; }
-  if(roomId === "perpustakaan"){ renderPerpustakaan(); return; }
-  if(roomId === "refleksi"){ renderRefleksi(); return; }
   quizIdx = 0; quizScore = 0;
   renderQuiz(roomId);
 }
@@ -7812,81 +7900,215 @@ function showBantuanNyata(){
 }
 
 /* ---------- PERPUSTAKAAN ---------- */
-/* Rencana koleksi sesuai dokumen review — 7 item lintas topik. Item yang
-   butuh aset ilustrasi/animasi asli (komik, video) ditandai ready:false
-   (nunggu tim art/konten, sesuai catatan dokumen "dikerjakan bertahap").
-   Item infografis/poster/artikel yang isinya bisa dirangkum dari teks
-   materi yang udah ada, aku isi kontennya langsung (ready:true). */
+/* Koleksi cuma 2 jenis: Komik (gambar, multi-halaman) & Video (link
+   YouTube/mp4, diisi guru sendiri lewat tombol ✏️ — sama pola kayak Video
+   Materi). Satu item per ruangan (7 ruangan level + Konseling), kebuka
+   begitu ruangan terkait diselesaikan.
+
+   Layar didesain PAS 1 VIEWPORT (nggak discroll): Komik & Video dipisah
+   jadi 2 TAB (bukan ditumpuk vertikal kayak versi sebelumnya) — tab yang
+   lagi aktif doang yang makan tinggi layar. Panah ganti halaman komik
+   ditaruh NEMPEL DI GAMBAR (kiri-kanan), bukan baris nav terpisah, biar
+   makin hemat tinggi.
+
+   Path komik pakai konvensi images/komik_<room>_<halaman>.png — tinggal
+   taruh filenya di folder images/ dengan nama itu (kalau belum ada,
+   otomatis disembunyikan lewat onerror). Item Pubertas UDAH diisi nama
+   file asli yang dikasih kakak (images/bingung_1_3.png dst). Kalau mau
+   ganti jumlah halaman/judul, tinggal edit array `komik` di bawah. */
 const PERPUS_ITEMS = [
-  {id:"komik_pubertas", type:"Komik", icon:"📖", title:"Cerita dari Rumah 'Aisyiyah", desc:"Cerita pendek tentang siswa yang bingung menghadapi perubahan tubuhnya.", unlockRooms:["pubertas"], ready:false},
-  {id:"video_pubertas", type:"Video", icon:"🎬", title:"Mengenal Tubuhku", desc:"Animasi pendek 2–3 menit soal pubertas & menstruasi.", unlockRooms:["pubertas","menstruasi"], unlockAny:true, ready:false},
-  {id:"info_pubertas", type:"Infografis", icon:"🖼️", title:"Mitos vs Fakta Pubertas", unlockRooms:["pubertas"], ready:true, content:[
-    "Mitos: Semua anak mengalami pubertas di usia yang sama persis. → Fakta: kecepatan pubertas beda-beda tiap orang, dan itu normal.",
-    "Mitos: Kalau pubertasmu lebih lambat/cepat dari teman, berarti ada yang salah. → Fakta: nggak ada yang 'terlambat' atau 'aneh'.",
-    "Mitos: Suasana hati naik-turun (mood swing) tandanya kamu 'baperan'. → Fakta: itu wajar, dipengaruhi perubahan hormon.",
-    "Mitos: Tinggi badan berhenti tumbuh begitu suara berubah. → Fakta: pertumbuhan tinggi biasanya masih berlanjut.",
-    "Mitos: Anak laki-laki nggak boleh menangis, itu tanda lemah. → Fakta: semua orang boleh mengekspresikan perasaannya, termasuk laki-laki.",
-  ]},
-  {id:"info_consent", type:"Infografis", icon:"🛡️", title:"5 Tanda Kamu Berhak Bilang Tidak", unlockRooms:["consent"], ready:true, content:[
-    "Kamu merasa nggak nyaman, walau alasannya belum jelas buatmu.",
-    "Kamu diminta melakukan sesuatu tanpa dijelasin kenapa.",
-    "Kamu diburu-buru buat langsung jawab 'iya'.",
-    "Kamu diancam atau dibuat merasa bersalah kalau menolak.",
-    "Kamu udah bilang 'iya' tapi berubah pikiran — itu tetap sah buat bilang 'tidak' sekarang.",
-  ]},
-  {id:"poster_medsos", type:"Poster", icon:"📱", title:"Ciri Akun Palsu", unlockRooms:["medsos"], ready:true, content:[
-    "Foto profil kelihatan 'terlalu sempurna', atau mirip foto orang terkenal.",
-    "Akun baru dibuat, jumlah followernya sedikit.",
-    "Buru-buru ngajak chat pribadi begitu follow.",
-    "Minta info pribadi (alamat, nomor HP, nama sekolah) di awal kenalan.",
-    "Minta kamu merahasiakan obrolan dari orang tua/wali.",
-  ]},
-  {id:"info_gizi", type:"Infografis", icon:"🍎", title:"Isi Piringku Versi Remaja", unlockRooms:["gizi"], ready:true, content:[
-    "Separuh piring: sayur & buah.",
-    "Seperempat piring: karbohidrat (nasi/roti/kentang).",
-    "Seperempat piring: protein (ayam/telur/tempe/tahu/ikan).",
-    "Air putih cukup tiap hari, batasi minuman manis.",
-    "Remaja putri: tambahan zat besi (bayam, hati ayam, kacang-kacangan) + Tablet Tambah Darah rutin 1x/minggu.",
-  ]},
-  {id:"artikel_konseling", type:"Artikel Ringan", icon:"💬", title:"Kenapa Cerita ke Orang Lain Itu Bukan Tanda Lemah", unlockRooms:["konseling"], ready:true, article:
-    "Banyak dari kita mikir kalau butuh bantuan itu artinya kita gagal atau lemah. Padahal nggak gitu. Semua orang — sekuat apa pun kelihatannya — pasti pernah ada momen yang berat buat dihadapi sendirian.\n\nCerita ke orang lain bukan berarti kamu nyerah. Justru itu butuh keberanian: berani jujur soal apa yang kamu rasain, berani percaya orang lain buat ikut bantu mikirin jalan keluarnya.\n\nKamu nggak harus nunggu sampai semuanya 'cukup parah' buat cerita. Perasaan yang masih kecil pun berhak didengar. Dan kamu berhak punya orang yang mau dengerin — entah itu orang tua, guru BK, atau teman yang kamu percaya.\n\nJadi kalau lagi berat, nggak apa-apa untuk cerita. Itu bukan tanda lemah — itu tanda kamu peduli sama dirimu sendiri."},
+  {id:"pubertas",   room:"pubertas",   icon:"🌱", title:"Serba-Serbi Pubertas",     komik:["images/bingung_1_3.png","images/bingung_2_3.png","images/bingung_3_3.png"]},
+  {id:"menstruasi", room:"menstruasi", icon:"🩸", title:"Cerita Menstruasi Pertama", komik:["images/kenapaberubahcewek_1_4.png","images/kenapaberubahcewek_2_4.png","images/kenapaberubahcewek_3_4.png","images/kenapaberubahcewek_4_4.png"]},
+  {id:"mimpibasah", room:"mimpibasah", icon:"🌙", title:"Cerita Mimpi Basah",        komik:["images/mimipibasah_1_4.png","images/mimipibasah_2_4.png","images/mimipibasah_3_4.png","images/mimipibasah_4_4.png"]},
+  {id:"consent",    room:"consent",    icon:"🛡️", title:"Berani Bilang Tidak",       komik:["images/beranibilangtidak_1_5.png","images/beranibilangtidak_2_5.png","images/beranibilangtidak_3_5.png","images/beranibilangtidak_4_5.png","images/beranibilangtidak_5_5.png"]},
+  {id:"relasi",     room:"relasi",     icon:"🤝", title:"Relasi yang Sehat",         komik:["images/relasisehat_1_5.png","images/relasisehat_2_5.png","images/relasisehat_3_5.png","images/relasisehat_4_5.png","images/relasisehat_5_5.png"]},
+  {id:"medsos",     room:"medsos",     icon:"📱", title:"Bijak Bermedia Sosial",     komik:["images/bijakmedsos_1_5.png","images/bijakmedsos_2_5.png","images/bijakmedsos_3_5.png","images/bijakmedsos_4_5.png","images/bijakmedsos_5_5.png"]},
+  {id:"gizi",       room:"gizi",       icon:"🍎", title:"Isi Piringku Versi Remaja", komik:["images/isipringku_1_5.png","images/isipringku_2_5.png","images/isipringku_3_5.png","images/isipringku_4_5.png","images/isipringku_5_5.png"]},
+  {id:"konseling",  room:"konseling",  icon:"💬", title:"Cerita Itu Bukan Tanda Lemah", komik:["images/ceritabukanlemah_1_4.png","images/ceritabukanlemah_2_4.png","images/ceritabukanlemah_3_4.png","images/ceritabukanlemah_4_4.png"]},
 ];
+let perpusIdx = 0;
+let perpusTab = "komik"; // "komik" | "video" — reset tiap pindah item (lihat perpusGo/renderPerpustakaan)
+let perpusKomikPage = {}; // itemId -> halaman komik yang lagi dibuka
+function perpusUnlocked(item){
+  return !!STATE.roomsDone[item.room];
+}
 function renderPerpustakaan(){
-  document.getElementById("roomBody").innerHTML = `
-    ${PERPUS_ITEMS.map((it,i)=>{
-      const unlocked = it.unlockAny
-        ? it.unlockRooms.some(r=>STATE.roomsDone[r])
-        : it.unlockRooms.every(r=>STATE.roomsDone[r]);
-      if(!unlocked){
-        const names = it.unlockRooms.map(r=>(getRooms().find(x=>x.id===r)||{}).name || r).join(it.unlockAny ? " / " : " & ");
-        return `<div class="card" style="opacity:.5;">🔒 ${it.icon} <b>${it.title}</b><br><span style="font-size:12px;color:var(--grey);">${it.type} — selesaikan Ruang ${names} dulu.</span></div>`;
-      }
-      if(!it.ready){
-        return `<div class="card">${it.icon} <b>${it.title}</b><br><span style="font-size:12px;color:var(--grey);">${it.type} — ${it.desc || ""} (segera hadir, materi lagi disiapin tim)</span></div>`;
-      }
-      return `<div class="card">${it.icon} <b>${it.title}</b><br><span style="font-size:11px;color:var(--text-accent);">${it.type}</span>
-        <button class="btn-outline btn-block" style="margin-top:8px;" onclick="perpusOpen('${it.id}')">Baca</button></div>`;
-    }).join("")}
-    <p style="font-size:12px;color:var(--grey);">Koleksi terbuka setelah kamu menyelesaikan ruangan terkait.</p>
+  perpusIdx = 0;
+  perpusTab = "komik";
+  renderPerpusSlide();
+}
+function perpusGo(delta){
+  const next = perpusIdx + delta;
+  if(next < 0 || next >= PERPUS_ITEMS.length) return;
+  perpusIdx = next;
+  perpusTab = "komik";
+  if(typeof playClickSfx === "function") playClickSfx("pageTurn");
+  renderPerpusSlide();
+}
+function perpusSwitchTab(tab){
+  perpusTab = tab;
+  if(typeof playClickSfx === "function") playClickSfx("pageTurn");
+  renderPerpusSlide();
+}
+function komikPageIdx(itemId){ return perpusKomikPage[itemId] || 0; }
+function perpusKomikGo(itemId, delta, max){
+  const idx = Math.max(0, Math.min(max-1, komikPageIdx(itemId)+delta));
+  perpusKomikPage[itemId] = idx;
+  renderPerpusSlide();
+}
+function renderPerpusKomikBox(item){
+  const idx = komikPageIdx(item.id);
+  const total = item.komik.length;
+  return `
+    <div class="perpus-komik-box">
+      <img src="${item.komik[idx]}" alt="${item.title}" onclick="openPerpusLightbox('${item.id}')" onerror="this.style.display='none'">
+      <div class="perpus-zoom-hint" onclick="openPerpusLightbox('${item.id}')" title="Perbesar" aria-label="Perbesar gambar">🔍</div>
+      ${total>1?`
+      <button type="button" class="perpus-komik-arrow left" onclick="perpusKomikGo('${item.id}',-1,${total})" ${idx===0?"disabled":""} aria-label="Halaman sebelumnya">‹</button>
+      <button type="button" class="perpus-komik-arrow right" onclick="perpusKomikGo('${item.id}',1,${total})" ${idx===total-1?"disabled":""} aria-label="Halaman berikutnya">›</button>
+      <div class="perpus-komik-dots">${item.komik.map((_,i)=>`<span class="${i===idx?"active":""}"></span>`).join("")}</div>
+      `:""}
+    </div>
   `;
 }
-function perpusOpen(id){
-  const it = PERPUS_ITEMS.find(x=>x.id===id);
-  if(!it) return;
-  const body = it.article
-    ? `<p style="font-size:13px;line-height:1.6;white-space:pre-line;">${it.article}</p>`
-    : `<ul style="font-size:13px;line-height:1.7;padding-left:18px;">${it.content.map(c=>`<li>${c}</li>`).join("")}</ul>`;
-  document.getElementById("roomBody").innerHTML = `
-    <div class="card">
-      <span class="badge-pill">${it.type}</span>
-      <h3 style="margin:8px 0;">${it.icon} ${it.title}</h3>
-      ${body}
-      <button class="btn-primary btn-block" style="margin-top:10px;" onclick="renderPerpustakaan()">← Kembali ke Rak</button>
+// ===== Lightbox komik: dibuat sekali & dipasang ke <body> (bukan ke
+// #roomBody yang isinya di-replace tiap render), jadi state buka/tutupnya
+// gak keganggu tiap kali renderPerpusSlide() jalan. =====
+let perpusLightboxItemId = null;
+function ensurePerpusLightbox(){
+  let lb = document.getElementById("perpusLightbox");
+  if(lb) return lb;
+  lb = document.createElement("div");
+  lb.id = "perpusLightbox";
+  lb.className = "perpus-lightbox";
+  lb.innerHTML = `
+    <div class="perpus-lightbox-inner">
+      <button type="button" class="perpus-lightbox-close" onclick="closePerpusLightbox()" aria-label="Tutup">✕</button>
+      <button type="button" class="perpus-lightbox-arrow left" id="perpusLbLeft" aria-label="Halaman sebelumnya">‹</button>
+      <img id="perpusLbImg" src="" alt="">
+      <button type="button" class="perpus-lightbox-arrow right" id="perpusLbRight" aria-label="Halaman berikutnya">›</button>
+      <div class="perpus-lightbox-counter" id="perpusLbCounter"></div>
+    </div>`;
+  document.body.appendChild(lb);
+  lb.addEventListener("click", (e)=>{ if(e.target===lb) closePerpusLightbox(); });
+  return lb;
+}
+function openPerpusLightbox(itemId){
+  perpusLightboxItemId = itemId;
+  const lb = ensurePerpusLightbox();
+  lb.classList.add("active");
+  renderPerpusLightbox();
+  document.addEventListener("keydown", perpusLightboxKeyHandler);
+  if(typeof playClickSfx === "function") playClickSfx("pageTurn");
+}
+function closePerpusLightbox(){
+  const lb = document.getElementById("perpusLightbox");
+  if(lb) lb.classList.remove("active");
+  document.removeEventListener("keydown", perpusLightboxKeyHandler);
+}
+function renderPerpusLightbox(){
+  const item = PERPUS_ITEMS.find(i=>i.id===perpusLightboxItemId);
+  if(!item) return;
+  const idx = komikPageIdx(item.id);
+  const total = item.komik.length;
+  document.getElementById("perpusLbImg").src = item.komik[idx];
+  document.getElementById("perpusLbImg").alt = item.title;
+  document.getElementById("perpusLbCounter").textContent = `Halaman ${idx+1} / ${total}`;
+  const left = document.getElementById("perpusLbLeft");
+  const right = document.getElementById("perpusLbRight");
+  left.disabled = idx===0;
+  right.disabled = idx===total-1;
+  left.onclick = ()=>{ perpusKomikGo(item.id,-1,total); renderPerpusLightbox(); };
+  right.onclick = ()=>{ perpusKomikGo(item.id,1,total); renderPerpusLightbox(); };
+}
+function perpusLightboxKeyHandler(e){
+  if(e.key==="Escape") closePerpusLightbox();
+  else if(e.key==="ArrowLeft") document.getElementById("perpusLbLeft")?.click();
+  else if(e.key==="ArrowRight") document.getElementById("perpusLbRight")?.click();
+}
+function perpusVideoFullscreen(btn){
+  const box = btn.closest(".perpus-video-box");
+  const target = box && (box.querySelector("video,iframe") || box);
+  if(!target) return;
+  const req = target.requestFullscreen || target.webkitRequestFullscreen || target.msRequestFullscreen;
+  if(req) req.call(target);
+}
+// Link video disimpan guru sendiri lewat tombol ✏️ (localStorage), persis
+// pola Video Materi (getMateriVideoUrl/setMateriVideoUrl) — biar nggak perlu
+// nunggu file dimasukkan ke kode dulu.
+function getPerpusVideoUrl(itemId){
+  try{ return (JSON.parse(localStorage.getItem("perpusVideoOverrides")||"{}"))[itemId] || ""; }catch(e){ return ""; }
+}
+function setPerpusVideoUrl(itemId, url){
+  try{
+    const overrides = JSON.parse(localStorage.getItem("perpusVideoOverrides")||"{}");
+    if(url) overrides[itemId] = url; else delete overrides[itemId];
+    localStorage.setItem("perpusVideoOverrides", JSON.stringify(overrides));
+  }catch(e){}
+}
+function promptPerpusVideo(itemId){
+  const current = getPerpusVideoUrl(itemId);
+  const input = window.prompt("Tempel link video (YouTube atau link .mp4 langsung). Kosongkan lalu OK untuk hapus:", current);
+  if(input === null) return;
+  setPerpusVideoUrl(itemId, input.trim());
+  renderPerpusSlide();
+}
+function renderPerpusVideoBox(item){
+  const url = getPerpusVideoUrl(item.id);
+  if(url){
+    const embed = toEmbeddableVideo(url);
+    const player = embed.type === "iframe"
+      ? `<iframe src="${embed.src}" title="Video ${item.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
+      : `<video controls playsinline preload="metadata"><source src="${embed.src}"></video>`;
+    return `<div class="perpus-video-box">${player}<button type="button" class="materi-video-edit" onclick="promptPerpusVideo('${item.id}')" title="Ganti video">✏️</button><button type="button" class="perpus-video-fs" onclick="perpusVideoFullscreen(this)" title="Layar penuh">⛶</button></div>`;
+  }
+  return `<div class="perpus-video-box perpus-video-box--empty" onclick="promptPerpusVideo('${item.id}')">
+    <div class="materi-video-placeholder">
+      <div class="materi-video-play">▶</div>
+      <div class="materi-video-caption">Video ${item.title}</div>
+      <div class="materi-video-note">Ketuk untuk isi link video</div>
+    </div>
+  </div>`;
+}
+function renderPerpusSlide(){
+  const item = PERPUS_ITEMS[perpusIdx];
+  const unlocked = perpusUnlocked(item);
+  const body = document.getElementById("roomBody");
+  const slideHtml = unlocked ? `
+    <div class="card perpus-card">
+      <div class="perpus-head">
+        <span class="perpus-head-icon">${item.icon}</span>
+        <h3>${item.title}</h3>
+      </div>
+      <div class="perpus-tabs" role="tablist">
+        <button type="button" class="perpus-tab ${perpusTab==="komik"?"active":""}" onclick="perpusSwitchTab('komik')">📖 Komik</button>
+        <button type="button" class="perpus-tab ${perpusTab==="video"?"active":""}" onclick="perpusSwitchTab('video')">🎬 Video</button>
+      </div>
+      <div class="perpus-stage">
+        ${perpusTab === "komik" ? renderPerpusKomikBox(item) : renderPerpusVideoBox(item)}
+      </div>
+    </div>
+  ` : `
+    <div class="card perpus-card center perpus-locked">
+      🔒<br><b>${item.title}</b><br>
+      <span style="font-size:12px;color:var(--grey);">Selesaikan Ruang ${(getRooms().find(r=>r.id===item.room)||{}).name || item.room} dulu buat buka koleksi ini.</span>
+    </div>
+  `;
+  body.innerHTML = `
+    <div class="perpus-shell">
+      ${slideHtml}
+      <div class="perpus-item-nav">
+        <button type="button" onclick="perpusGo(-1)" ${perpusIdx===0?"disabled":""} aria-label="Koleksi sebelumnya">‹</button>
+        <div class="materi-points-dots">${PERPUS_ITEMS.map((_,i)=>`<span class="${i===perpusIdx?"active":""}"></span>`).join("")}</div>
+        <button type="button" onclick="perpusGo(1)" ${perpusIdx===PERPUS_ITEMS.length-1?"disabled":""} aria-label="Koleksi berikutnya">›</button>
+      </div>
+      <p class="perpus-counter">${perpusIdx+1} / ${PERPUS_ITEMS.length}</p>
     </div>
   `;
 }
 
 /* ---------- REFLEKSI (before-after + jurnal) ---------- */
+
 function renderRefleksi(){
   const requiredRooms = ["pubertas","menstruasi","mimpibasah","consent","relasi","medsos","gizi","konseling"];
   const doneCount = requiredRooms.filter(r=>STATE.roomsDone[r]).length;
