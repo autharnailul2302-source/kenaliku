@@ -2129,6 +2129,42 @@
     background:var(--card);border-radius:16px;border:2px dashed #e2d9bd;
   }
   .admin-empty .ee-icon{font-size:30px;display:block;margin-bottom:8px;}
+  /* ---- Tab "Statistik Kunjungan" di Panel Admin ---- */
+  .admin-tab.tab-stats.active{background:var(--admin-deep);color:#fff;box-shadow:0 6px 14px rgba(122,36,86,.35);}
+  .admin-tab.tab-stats.active .count{background:rgba(255,255,255,.22);color:#fff;}
+  .admin-stats{display:flex;flex-direction:column;gap:14px;overflow-y:auto;flex:1;align-content:start;}
+  .stats-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;}
+  .stats-card{
+    background:var(--card);border-radius:14px;padding:16px 10px;text-align:center;
+    box-shadow:0 4px 14px rgba(43,43,40,.10);border-top:4px solid var(--admin-mid);
+    animation:adminRowIn .32s cubic-bezier(.2,.9,.3,1.1) backwards;
+  }
+  .stats-card:nth-child(1){animation-delay:0ms;} .stats-card:nth-child(2){animation-delay:45ms;}
+  .stats-card:nth-child(3){animation-delay:90ms;} .stats-card:nth-child(4){animation-delay:135ms;}
+  .stats-card-num{font-size:27px;font-weight:900;color:var(--admin-deep);line-height:1.1;}
+  .stats-card-label{font-size:11.5px;color:var(--grey);margin-top:5px;font-weight:700;}
+  .stats-card--accent{border-top-color:var(--gold);}
+  .stats-card--accent .stats-card-num{color:var(--gold);}
+  .stats-panel{background:var(--card);border-radius:16px;padding:16px;box-shadow:0 4px 14px rgba(43,43,40,.10);}
+  .stats-panel-title{font-weight:800;font-size:13.5px;color:var(--ink);margin-bottom:16px;}
+  .stats-chart{display:flex;align-items:flex-end;gap:5px;height:150px;padding-top:20px;overflow-x:auto;}
+  .stats-bar-col{flex:1;min-width:20px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+  .stats-bar{
+    width:100%;max-width:26px;background:linear-gradient(180deg,var(--admin-mid),var(--admin-deep));
+    border-radius:6px 6px 3px 3px;position:relative;min-height:3px;
+    transition:height .5s cubic-bezier(.2,.9,.3,1.1);
+  }
+  .stats-bar--bulan{background:linear-gradient(180deg,var(--green-mid),var(--green-deep));}
+  .stats-bar-val{
+    position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+    font-size:9.5px;font-weight:800;color:var(--ink);white-space:nowrap;
+  }
+  .stats-bar-label{font-size:9.5px;color:var(--grey);margin-top:6px;font-weight:700;white-space:nowrap;}
+  .stats-year-list{display:flex;flex-direction:column;gap:8px;}
+  .stats-year-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--admin-soft);border-radius:10px;font-size:12.5px;flex-wrap:wrap;}
+  .stats-year-label{font-weight:900;color:var(--admin-deep);min-width:44px;}
+  .stats-year-num{font-weight:700;color:var(--ink);}
+  .stats-year-unik{margin-left:auto;color:var(--grey);}
   .hikmah-quote{font-style:italic;color:var(--text-accent);font-size:15px;margin:10px 0;}
   .hikmah-source{font-size:12px;color:var(--grey);margin-bottom:14px;}
 
@@ -2756,9 +2792,13 @@ if("serviceWorker" in navigator){
         <button class="admin-tab tab-siswa" id="adminTabUsers" onclick="switchAdminTab('users')">
           <span>👥 Penempatan Siswa</span><span class="count" id="adminUsersCount">0</span>
         </button>
+        <button class="admin-tab tab-stats" id="adminTabStats" onclick="switchAdminTab('stats')">
+          <span>📊 Statistik Kunjungan</span>
+        </button>
       </div>
       <div class="admin-body" id="adminPendingList"></div>
       <div class="admin-body" id="adminUsersList" style="display:none;"></div>
+      <div class="admin-stats" id="adminStatsBody" style="display:none;"></div>
     </div>
   </section>
 
@@ -3888,6 +3928,38 @@ function proceedNewAccount(){
   openChooseFasilitator();
 }
 
+/* ---------- Pencatat kunjungan halaman (buat Statistik Admin) ----------
+   Dicatat SEKALI tiap index.html selesai dimuat, siapa pun yang buka
+   (belum login sekalipun) — jadi ini pageview, bukan aktivitas login.
+   "kk_visitor_id" disimpan permanen di localStorage tiap browser/perangkat
+   supaya server bisa membedakan "total kunjungan" vs "pengunjung unik". */
+function getVisitorId(){
+  try{
+    let id = localStorage.getItem("kk_visitor_id");
+    if(!id){
+      id = "v-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,10);
+      localStorage.setItem("kk_visitor_id", id);
+    }
+    return id;
+  }catch(e){ return "anon"; }
+}
+function logPageVisit(){
+  if(!GAME_API_URL) return;
+  try{
+    fetch(GAME_API_URL, {
+      method: "POST",
+      mode: "no-cors", // fire-and-forget, sama seperti logToSheet()
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({
+        action: "log_visit",
+        waktu: new Date().toISOString(),
+        visitorId: getVisitorId(),
+        halaman: location.pathname,
+      }),
+    });
+  }catch(e){ /* diam saja, jangan ganggu pengalaman main */ }
+}
+
 /* ---------- API helper (GET, dibaca balasannya) ---------- */
 async function apiGet(action, params){
   if(!GAME_API_URL) return { status: "no_api" };
@@ -4226,10 +4298,78 @@ function adminLogout(){
 function switchAdminTab(tab){
   document.getElementById("adminTabPending").classList.toggle("active", tab==="pending");
   document.getElementById("adminTabUsers").classList.toggle("active", tab==="users");
+  document.getElementById("adminTabStats").classList.toggle("active", tab==="stats");
   document.getElementById("adminPendingList").style.display = tab==="pending" ? "grid" : "none";
   document.getElementById("adminUsersList").style.display = tab==="users" ? "grid" : "none";
+  document.getElementById("adminStatsBody").style.display = tab==="stats" ? "flex" : "none";
   if(tab === "pending") renderAdminPending();
-  else renderAdminUsers();
+  else if(tab === "users") renderAdminUsers();
+  else renderAdminStats();
+}
+// Bulan cerah, dipakai buat label sumbu grafik "12 Bulan Terakhir".
+const NAMA_BULAN_PENDEK = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+async function renderAdminStats(){
+  const box = document.getElementById("adminStatsBody");
+  box.innerHTML = `<p class="admin-empty">Memuat statistik…</p>`;
+  const result = await apiGet("get_visit_stats", adminParams());
+  if(result.status !== "ok"){
+    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">⚠️</span>Gagal memuat statistik. Coba lagi.</p>`;
+    return;
+  }
+  const r = result.ringkasan || {};
+  const perHari = result.perHari || [];
+  const perBulan = result.perBulan || [];
+  const perTahun = result.perTahun || [];
+  const maxHari = Math.max(1, ...perHari.map(d=>d.jumlah));
+  const maxBulan = Math.max(1, ...perBulan.map(d=>d.jumlah));
+
+  const barHari = perHari.map(d=>{
+    const h = Math.round((d.jumlah/maxHari)*100);
+    const tgl = d.tanggal.slice(8,10);
+    return `<div class="stats-bar-col" title="${d.tanggal}: ${d.jumlah} kunjungan, ${d.unik} pengunjung unik">
+      <div class="stats-bar" style="height:${Math.max(h,3)}%">${d.jumlah>0?`<span class="stats-bar-val">${d.jumlah}</span>`:""}</div>
+      <div class="stats-bar-label">${tgl}</div>
+    </div>`;
+  }).join("");
+
+  const barBulan = perBulan.map(d=>{
+    const h = Math.round((d.jumlah/maxBulan)*100);
+    const parts = d.bulan.split("-");
+    const label = NAMA_BULAN_PENDEK[parseInt(parts[1],10)-1] + " '" + parts[0].slice(2);
+    return `<div class="stats-bar-col" title="${d.bulan}: ${d.jumlah} kunjungan, ${d.unik} pengunjung unik">
+      <div class="stats-bar stats-bar--bulan" style="height:${Math.max(h,3)}%">${d.jumlah>0?`<span class="stats-bar-val">${d.jumlah}</span>`:""}</div>
+      <div class="stats-bar-label">${label}</div>
+    </div>`;
+  }).join("");
+
+  const barisTahun = perTahun.length ? perTahun.map(d=>`
+    <div class="stats-year-row">
+      <span class="stats-year-label">${d.tahun}</span>
+      <span class="stats-year-num">${d.jumlah} kunjungan</span>
+      <span class="stats-year-unik">${d.unik} pengunjung unik</span>
+    </div>
+  `).join("") : `<p class="admin-empty" style="padding:24px 16px;">Belum ada data tahunan.</p>`;
+
+  box.innerHTML = `
+    <div class="stats-cards">
+      <div class="stats-card"><div class="stats-card-num">${r.hariIni||0}</div><div class="stats-card-label">Hari Ini</div></div>
+      <div class="stats-card"><div class="stats-card-num">${r.bulanIni||0}</div><div class="stats-card-label">Bulan Ini</div></div>
+      <div class="stats-card"><div class="stats-card-num">${r.tahunIni||0}</div><div class="stats-card-label">Tahun Ini</div></div>
+      <div class="stats-card stats-card--accent"><div class="stats-card-num">${r.totalUnikSemua||0}</div><div class="stats-card-label">Pengunjung Unik (Total)</div></div>
+    </div>
+    <div class="stats-panel">
+      <div class="stats-panel-title">📅 14 Hari Terakhir</div>
+      <div class="stats-chart">${barHari}</div>
+    </div>
+    <div class="stats-panel">
+      <div class="stats-panel-title">🗓️ 12 Bulan Terakhir</div>
+      <div class="stats-chart">${barBulan}</div>
+    </div>
+    <div class="stats-panel">
+      <div class="stats-panel-title">📆 Rekap Per Tahun</div>
+      <div class="stats-year-list">${barisTahun}</div>
+    </div>
+  `;
 }
 async function renderAdminPending(){
   const box = document.getElementById("adminPendingList");
@@ -4341,6 +4481,7 @@ function togglePinVisibility(){
   btn.textContent = showing ? "👁" : "🙈";
 }
 document.addEventListener("DOMContentLoaded", ()=>{
+  logPageVisit();
   applyA11yPrefs();
   syncMusicSwitch();
   document.getElementById("nameInput").addEventListener("input", checkCharForm);
