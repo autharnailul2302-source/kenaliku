@@ -2075,6 +2075,10 @@
     display:flex;flex-direction:column;align-items:center;gap:3px;transition:background .18s,color .18s,transform .12s;
   }
   .admin-tab .count{background:#ddd4c4;color:#63594a;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:800;transition:background .18s,color .18s;}
+  .admin-tab .count.online-count{background:var(--green-soft,#dff3e6);color:var(--green-deep,#1e6b46);display:inline-flex;align-items:center;}
+  .admin-tab.active .count.online-count{background:rgba(255,255,255,.22);color:#fff;}
+  .online-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ecc71;box-shadow:0 0 0 3px rgba(46,204,113,.25);vertical-align:middle;margin-right:2px;animation:onlinePulse 1.6s ease-in-out infinite;}
+  @keyframes onlinePulse{0%,100%{opacity:1;}50%{opacity:.45;}}
   .admin-tab.tab-facil.active{background:var(--facil-deep);color:#fff;box-shadow:0 6px 14px rgba(31,78,121,.35);}
   .admin-tab.tab-facil.active .count{background:rgba(255,255,255,.22);color:#fff;}
   .admin-tab.tab-siswa.active{background:var(--green-deep);color:#fff;box-shadow:0 6px 14px rgba(31,94,74,.35);}
@@ -2790,7 +2794,7 @@ if("serviceWorker" in navigator){
           <span>✅ Persetujuan Fasilitator</span><span class="count" id="adminPendingCount">0</span>
         </button>
         <button class="admin-tab tab-siswa" id="adminTabUsers" onclick="switchAdminTab('users')">
-          <span>👥 Penempatan Siswa</span><span class="count" id="adminUsersCount">0</span>
+          <span>👥 Penempatan Siswa</span><span class="count" id="adminUsersCount">0</span><span class="count online-count" id="adminUsersOnlineCount" style="display:none;">🟢 0</span>
         </button>
         <button class="admin-tab tab-stats" id="adminTabStats" onclick="switchAdminTab('stats')">
           <span>📊 Statistik Kunjungan</span>
@@ -3262,6 +3266,30 @@ async function loadStateFromSheet(nama, pin){
   const url = GAME_API_URL + "?action=load_state&nama=" + encodeURIComponent(nama) + "&pin=" + encodeURIComponent(pin);
   const res = await fetch(url);
   return await res.json();
+}
+
+// Sinyal "aku masih di sini" buat fitur online/offline di Dashboard
+// Fasilitator & Panel Admin. Fire-and-forget, ringan (nggak nulis ke
+// Sheet, cuma cache sementara di server), dikirim tiap ~45 detik
+// selama tab kebuka & terlihat.
+function sendHeartbeat(){
+  if(!GAME_API_URL || !STATE.name || !STATE.pin) return;
+  try{
+    fetch(GAME_API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify({ action:"heartbeat", nama: STATE.name, pin: STATE.pin }),
+    }).catch(()=>{});
+  }catch(e){ /* diam saja, jangan ganggu pengalaman main */ }
+}
+let heartbeatTimer = null;
+function startHeartbeatLoop(){
+  if(heartbeatTimer) return;
+  sendHeartbeat();
+  heartbeatTimer = setInterval(()=>{
+    if(document.visibilityState === "visible") sendHeartbeat();
+  }, 45000);
 }
 
 function logToSheet(action, data){
@@ -3857,6 +3885,7 @@ function openContinueRemoteModal(){
    perjalanan ketemu teman) belum kelar pas terakhir keluar, lanjutkan persis
    dari situ — bukan lompat ke Lobby dan menganggap sudah selesai. */
 function enterGameFromSavedState(){
+  sendHeartbeat();
   if(STATE.storyDone === false){
     storyStep = STATE.storyStep || 0;
     beforeIdx = STATE.beforeIdx || 0;
@@ -4127,8 +4156,10 @@ async function renderFacilitatorDashboard(){
   const isAttn = u => (u.mood==="sedih"||u.mood==="berat") && u.status!=="selesai";
   const avgRooms = list.length ? Math.round(list.reduce((a,u)=>a+(u.roomsDone||0),0)/list.length) : 0;
   const needAttention = list.filter(isAttn).length;
+  const onlineCount = list.filter(u=>u.online).length;
   summaryBox.innerHTML = `
     <div class="facil-stat"><div class="n">${list.length}</div><div class="l">Siswa Bimbingan</div></div>
+    <div class="facil-stat"><div class="n">🟢 ${onlineCount}</div><div class="l">Online Sekarang</div></div>
     <div class="facil-stat"><div class="n">${avgRooms}/${totalRooms}</div><div class="l">Rata² Ruangan</div></div>
     <div class="facil-stat"><div class="n">${needAttention}</div><div class="l">Perlu Perhatian</div></div>
   `;
@@ -4151,6 +4182,9 @@ async function renderFacilitatorDashboard(){
       ? `<span class="status-pill ${statusInfo.cls}">${statusInfo.emoji} ${statusInfo.label}</span>`
       : `<span class="status-pill pending">🕓 Belum Ditindaklanjuti</span>`;
     const attnFlag = isAttn(u) ? `<div class="facil-row-attn-flag">⚠️ Perlu perhatian — mood ${moodInfo?moodInfo.label.toLowerCase():"kurang baik"} beberapa waktu terakhir</div>` : "";
+    const activitySub = u.online
+      ? `<span class="online-dot" aria-hidden="true"></span> Online sekarang`
+      : `terakhir aktif ${formatTanggalSingkat(u.terakhir)}`;
     return `
     <div class="facil-row ${isAttn(u)?'facil-row--attn':''}" style="--i:${i}">
       ${attnFlag}
@@ -4158,7 +4192,7 @@ async function renderFacilitatorDashboard(){
         <div class="admin-avatar">${initials(u.nama)}</div>
         <div style="min-width:0;">
           <div class="facil-row-name">${escapeHtml(u.nama)}</div>
-          <div class="facil-row-sub">${u.points||0} poin · terakhir aktif ${formatTanggalSingkat(u.terakhir)}</div>
+          <div class="facil-row-sub">${u.points||0} poin · ${activitySub}</div>
         </div>
       </div>
       <div class="facil-progress-wrap">
@@ -4423,19 +4457,27 @@ async function renderAdminUsers(){
   }
   const list = usersResult.list || [];
   document.getElementById("adminUsersCount").textContent = list.length;
+  const onlineCountEl = document.getElementById("adminUsersOnlineCount");
+  const onlineTotal = list.filter(u=>u.online).length;
+  onlineCountEl.textContent = "🟢 " + onlineTotal;
+  onlineCountEl.style.display = list.length ? "inline-flex" : "none";
   if(list.length === 0){
     box.innerHTML = `<p class="admin-empty"><span class="ee-icon">🎓</span>Belum ada siswa yang tersimpan di server.</p>`;
     return;
   }
   const fasilitatorOptions = FASILITATOR_LIST.map(f=>`<option value="${f.username}">${f.nama}${f.instansi?" — "+f.instansi:""}</option>`).join("");
-  box.innerHTML = list.map((u,i)=>`
+  box.innerHTML = list.map((u,i)=>{
+    const activitySub = u.online
+      ? `<span class="online-dot" aria-hidden="true"></span> Online sekarang`
+      : `terakhir aktif ${formatTanggalSingkat(u.terakhir)}`;
+    return `
     <div class="admin-row admin-row--siswa" style="--i:${i}">
       <div class="admin-row-top">
         <div class="admin-row-id">
           <div class="admin-avatar">${initials(u.nama)}</div>
           <div>
             <div class="admin-row-name">${u.nama}</div>
-            <div class="admin-row-sub">${u.points||0} poin · ${u.roomsDone||0} ruangan selesai${u.mood ? " · mood terakhir: "+u.mood+(u.moodStreak>=3?" ("+u.moodStreak+" hari berturut)":"") : ""}</div>
+            <div class="admin-row-sub">${u.points||0} poin · ${u.roomsDone||0} ruangan selesai · ${activitySub}${u.mood ? " · mood terakhir: "+u.mood+(u.moodStreak>=3?" ("+u.moodStreak+" hari berturut)":"") : ""}</div>
           </div>
         </div>
         <span class="status-pill ${u.fasilitator?'approved':'pending'}">${u.fasilitator ? "ADA FASILITATOR" : "BELUM ADA"}</span>
@@ -4448,7 +4490,7 @@ async function renderAdminUsers(){
         <button class="btn-approve" onclick="assignFasilitatorAction('${u.nama.replace(/'/g,"\\'")}','${u.pin}',document.getElementById('assignSel${i}').value)">💾 Simpan</button>
       </div>
     </div>
-  `).join("");
+  `;}).join("");
   list.forEach((u,i)=>{ document.getElementById("assignSel"+i).value = u.fasilitator || ""; });
 }
 async function assignFasilitatorAction(nama, pin, fasilitatorUsername){
@@ -4482,6 +4524,7 @@ function togglePinVisibility(){
 }
 document.addEventListener("DOMContentLoaded", ()=>{
   logPageVisit();
+  startHeartbeatLoop();
   applyA11yPrefs();
   syncMusicSwitch();
   document.getElementById("nameInput").addEventListener("input", checkCharForm);
@@ -4510,6 +4553,7 @@ function confirmCharacter(){
   ss = null;
   saveState();
   logToSheet("mulai_karakter", {gender: STATE.gender, jenjang: STATE.jenjang});
+  sendHeartbeat();
   goTo("screen-story");
   renderStory();
 }
