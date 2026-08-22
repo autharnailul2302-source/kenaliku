@@ -2079,9 +2079,9 @@
   .admin-tab.active .count.online-count{background:rgba(255,255,255,.22);color:#fff;}
   .online-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#2ecc71;box-shadow:0 0 0 3px rgba(46,204,113,.25);vertical-align:middle;margin-right:2px;animation:onlinePulse 1.6s ease-in-out infinite;}
   @keyframes onlinePulse{0%,100%{opacity:1;}50%{opacity:.45;}}
-  .admin-tab.tab-facil.active{background:var(--facil-deep);color:#fff;box-shadow:0 6px 14px rgba(31,78,121,.35);}
+  .admin-tab.tab-facil.active{background:var(--admin-deep);color:#fff;box-shadow:0 6px 14px rgba(122,36,86,.35);}
   .admin-tab.tab-facil.active .count{background:rgba(255,255,255,.22);color:#fff;}
-  .admin-tab.tab-siswa.active{background:var(--green-deep);color:#fff;box-shadow:0 6px 14px rgba(31,94,74,.35);}
+  .admin-tab.tab-siswa.active{background:var(--admin-mid);color:#fff;box-shadow:0 6px 14px rgba(176,80,138,.35);}
   .admin-tab.tab-siswa.active .count{background:rgba(255,255,255,.22);color:#fff;}
   @media (hover:hover) and (pointer:fine){
     .admin-tab:not(.active):hover{background:rgba(0,0,0,.05);color:var(--ink);transform:translateY(-1px);}
@@ -2119,7 +2119,45 @@
   }
   .status-pill.pending{background:#fbe9d0;color:#8a5a12;}
   .status-pill.approved{background:var(--facil-soft);color:var(--facil-deep);}
+  .admin-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  .admin-search{
+    flex:1;min-width:180px;max-width:340px;padding:9px 14px;border-radius:10px;border:2px solid #ddd0ac;
+    font-family:inherit;font-size:13px;background:var(--card);color:var(--ink);
+  }
+  .admin-search:focus{outline:none;border-color:var(--admin-mid);}
+  .admin-search::placeholder{color:var(--grey);}
+  .btn-add-account{
+    background:var(--facil-deep);color:#fff;border:none;border-radius:12px;padding:9px 16px;
+    font-weight:800;font-size:13px;cursor:pointer;box-shadow:0 4px 12px rgba(31,78,121,.25);transition:transform .12s;
+  }
+  .btn-add-account:hover{transform:translateY(-1px);}
+  .btn-export{
+    background:transparent;color:var(--facil-deep);border:2px solid var(--facil-deep);border-radius:12px;padding:9px 16px;
+    font-weight:800;font-size:13px;cursor:pointer;transition:transform .12s;
+  }
+  .btn-export:hover{transform:translateY(-1px);}
+  .admin-bulk-bar{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:-2px 0 10px;padding:10px 14px;
+    background:#faf6ea;border:2px dashed #ddd0ac;border-radius:12px;font-size:13px;
+  }
+  .admin-bulk-selectall{display:flex;align-items:center;gap:6px;cursor:pointer;font-weight:700;color:var(--ink);}
+  .admin-bulk-count{font-weight:800;color:var(--facil-deep);}
+  .admin-bulk-bar select{padding:7px 10px;border-radius:8px;border:2px solid #ddd0ac;font-family:inherit;font-size:12.5px;background:var(--card);color:var(--ink);}
+  .btn-delete-account{
+    background:transparent;color:var(--danger);border:2px solid var(--danger);border-radius:10px;
+    padding:6px 12px;font-weight:800;font-size:12px;cursor:pointer;
+  }
   .admin-row-actions{display:flex;gap:8px;}
+  .admin-page-nav{display:flex;align-items:center;justify-content:center;gap:14px;padding:12px 0 2px;flex:none;}
+  .admin-page-btn{
+    background:var(--card);border:2px solid #ddd0ac;border-radius:10px;padding:8px 14px;
+    font-weight:800;font-size:12.5px;color:var(--ink);cursor:pointer;font-family:inherit;transition:transform .12s,background .15s;
+  }
+  .admin-page-btn:disabled{opacity:.35;cursor:default;}
+  @media (hover:hover) and (pointer:fine){
+    .admin-page-btn:not(:disabled):hover{background:var(--admin-soft);transform:translateY(-1px);}
+  }
+  .admin-page-label{font-size:12.5px;font-weight:800;color:var(--grey);}
   .admin-row-actions button{flex:1;padding:9px 8px;font-size:12.5px;border-radius:10px;font-weight:800;transition:filter .15s,transform .1s;}
   .admin-row--facil .btn-approve{background:linear-gradient(180deg,var(--facil-mid),var(--facil-deep));color:#fff;}
   .admin-row--siswa .btn-approve{background:linear-gradient(180deg,var(--green-mid),var(--green-deep));color:#fff;}
@@ -2134,7 +2172,7 @@
   }
   .admin-empty .ee-icon{font-size:30px;display:block;margin-bottom:8px;}
   /* ---- Tab "Statistik Kunjungan" di Panel Admin ---- */
-  .admin-tab.tab-stats.active{background:var(--admin-deep);color:#fff;box-shadow:0 6px 14px rgba(122,36,86,.35);}
+  .admin-tab.tab-stats.active{background:var(--gold);color:#fff;box-shadow:0 6px 14px rgba(192,138,46,.35);}
   .admin-tab.tab-stats.active .count{background:rgba(255,255,255,.22);color:#fff;}
   .admin-stats{display:flex;flex-direction:column;gap:14px;overflow-y:auto;flex:1;align-content:start;}
   .stats-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;}
@@ -2341,6 +2379,20 @@
     display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:var(--danger);
     margin-bottom:8px;
   }
+  .facil-row--krisis{border-left-color:var(--danger);border-left-width:6px;}
+  .facil-row-krisis-flag{
+    background:#fbeae5;border:1.5px solid var(--danger);border-radius:10px;
+    padding:9px 11px;margin-bottom:10px;
+  }
+  .facil-row-krisis-flag .k-title{font-size:12px;font-weight:800;color:var(--danger);margin-bottom:3px;}
+  .facil-row-krisis-flag .k-body{font-size:11.5px;color:var(--ink);line-height:1.45;}
+  .krisis-protocol-box{
+    background:#fbeae5;border:1.5px solid var(--danger);border-radius:12px;
+    padding:12px 14px;margin:0 0 14px;font-size:12.5px;line-height:1.55;color:var(--ink);
+  }
+  .krisis-protocol-box .kp-title{font-weight:800;color:var(--danger);margin-bottom:6px;font-size:13px;}
+  .krisis-protocol-box ol{margin:6px 0 0;padding-left:18px;}
+  .krisis-protocol-box li{margin-bottom:4px;}
   .facil-row-status-line{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px;}
   .facil-history-row{
     background:var(--card);border-radius:14px;padding:12px 14px;
@@ -2791,20 +2843,75 @@ if("serviceWorker" in navigator){
     <div class="admin-wrap">
       <div class="admin-tabs">
         <button class="admin-tab tab-facil active" id="adminTabPending" onclick="switchAdminTab('pending')">
-          <span>✅ Persetujuan Fasilitator</span><span class="count" id="adminPendingCount">0</span>
+          <span>🧑‍🏫 Kelola Fasilitator</span><span class="count" id="adminPendingCount">0</span>
         </button>
         <button class="admin-tab tab-siswa" id="adminTabUsers" onclick="switchAdminTab('users')">
-          <span>👥 Penempatan Siswa</span><span class="count" id="adminUsersCount">0</span><span class="count online-count" id="adminUsersOnlineCount" style="display:none;">🟢 0</span>
+          <span>👥 Kelola Siswa</span><span class="count" id="adminUsersCount">0</span><span class="count online-count" id="adminUsersOnlineCount" style="display:none;">🟢 0</span>
         </button>
         <button class="admin-tab tab-stats" id="adminTabStats" onclick="switchAdminTab('stats')">
           <span>📊 Statistik Kunjungan</span>
         </button>
+        <button class="admin-tab tab-stats" id="adminTabLog" onclick="switchAdminTab('log')">
+          <span>📝 Log Aktivitas</span>
+        </button>
+      </div>
+      <div class="admin-toolbar" id="adminToolbarFacil">
+        <input type="text" id="adminFacilSearch" class="admin-search" placeholder="🔍 Cari nama, username, atau instansi..." oninput="onAdminFacilSearchInput(this.value)">
+        <button class="btn-add-account" onclick="openAdminAddFasilitator()">➕ Tambah Akun Fasilitator</button>
+      </div>
+      <div class="admin-toolbar" id="adminToolbarSiswa" style="display:none;">
+        <input type="text" id="adminSiswaSearch" class="admin-search" placeholder="🔍 Cari nama siswa..." oninput="onAdminSiswaSearchInput(this.value)">
+        <button class="btn-export" onclick="exportAdminSiswaCSV()">⬇️ Ekspor CSV</button>
+        <button class="btn-add-account" onclick="openAdminAddStudent()">➕ Tambah Akun Siswa</button>
+      </div>
+      <div class="admin-bulk-bar" id="adminBulkBar" style="display:none;">
+        <label class="admin-bulk-selectall">
+          <input type="checkbox" id="adminBulkSelectAllCb" onchange="toggleAdminSelectAllFiltered(this.checked)">
+          Pilih semua hasil (<span id="adminBulkFilteredCount">0</span>)
+        </label>
+        <span class="admin-bulk-count" id="adminBulkSelectedLabel" style="display:none;"></span>
+        <select id="adminBulkAssignSelect" style="display:none;"><option value="">-- Tanpa Fasilitator --</option></select>
+        <button class="btn-approve" id="adminBulkApplyBtn" style="display:none;padding:8px 14px;font-size:12.5px;border-radius:10px;" onclick="applyBulkAssignFasilitator()">🔗 Tugaskan Fasilitator</button>
+        <button class="btn-ghost" id="adminBulkClearBtn" style="display:none;" onclick="clearAdminSelection()">Batalkan Pilihan</button>
       </div>
       <div class="admin-body" id="adminPendingList"></div>
+      <div class="admin-page-nav" id="adminPendingPageNav"></div>
       <div class="admin-body" id="adminUsersList" style="display:none;"></div>
+      <datalist id="asalSekolahListAdmin" class="asal-sekolah-datalist"></datalist>
+      <div class="admin-page-nav" id="adminUsersPageNav" style="display:none;"></div>
       <div class="admin-stats" id="adminStatsBody" style="display:none;"></div>
+      <div class="admin-body" id="adminLogList" style="display:none;"></div>
     </div>
   </section>
+
+  <!-- Modal admin: tambah akun fasilitator langsung (auto disetujui) -->
+  <div class="modal-backdrop" id="modalAdminAddFasilitator">
+    <div class="modal-card modal-card-themed">
+      <span class="modal-plaque">TAMBAH AKUN FASILITATOR</span>
+      <p class="center" style="font-size:13px;margin-bottom:4px;color:var(--ink);">Dibuat admin langsung berstatus disetujui, tanpa perlu approval lagi.</p>
+      <input type="text" id="adminNewFacNama" placeholder="Nama lengkap">
+      <input type="text" id="adminNewFacInstansi" placeholder="Instansi / Sekolah">
+      <input type="text" id="adminNewFacUsername" placeholder="Username">
+      <input type="password" id="adminNewFacPassword" placeholder="Kata sandi">
+      <p id="adminNewFacError" style="color:var(--danger);font-size:12px;display:none;margin:-8px 0 10px;"></p>
+      <button class="btn-modal-choice primary" id="btnAdminAddFac" onclick="submitAdminAddFasilitator()">SIMPAN</button>
+      <button class="btn-ghost" style="margin-top:10px;" onclick="closeModal('modalAdminAddFasilitator')">Batal</button>
+    </div>
+  </div>
+
+  <!-- Modal admin: tambah akun siswa langsung -->
+  <div class="modal-backdrop" id="modalAdminAddStudent">
+    <div class="modal-card modal-card-themed">
+      <span class="modal-plaque">TAMBAH AKUN SISWA</span>
+      <p class="center" style="font-size:13px;margin-bottom:4px;color:var(--ink);">Siswa lanjut pakai Nama+PIN ini di layar "Lanjutkan dari perangkat lain".</p>
+      <input type="text" id="adminNewSiswaNama" placeholder="Nama siswa">
+      <input type="text" id="adminNewSiswaPin" placeholder="PIN (bebas, mudah diingat)">
+      <select id="adminNewSiswaFasil"><option value="">— Tanpa fasilitator (opsional) —</option></select>
+      <p id="adminNewSiswaError" style="color:var(--danger);font-size:12px;display:none;margin:8px 0 -2px;"></p>
+      <button class="btn-modal-choice primary" style="margin-top:12px;" id="btnAdminAddSiswa" onclick="submitAdminAddStudent()">SIMPAN</button>
+      <button class="btn-ghost" style="margin-top:10px;" onclick="closeModal('modalAdminAddStudent')">Batal</button>
+    </div>
+  </div>
 
   <!-- FASILITATOR DASHBOARD -->
   <section class="screen" id="screen-fasilitator">
@@ -2821,7 +2928,12 @@ if("serviceWorker" in navigator){
           <span>🕘 Riwayat</span>
         </button>
       </div>
+      <div class="admin-toolbar">
+        <input type="text" id="facilSearch" class="admin-search" placeholder="🔍 Cari nama siswa..." oninput="onFacilSearchInput(this.value)">
+        <button class="btn-export" onclick="exportFacilSiswaCSV()">⬇️ Ekspor CSV</button>
+      </div>
       <div class="admin-body" id="facilStudentList"></div>
+      <div class="admin-page-nav" id="facilStudentsPageNav"></div>
       <div class="admin-body" id="facilHistoryList" style="display:none;"></div>
     </div>
   </section>
@@ -2886,6 +2998,7 @@ if("serviceWorker" in navigator){
     <div class="modal-card" style="text-align:left;">
       <div class="center" style="font-size:30px;">🧑‍🏫</div>
       <h3 class="center" style="margin-top:2px;" id="tindakLanjutNama">Nama Siswa</h3>
+      <div id="tindakLanjutProtokol"></div>
       <span class="field-label">Status Tindak Lanjut</span>
       <select id="tindakLanjutStatus">
         <option value="belum">🕓 Belum Ditindaklanjuti</option>
@@ -2900,6 +3013,25 @@ if("serviceWorker" in navigator){
         <button class="btn-outline btn-block" onclick="closeModal('modalTindakLanjut')">Batal</button>
         <button class="btn-primary btn-block" id="btnSimpanTindakLanjut" onclick="submitTindakLanjut()">💾 Simpan</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Detail Skor Pemahaman & Waktu Pengerjaan per ruangan — dibuka dari
+       tombol "📊 Detail Ruangan" di kartu siswa (Dashboard Fasilitator &
+       Panel Admin). Beda dari progress bar (yang cuma nunjukin status
+       selesai/belum), modal ini nunjukin SEBERAPA PAHAM (skor kuis, dari
+       roomScores) DAN SEBERAPA LAMA (dari timeOnTask, dicatat client-side
+       tiap keluar-masuk ruangan — lihat goTo() di index.html) siswa di tiap
+       ruangan — datanya sudah kebawa di list siswa, nggak perlu API call baru. -->
+  <div class="modal-backdrop" id="modalMasteryDetail">
+    <div class="modal-card" style="text-align:left;max-height:80vh;overflow-y:auto;">
+      <div class="center" style="font-size:30px;">📊</div>
+      <h3 class="center" style="margin-top:2px;" id="masteryDetailNama">Nama Siswa</h3>
+      <p class="center" style="font-size:12.5px;color:var(--grey);margin:0 0 4px;">Rata-rata pemahaman: <b id="masteryDetailAvg">-</b></p>
+      <p class="center" style="font-size:12.5px;color:var(--grey);margin:0 0 14px;">Total waktu pengerjaan: <b id="masteryDetailTotalTime">-</b></p>
+      <div id="masteryDetailBody" style="display:flex;flex-direction:column;gap:8px;"></div>
+      <p style="font-size:11px;color:var(--grey);margin:14px 0 0;line-height:1.5;">Persentase &amp; bintang dihitung dari jawaban benar di kuis tiap ruangan — bukan cuma status selesai/belum, supaya kelihatan seberapa PAHAM, bukan sekadar seberapa jauh siswa sudah klik.</p>
+      <button class="btn-outline btn-block" style="margin-top:14px;" onclick="closeModal('modalMasteryDetail')">Tutup</button>
     </div>
   </div>
 
@@ -2959,11 +3091,13 @@ if("serviceWorker" in navigator){
     </div>
   </div>
 
-  <!-- Profil Pemain — dibuka lewat avatar di pojok kiri atas lobby. Sengaja
-       CUMA nampung nama (rename), pilihan karakter, dan pintasan ke bantuan/
-       pengaturan — TIDAK ada field nomor HP/email/data sekolah tambahan,
-       karena ini game client-side buat remaja dan nggak ada alasan kuat buat
-       nyimpen data kontak pribadi semacam itu. -->
+  <!-- Profil Pemain — dibuka lewat avatar di pojok kiri atas lobby. Nampung
+       nama (rename), asal sekolah (opsional — dipakai admin/fasilitator buat
+       ngenalin siswa lintas sekolah, autocomplete dari sekolah yang sudah
+       pernah diisi siswa lain lewat datalist #asalSekolahList), pilihan
+       karakter, dan pintasan ke bantuan/pengaturan. Sengaja TIDAK ada field
+       nomor HP/email atau data kontak pribadi lain — cuma nama & asal
+       sekolah, karena ini game client-side buat remaja. -->
   <div class="modal-backdrop" id="modalProfile">
     <div class="modal-card profile-card" style="text-align:left;">
       <div class="profile-grid">
@@ -2982,6 +3116,14 @@ if("serviceWorker" in navigator){
             <button class="btn-primary" style="white-space:nowrap;padding:0 16px;" onclick="saveProfileName()">Simpan</button>
           </div>
           <p id="profileNameNote" style="font-size:11px;color:var(--grey);margin:5px 0 0;">Nama & PIN dipakai buat nyambungin progres kamu — kalau diganti, inget nama barunya ya biar tetap bisa lanjut dari perangkat lain.</p>
+
+          <label style="display:block;font-size:11px;font-weight:700;color:var(--grey);text-transform:uppercase;letter-spacing:.4px;margin-top:14px;">Asal Sekolah (opsional)</label>
+          <div style="display:flex;gap:8px;margin-top:4px;">
+            <input type="text" id="profileAsalSekolahInput" list="asalSekolahList" maxlength="80" placeholder="Contoh: SMK Negeri 1 Brondong" style="flex:1;">
+            <button class="btn-primary" style="white-space:nowrap;padding:0 16px;" onclick="saveProfileAsalSekolah()">Simpan</button>
+          </div>
+          <datalist id="asalSekolahList" class="asal-sekolah-datalist"></datalist>
+          <p id="profileAsalSekolahNote" style="font-size:11px;color:var(--grey);margin:5px 0 0;">Biar fasilitator & admin gampang ngenalin kamu kalau sekolahmu ikut program ini bareng sekolah lain.</p>
         </div>
 
         <div class="profile-col-right">
@@ -3193,8 +3335,8 @@ const GAME_API_URL = "https://script.google.com/macros/s/AKfycbzRQ7HJK6dK_Ac5L1l
 /* ---------- STATE ---------- */
 let STATE = loadState() || {
   name: "", pin: "", gender: "perempuan", jenjang: "sma", points: 0, level: 1,
-  badges: {}, kunciNilai: {}, hikmah: {}, infoNetral: {}, roomsDone: {},
-  before: {}, after: {}, journal: "", charChosen: false, fasilitator: "",
+  badges: {}, kunciNilai: {}, hikmah: {}, infoNetral: {}, roomsDone: {}, roomScores: {},
+  before: {}, after: {}, journal: "", charChosen: false, fasilitator: "", asalSekolah: "",
   /* Progres intro cerita (narasi + kuis pemahaman awal + perjalanan ketemu teman).
      storyDone sengaja TIDAK diisi default false di sini — dicek pakai "!== false"
      di tempat lain, supaya akun lama (sebelum fitur ini ada) yang belum punya
@@ -3226,6 +3368,8 @@ let STATE = loadState() || {
 };
 STATE.levelProgress = STATE.levelProgress || {}; // akun lama sebelum fitur ini ada
 STATE.levelStars = STATE.levelStars || {}; // akun lama sebelum fitur ini ada
+STATE.asalSekolah = STATE.asalSekolah || ""; // akun lama sebelum fitur ini ada
+STATE.timeOnTask = STATE.timeOnTask || {}; // akun lama sebelum fitur ini ada — {roomId: total detik}
 
 function saveState(){
   localStorage.setItem("rumah_aisyiyah_state", JSON.stringify(STATE));
@@ -3698,8 +3842,41 @@ function confirmExit(){
 }
 
 /* ---------- NAVIGATION ---------- */
-const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading","screen-story","screen-mood","screen-corridor","screen-lobby","screen-room","screen-trophy","screen-hikmah"];
+const FULLBLEED_SCREENS = ["screen-title","screen-splash","screen-loading","screen-story","screen-mood","screen-corridor","screen-lobby","screen-room","screen-trophy","screen-hikmah","screen-admin","screen-fasilitator"];
+/* ---------- TIME-ON-TASK ----------
+   Nyatat berapa lama siswa BENERAN di dalam satu ruangan (bukan cuma
+   "selesai atau belum"), disimpan per roomId di STATE.timeOnTask (detik).
+   Sengaja dipasang di SATU titik (goTo()) alih-alih di tiap tombol "kembali
+   ke lobby"/topbar yang tersebar di banyak layar — karena semua transisi
+   layar (termasuk keluar-masuk screen-room, dari cara APAPUN: topbar,
+   tombol "Kembali ke Lobby" pas selesai, dst) selalu lewat goTo(). */
+let roomTimeStartedAt = null;
+function recordRoomTime_(roomId, ms){
+  if(!roomId || !ms || ms <= 0) return;
+  // Batasi maksimum 2 jam per kunjungan — jaga-jaga kalau tab dibiarkan
+  // kebuka lama tanpa aktivitas (misal HP di-lock semalaman), biar nggak
+  // muncul angka waktu yang nggak masuk akal di dashboard fasilitator.
+  const seconds = Math.min(Math.round(ms/1000), 2*60*60);
+  STATE.timeOnTask = STATE.timeOnTask || {};
+  STATE.timeOnTask[roomId] = (STATE.timeOnTask[roomId] || 0) + seconds;
+  saveState();
+}
+// Best-effort: kalau tab/browser ditutup PAS lagi di dalam ruangan (tanpa
+// sempat pencet apa-apa buat keluar), tetap catat waktu sampai saat itu.
+window.addEventListener("beforeunload", function(){
+  if(roomTimeStartedAt && currentRoom){
+    recordRoomTime_(currentRoom.id, Date.now() - roomTimeStartedAt);
+    roomTimeStartedAt = null;
+  }
+});
 function goTo(id){
+  const prevScreenEl = document.querySelector(".screen.active");
+  const wasInRoom = prevScreenEl && prevScreenEl.id === "screen-room";
+  if(wasInRoom && id !== "screen-room" && roomTimeStartedAt && currentRoom){
+    recordRoomTime_(currentRoom.id, Date.now() - roomTimeStartedAt);
+  }
+  roomTimeStartedAt = (id === "screen-room") ? Date.now() : null;
+
   document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
   window.scrollTo(0,0);
@@ -3951,7 +4128,7 @@ function confirmNewAccountProceed(){
   proceedNewAccount();
 }
 function proceedNewAccount(){
-  STATE = { name:"", pin:"", gender:"perempuan", jenjang:"sma", points:0, level:1, badges:{}, kunciNilai:{}, hikmah:{}, infoNetral:{}, roomsDone:{}, before:{}, after:{}, journal:"", charChosen:false, fasilitator:"", pesanLastSeenAt:"" };
+  STATE = { name:"", pin:"", gender:"perempuan", jenjang:"sma", points:0, level:1, badges:{}, kunciNilai:{}, hikmah:{}, infoNetral:{}, roomsDone:{}, roomScores:{}, before:{}, after:{}, journal:"", charChosen:false, fasilitator:"", pesanLastSeenAt:"" };
   saveState();
   closeModal("modalEntryChoice");
   openChooseFasilitator();
@@ -4100,6 +4277,7 @@ async function submitFasilitatorLogin(){
   if(result.status === "ok"){
     logToSheet("login_fasilitator", {nama: result.nama});
     FACIL_SESSION = {username, password, nama: result.nama, instansi: result.instansi||""};
+    try{ sessionStorage.setItem(FACIL_SESSION_KEY, JSON.stringify(FACIL_SESSION)); }catch(e){}
     closeModal("modalFasilitatorLogin");
     document.getElementById("facilWhoLabel").textContent = result.nama;
     goTo("screen-fasilitator");
@@ -4117,7 +4295,8 @@ async function submitFasilitatorLogin(){
 }
 
 /* ---------- DASHBOARD FASILITATOR ---------- */
-let FACIL_SESSION = null; // {username, password, nama, instansi} — disimpan di memori saja
+let FACIL_SESSION = null; // {username, password, nama, instansi} — juga disalin ke sessionStorage biar tahan refresh
+const FACIL_SESSION_KEY = "kenaliku_facil_session";
 let FACIL_STUDENTS = []; // cache list terakhir, dipakai modal Tindak Lanjuti tanpa fetch ulang
 const STATUS_OPTIONS = [
   {key:"belum",      label:"Belum Ditindaklanjuti", emoji:"🕓", cls:"pending"},
@@ -4127,9 +4306,86 @@ const STATUS_OPTIONS = [
 function facilParams(){
   return FACIL_SESSION ? {facUser: FACIL_SESSION.username, facPass: FACIL_SESSION.password} : {};
 }
+
+/* ---------- EKSPOR CSV — dipakai tombol "Ekspor CSV" di Panel Admin
+   (Kelola Siswa) & Dashboard Fasilitator (Siswa Bimbingan). Murni olah
+   data yang SUDAH di-load di browser (tidak minta ulang ke server) lalu
+   di-download sebagai file .csv. Delimiter titik-koma (;) karena itu
+   default Excel di locale Indonesia; BOM UTF-8 ditambahkan supaya nama
+   dan emoji mood tetap kebaca benar kalau dibuka langsung di Excel. ---------- */
+function csvEscape_(val){
+  const s = (val===null||val===undefined) ? "" : String(val);
+  return /[;"\n\r]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+function downloadCSV_(filename, rows){
+  const csv = rows.map(r=>r.map(csvEscape_).join(";")).join("\r\n");
+  const blob = new Blob(["\uFEFF"+csv], {type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function todayStamp_(){
+  const d = new Date();
+  const p = n=>String(n).padStart(2,"0");
+  return d.getFullYear()+""+p(d.getMonth()+1)+p(d.getDate());
+}
+function siswaToCSVRows_(list){
+  const statusLookup = Object.fromEntries(STATUS_OPTIONS.map(s=>[s.key,s]));
+  const header = ["Nama","PIN","Fasilitator","Status Tindak Lanjut","Poin","Ruangan Selesai","Mood Terakhir","Skor Pemahaman Rata-rata (%)","Total Waktu Pengerjaan","Online","Update Terakhir"];
+  const body = list.map(u=>{
+    const statusInfo = statusLookup[u.status];
+    return [
+      u.nama||"", u.pin||"", u.fasilitator||"",
+      statusInfo ? statusInfo.label : (u.status||""),
+      u.points||0, u.roomsDone||0, u.mood||"",
+      (u.avgMastery===null||u.avgMastery===undefined) ? "" : u.avgMastery,
+      u.totalTimeOnTask ? formatDurasiSingkat(u.totalTimeOnTask) : "",
+      u.online ? "Online" : "Offline",
+      formatTanggalSingkat(u.terakhir),
+    ];
+  });
+  return [header, ...body];
+}
+// Ekspor mengikuti hasil pencarian yang sedang tampil (kalau lagi difilter),
+// bukan selalu semua siswa — supaya ekspor konsisten sama yang dilihat admin.
+function exportAdminSiswaCSV(){
+  const term = adminSiswaSearchTerm;
+  const list = term ? adminSiswaFullList.filter(u=>(u.nama||"").toLowerCase().includes(term)) : adminSiswaFullList;
+  if(!list.length){ alert("Belum ada data siswa untuk diekspor."); return; }
+  downloadCSV_("kenaliku-siswa-"+todayStamp_()+".csv", siswaToCSVRows_(list));
+}
+function exportFacilSiswaCSV(){
+  const term = facilSearchTerm;
+  const list = term ? FACIL_STUDENTS.filter(u=>(u.nama||"").toLowerCase().includes(term)) : FACIL_STUDENTS;
+  if(!list.length){ alert("Belum ada data siswa bimbingan untuk diekspor."); return; }
+  downloadCSV_("kenaliku-siswa-bimbingan-"+todayStamp_()+".csv", siswaToCSVRows_(list));
+}
 function facilitatorLogout(){
   FACIL_SESSION = null;
+  try{ sessionStorage.removeItem(FACIL_SESSION_KEY); }catch(e){}
+  facilSearchTerm = "";
+  const searchEl = document.getElementById("facilSearch"); if(searchEl) searchEl.value = "";
   goTo("screen-title");
+}
+// Sama seperti restoreAdminSession — pulihkan sesi fasilitator kalau ada &
+// masih sah, supaya refresh halaman tidak melempar balik ke layar judul.
+async function restoreFacilSession(){
+  let saved = null;
+  try{ saved = JSON.parse(sessionStorage.getItem(FACIL_SESSION_KEY) || "null"); }catch(e){ saved = null; }
+  if(!saved || !saved.username || !saved.password) return false;
+  FACIL_SESSION = saved;
+  const check = await apiGet("list_students_for_facilitator", facilParams());
+  if(check.status !== "ok"){
+    FACIL_SESSION = null;
+    try{ sessionStorage.removeItem(FACIL_SESSION_KEY); }catch(e){}
+    return false;
+  }
+  document.getElementById("facilWhoLabel").textContent = saved.nama;
+  goTo("screen-fasilitator");
+  renderFacilitatorDashboard();
+  return true;
 }
 function switchFacilTab(tab){
   document.getElementById("facilTabStudents").classList.toggle("active", tab==="students");
@@ -4138,9 +4394,70 @@ function switchFacilTab(tab){
   document.getElementById("facilHistoryList").style.display = tab==="history" ? "grid" : "none";
   if(tab === "history") renderFacilitatorHistory();
 }
+let facilSearchTerm = "";
+let facilStudentsPage = 0;
+function onFacilSearchInput(value){
+  facilSearchTerm = value.trim().toLowerCase();
+  facilStudentsPage = 0;
+  renderFacilStudentsPage();
+}
+/* ---------- SKOR PEMAHAMAN (mastery) — dipakai Panel Admin & Dashboard
+   Fasilitator, supaya keduanya bisa lihat SEBERAPA PAHAM siswa per ruangan
+   (dari skor kuis), bukan cuma status "selesai/belum" (roomsDone). Datanya
+   sendiri sudah ikut kebawa di STATE.roomScores tiap kali completeRoom()
+   dipanggil, lalu di-normalisasi jadi u.avgMastery + u.roomScores oleh
+   listUsersForAdmin() di Code.gs. */
+function masteryPillHTML(avgMastery){
+  if(avgMastery == null) return `<span class="status-pill pending" style="font-size:11px;">Belum ada skor kuis</span>`;
+  const colors = avgMastery >= 80 ? {bg:"var(--green-soft)", fg:"var(--green-deep)"}
+    : avgMastery >= 50 ? {bg:"#fbe9d0", fg:"#8a5a12"}
+    : {bg:"#fbeae5", fg:"var(--danger)"};
+  const label = avgMastery >= 80 ? "Paham baik" : avgMastery >= 50 ? "Cukup paham" : "Perlu diulang";
+  return `<span class="status-pill" style="font-size:11px;background:${colors.bg};color:${colors.fg};">🎯 ${avgMastery}% · ${label}</span>`;
+}
+function masteryStarsHTML(n){
+  return [1,2,3].map(i=>`<span style="opacity:${i<=(n||0)?1:.22};">★</span>`).join("");
+}
+// roomId siswa yang ber-kuis & bisa dinilai (7 ruangan materi utama) —
+// urutan sama seperti LEVEL_ROOM_IDS supaya konsisten sama engine kuis-nya.
+const MASTERY_ROOM_IDS = ["pubertas","menstruasi","mimpibasah","consent","relasi","medsos","gizi"];
+// Format detik jadi "1j 12m" / "8m" / "<1m" — dipakai tampilan waktu pengerjaan.
+function formatDurasiSingkat(totalSeconds){
+  const s = Math.max(0, Math.round(totalSeconds||0));
+  if(s < 60) return "<1m";
+  const h = Math.floor(s/3600), m = Math.floor((s%3600)/60);
+  return h > 0 ? `${h}j ${m}m` : `${m}m`;
+}
+function openMasteryDetail(nama, pin, source){
+  const list = source === "facil" ? FACIL_STUDENTS : adminSiswaFullList;
+  const u = (list||[]).find(x=>x.nama===nama && String(x.pin)===String(pin));
+  if(!u) return;
+  const rs = u.roomScores || {};
+  const tot = u.timeOnTask || {};
+  document.getElementById("masteryDetailNama").textContent = u.nama;
+  document.getElementById("masteryDetailAvg").innerHTML = u.avgMastery!=null ? `${u.avgMastery}%` : "Belum ada ruangan berkuis yang dicoba";
+  document.getElementById("masteryDetailTotalTime").innerHTML = u.totalTimeOnTask ? formatDurasiSingkat(u.totalTimeOnTask) : "Belum tercatat";
+  document.getElementById("masteryDetailBody").innerHTML = MASTERY_ROOM_IDS.map(id=>{
+    const room = ROOMS.find(r=>r.id===id);
+    if(!room) return "";
+    const sc = rs[id];
+    const waktu = tot[id] ? formatDurasiSingkat(tot[id]) : null;
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;background:#faf6ea;">
+        <span style="font-size:13px;">${room.icon} ${room.name}</span>
+        <span style="text-align:right;">
+          ${sc
+            ? `<span style="font-size:13px;white-space:nowrap;">${masteryStarsHTML(sc.stars)} <b>${sc.pct}%</b> <span style="opacity:.65;font-size:11.5px;">(${sc.correct}/${sc.total} benar)</span></span>`
+            : `<span style="font-size:12px;opacity:.5;">Belum dicoba</span>`
+          }
+          ${waktu ? `<div style="font-size:11px;opacity:.65;margin-top:2px;">⏱ ${waktu}</div>` : ""}
+        </span>
+      </div>
+    `;
+  }).join("");
+  openModal("modalMasteryDetail");
+}
 async function renderFacilitatorDashboard(){
-  const statusLookup = Object.fromEntries(STATUS_OPTIONS.map(s=>[s.key,s]));
-  const moodLookup = Object.fromEntries(MOOD_OPTIONS.map(m=>[m.key,m]));
   const totalRooms = ROOMS.length;
   const summaryBox = document.getElementById("facilSummary");
   const listBox = document.getElementById("facilStudentList");
@@ -4149,29 +4466,57 @@ async function renderFacilitatorDashboard(){
   if(result.status !== "ok"){
     summaryBox.innerHTML = "";
     listBox.innerHTML = `<p class="admin-empty"><span class="ee-icon">⚠️</span>Gagal memuat data. Coba lagi.</p>`;
+    document.getElementById("facilStudentsPageNav").innerHTML = "";
     return;
   }
   let list = result.list || [];
   document.getElementById("facilStudentsCount").textContent = list.length;
-  const isAttn = u => (u.mood==="sedih"||u.mood==="berat") && u.status!=="selesai";
   const avgRooms = list.length ? Math.round(list.reduce((a,u)=>a+(u.roomsDone||0),0)/list.length) : 0;
-  const needAttention = list.filter(isAttn).length;
+  const krisisCount = list.filter(u=>getEscalationLevel(u)==="krisis").length;
+  const needAttention = list.filter(u=>getEscalationLevel(u)).length;
   const onlineCount = list.filter(u=>u.online).length;
+  // Rata² PEMAHAMAN (skor kuis), bukan cuma rata² ruangan yang DILEWATI — dua
+  // angka ini bisa beda jauh (siswa bisa "selesai" banyak ruangan tapi
+  // pemahamannya rendah kalau asal klik).
+  const masteryList = list.filter(u=>u.avgMastery!=null);
+  const avgMastery = masteryList.length ? Math.round(masteryList.reduce((a,u)=>a+u.avgMastery,0)/masteryList.length) : null;
   summaryBox.innerHTML = `
     <div class="facil-stat"><div class="n">${list.length}</div><div class="l">Siswa Bimbingan</div></div>
     <div class="facil-stat"><div class="n">🟢 ${onlineCount}</div><div class="l">Online Sekarang</div></div>
     <div class="facil-stat"><div class="n">${avgRooms}/${totalRooms}</div><div class="l">Rata² Ruangan</div></div>
+    <div class="facil-stat"><div class="n">${avgMastery!=null?avgMastery+"%":"—"}</div><div class="l">Rata² Pemahaman</div></div>
+    <div class="facil-stat" style="${krisisCount>0?'border-top-color:var(--danger);':''}"><div class="n" style="${krisisCount>0?'color:var(--danger);':''}">${krisisCount>0?"🚨 ":""}${krisisCount}</div><div class="l">Perlu Eskalasi</div></div>
     <div class="facil-stat"><div class="n">${needAttention}</div><div class="l">Perlu Perhatian</div></div>
   `;
-  if(list.length === 0){
-    FACIL_STUDENTS = [];
+  // krisis paling atas, lalu perhatian, biar nggak kelewat
+  const levelRank = {krisis:2, perhatian:1};
+  list = list.slice().sort((a,b)=> (levelRank[getEscalationLevel(b)]||0) - (levelRank[getEscalationLevel(a)]||0));
+  FACIL_STUDENTS = list;
+  facilStudentsPage = 0;
+  renderFacilStudentsPage();
+}
+function renderFacilStudentsPage(){
+  const statusLookup = Object.fromEntries(STATUS_OPTIONS.map(s=>[s.key,s]));
+  const moodLookup = Object.fromEntries(MOOD_OPTIONS.map(m=>[m.key,m]));
+  const totalRooms = ROOMS.length;
+  const listBox = document.getElementById("facilStudentList");
+  const navBox = document.getElementById("facilStudentsPageNav");
+  if(FACIL_STUDENTS.length === 0){
     listBox.innerHTML = `<p class="admin-empty"><span class="ee-icon">🧑‍🏫</span>Belum ada siswa yang ditempatkan ke kamu. Hubungi admin sekolah untuk penempatan.</p>`;
+    navBox.innerHTML = "";
     return;
   }
-  // siswa yang perlu perhatian tampil paling atas, biar nggak kelewat
-  list = list.slice().sort((a,b)=> (isAttn(b)?1:0) - (isAttn(a)?1:0));
-  FACIL_STUDENTS = list;
-  listBox.innerHTML = list.map((u,i)=>{
+  const term = facilSearchTerm;
+  const filtered = term ? FACIL_STUDENTS.filter(u=>(u.nama||"").toLowerCase().includes(term)) : FACIL_STUDENTS;
+  if(filtered.length === 0){
+    listBox.innerHTML = `<p class="admin-empty"><span class="ee-icon">🔍</span>Tidak ada siswa yang cocok dengan pencarian "${escapeHtml(facilSearchTerm)}".</p>`;
+    navBox.innerHTML = "";
+    return;
+  }
+  const pageCount = Math.max(1, Math.ceil(filtered.length / ADMIN_PAGE_SIZE));
+  facilStudentsPage = Math.max(0, Math.min(facilStudentsPage, pageCount-1));
+  const pageList = filtered.slice(facilStudentsPage*ADMIN_PAGE_SIZE, facilStudentsPage*ADMIN_PAGE_SIZE + ADMIN_PAGE_SIZE);
+  listBox.innerHTML = pageList.map((u,i)=>{
     const pct = Math.round(((u.roomsDone||0)/totalRooms)*100);
     const moodInfo = moodLookup[u.mood];
     const moodTag = moodInfo
@@ -4181,18 +4526,27 @@ async function renderFacilitatorDashboard(){
     const statusPill = statusInfo
       ? `<span class="status-pill ${statusInfo.cls}">${statusInfo.emoji} ${statusInfo.label}</span>`
       : `<span class="status-pill pending">🕓 Belum Ditindaklanjuti</span>`;
-    const attnFlag = isAttn(u) ? `<div class="facil-row-attn-flag">⚠️ Perlu perhatian — mood ${moodInfo?moodInfo.label.toLowerCase():"kurang baik"} beberapa waktu terakhir</div>` : "";
+    const escLevel = getEscalationLevel(u);
+    const attnFlag = escLevel === "krisis"
+      ? `<div class="facil-row-krisis-flag"><div class="k-title">🚨 Perlu eskalasi — mood berat menetap ${u.moodStreak} hari berturut</div><div class="k-body">Bukan sekadar sedih sesekali. Klik "🚨 Lihat Protokol" untuk langkah yang disarankan.</div></div>`
+      : escLevel === "perhatian"
+      ? `<div class="facil-row-attn-flag">⚠️ Perlu perhatian — mood ${moodInfo?moodInfo.label.toLowerCase():"kurang baik"} beberapa waktu terakhir</div>`
+      : "";
     const activitySub = u.online
       ? `<span class="online-dot" aria-hidden="true"></span> Online sekarang`
       : `terakhir aktif ${formatTanggalSingkat(u.terakhir)}`;
+    const masteryPill = masteryPillHTML(u.avgMastery);
+    const rowCls = escLevel === "krisis" ? "facil-row--krisis" : escLevel === "perhatian" ? "facil-row--attn" : "";
+    const tindakBtnLabel = escLevel === "krisis" ? "🚨 Lihat Protokol &amp; Tindak Lanjuti" : "✏️ Tindak Lanjuti";
     return `
-    <div class="facil-row ${isAttn(u)?'facil-row--attn':''}" style="--i:${i}">
+    <div class="facil-row ${rowCls}" style="--i:${i}">
       ${attnFlag}
       <div class="facil-row-top">
         <div class="admin-avatar">${initials(u.nama)}</div>
         <div style="min-width:0;">
           <div class="facil-row-name">${escapeHtml(u.nama)}</div>
           <div class="facil-row-sub">${u.points||0} poin · ${activitySub}</div>
+          ${u.asalSekolah ? `<div class="facil-row-sub" style="margin-top:2px;">🏫 ${escapeHtml(u.asalSekolah)}</div>` : ""}
         </div>
       </div>
       <div class="facil-progress-wrap">
@@ -4200,12 +4554,15 @@ async function renderFacilitatorDashboard(){
         <span class="facil-progress-label">${u.roomsDone||0}/${totalRooms}</span>
       </div>
       ${moodTag}
-      <div class="facil-row-status-line">
+      <div class="facil-row-status-line" style="flex-wrap:wrap;">
         ${statusPill}
-        <button class="btn-approve" style="flex:none;padding:8px 14px;font-size:12px;border-radius:10px;background:linear-gradient(180deg,var(--facil-mid),var(--facil-deep));color:#fff;font-weight:800;" onclick="openTindakLanjutModal('${u.nama.replace(/'/g,"\\'")}','${u.pin}')">✏️ Tindak Lanjuti</button>
+        ${masteryPill}
+        <button class="btn-outline" style="flex:none;padding:8px 12px;font-size:12px;border-radius:10px;" onclick="openMasteryDetail('${u.nama.replace(/'/g,"\\'")}','${u.pin}','facil')">📊 Detail Ruangan</button>
+        <button class="btn-approve" style="flex:none;padding:8px 14px;font-size:12px;border-radius:10px;background:linear-gradient(180deg,var(--facil-mid),var(--facil-deep));color:#fff;font-weight:800;${escLevel==='krisis'?'background:linear-gradient(180deg,#c0503a,var(--danger));':''}" onclick="openTindakLanjutModal('${u.nama.replace(/'/g,"\\'")}','${u.pin}')">${tindakBtnLabel}</button>
       </div>
     </div>
   `;}).join("");
+  navBox.innerHTML = renderAdminPageNavHtml(facilStudentsPage, pageCount, "facilStudentsPage", "renderFacilStudentsPage");
 }
 async function renderFacilitatorHistory(){
   const box = document.getElementById("facilHistoryList");
@@ -4239,6 +4596,7 @@ function openTindakLanjutModal(nama, pin){
   const siswa = FACIL_STUDENTS.find(u=>u.nama===nama && String(u.pin)===String(pin));
   TINDAK_LANJUT_TARGET = {nama, pin};
   document.getElementById("tindakLanjutNama").textContent = nama;
+  document.getElementById("tindakLanjutProtokol").innerHTML = (siswa && getEscalationLevel(siswa)==="krisis") ? krisisProtocolHTML() : "";
   document.getElementById("tindakLanjutStatus").value = (siswa && siswa.status) || "belum";
   document.getElementById("tindakLanjutPesan").value = "";
   document.getElementById("tindakLanjutError").style.display = "none";
@@ -4282,7 +4640,8 @@ function entryAdminLogin(){
   document.getElementById("adminError").style.display = "none";
   openModal("modalAdminLogin");
 }
-let ADMIN_SESSION = null; // {username, password} — disimpan di memori saja, dikirim ulang tiap panggilan API admin
+let ADMIN_SESSION = null; // {username, password} — juga disalin ke sessionStorage supaya sesi login admin tidak hilang kalau halaman di-refresh (tapi otomatis hilang kalau tab ditutup, beda dengan localStorage yang lebih permanen).
+const ADMIN_SESSION_KEY = "kenaliku_admin_session";
 
 // Code.gs (adminGuard_) membaca kredensial admin dari field "adminUser"/"adminPass",
 // BUKAN "username"/"password" — nama itu sengaja dipisah supaya tidak pernah
@@ -4312,6 +4671,7 @@ async function submitAdminLogin(){
   if(btn){ btn.disabled = false; btn.textContent = "MASUK SEBAGAI ADMIN"; }
   if(result.status === "ok"){
     ADMIN_SESSION = {username, password};
+    try{ sessionStorage.setItem(ADMIN_SESSION_KEY, JSON.stringify(ADMIN_SESSION)); }catch(e){ /* storage penuh/diblokir, sesi tetap jalan di memori */ }
     logToSheet("login_admin", {username});
     closeModal("modalAdminLogin");
     document.getElementById("adminWhoLabel").textContent = username;
@@ -4327,18 +4687,84 @@ async function submitAdminLogin(){
 }
 function adminLogout(){
   ADMIN_SESSION = null;
+  try{ sessionStorage.removeItem(ADMIN_SESSION_KEY); }catch(e){}
+  adminFacilSearchTerm = ""; adminSiswaSearchTerm = "";
+  const facSearchEl = document.getElementById("adminFacilSearch"); if(facSearchEl) facSearchEl.value = "";
+  const siswaSearchEl = document.getElementById("adminSiswaSearch"); if(siswaSearchEl) siswaSearchEl.value = "";
   goTo("screen-title");
+}
+// Dipanggil sekali saat halaman dibuka: kalau ada sesi admin tersimpan dari
+// sebelum refresh, coba pulihkan otomatis (tanpa perlu login ulang). Sesi
+// tetap divalidasi ke server dulu — kalau kredensial ternyata sudah tidak
+// sah (mis. sudah tidak ada di properti server), sesi dibuang & user
+// kembali ke layar judul seperti biasa.
+async function restoreAdminSession(){
+  let saved = null;
+  try{ saved = JSON.parse(sessionStorage.getItem(ADMIN_SESSION_KEY) || "null"); }catch(e){ saved = null; }
+  if(!saved || !saved.username || !saved.password) return false;
+  ADMIN_SESSION = saved;
+  const check = await apiGet("list_fasilitator_all", adminParams());
+  if(check.status !== "ok"){
+    ADMIN_SESSION = null;
+    try{ sessionStorage.removeItem(ADMIN_SESSION_KEY); }catch(e){}
+    return false;
+  }
+  document.getElementById("adminWhoLabel").textContent = saved.username;
+  goTo("screen-admin");
+  switchAdminTab("pending");
+  return true;
 }
 function switchAdminTab(tab){
   document.getElementById("adminTabPending").classList.toggle("active", tab==="pending");
   document.getElementById("adminTabUsers").classList.toggle("active", tab==="users");
   document.getElementById("adminTabStats").classList.toggle("active", tab==="stats");
+  document.getElementById("adminTabLog").classList.toggle("active", tab==="log");
   document.getElementById("adminPendingList").style.display = tab==="pending" ? "grid" : "none";
+  document.getElementById("adminPendingPageNav").style.display = tab==="pending" ? "flex" : "none";
   document.getElementById("adminUsersList").style.display = tab==="users" ? "grid" : "none";
+  document.getElementById("adminUsersPageNav").style.display = tab==="users" ? "flex" : "none";
   document.getElementById("adminStatsBody").style.display = tab==="stats" ? "flex" : "none";
+  document.getElementById("adminLogList").style.display = tab==="log" ? "grid" : "none";
+  document.getElementById("adminToolbarFacil").style.display = tab==="pending" ? "flex" : "none";
+  document.getElementById("adminToolbarSiswa").style.display = tab==="users" ? "flex" : "none";
+  document.getElementById("adminBulkBar").style.display = tab==="users" ? "flex" : "none";
   if(tab === "pending") renderAdminPending();
   else if(tab === "users") renderAdminUsers();
+  else if(tab === "log") renderAdminLog();
   else renderAdminStats();
+}
+// Label & ikon aksi admin, dipakai tab "Log Aktivitas" supaya lebih terbaca
+// daripada nama action mentah dari backend.
+const ADMIN_LOG_LABELS = {
+  create_fasilitator: "➕ Tambah fasilitator",
+  delete_fasilitator: "🗑️ Hapus fasilitator",
+  approve_fasilitator: "✅ Setujui/tolak fasilitator",
+  assign_fasilitator: "🔗 Tugaskan fasilitator",
+  bulk_assign_fasilitator: "🔗📦 Tugaskan fasilitator (massal)",
+  create_student: "➕ Tambah siswa",
+  delete_student: "🗑️ Hapus siswa",
+};
+async function renderAdminLog(){
+  const box = document.getElementById("adminLogList");
+  box.innerHTML = `<p class="admin-empty">Memuat log aktivitas…</p>`;
+  const result = await apiGet("list_admin_log", adminParams());
+  if(result.status !== "ok"){
+    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">⚠️</span>Gagal memuat log. Coba lagi.</p>`;
+    return;
+  }
+  const list = result.list || [];
+  if(list.length === 0){
+    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">📝</span>Belum ada aksi admin yang tercatat.</p>`;
+    return;
+  }
+  box.innerHTML = list.map((h,i)=>{
+    const label = ADMIN_LOG_LABELS[h.aksi] || h.aksi;
+    return `
+    <div class="facil-history-row" style="--i:${i}">
+      <div class="h-top"><span>${label}</span><span>${formatTanggalSingkat(h.waktu)}</span></div>
+      <div class="h-body">Oleh <b>${escapeHtml(h.admin)}</b> · Target: <b>${escapeHtml(h.target)}</b>${h.detail ? " — "+escapeHtml(h.detail) : ""}</div>
+    </div>
+  `;}).join("");
 }
 // Bulan cerah, dipakai buat label sumbu grafik "12 Bulan Terakhir".
 const NAMA_BULAN_PENDEK = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
@@ -4405,22 +4831,66 @@ async function renderAdminStats(){
     </div>
   `;
 }
+const ADMIN_PAGE_SIZE = 4;
+// Helper generik buat tombol navigasi paging admin (dipakai tab Fasilitator & Siswa).
+// pageVarName & rerenderFnName dikirim sebagai string nama variabel/fungsi global,
+// karena atribut onclick di HTML cuma bisa manggil lewat nama, bukan referensi langsung.
+function renderAdminPageNavHtml(currentPage, pageCount, pageVarName, rerenderFnName){
+  if(pageCount <= 1) return "";
+  return `
+    <button type="button" class="admin-page-btn" onclick="${pageVarName}--;${rerenderFnName}();" ${currentPage===0?"disabled":""}>‹ Sebelumnya</button>
+    <span class="admin-page-label">Halaman ${currentPage+1} dari ${pageCount}</span>
+    <button type="button" class="admin-page-btn" onclick="${pageVarName}++;${rerenderFnName}();" ${currentPage===pageCount-1?"disabled":""}>Berikutnya ›</button>
+  `;
+}
+let adminFacilFullList = [];
+let adminFacilPage = 0;
+let adminFacilSearchTerm = "";
+function onAdminFacilSearchInput(value){
+  adminFacilSearchTerm = value.trim().toLowerCase();
+  adminFacilPage = 0;
+  renderAdminPendingPage();
+}
 async function renderAdminPending(){
   const box = document.getElementById("adminPendingList");
   box.innerHTML = `<p class="admin-empty">Memuat…</p>`;
-  const result = await apiGet("list_fasilitator_pending", adminParams());
+  const result = await apiGet("list_fasilitator_all", adminParams());
   if(result.status !== "ok"){
     box.innerHTML = `<p class="admin-empty"><span class="ee-icon">⚠️</span>Gagal memuat data. Coba lagi.</p>`;
     document.getElementById("adminPendingCount").textContent = "0";
+    document.getElementById("adminPendingPageNav").innerHTML = "";
     return;
   }
-  const list = result.list || [];
-  document.getElementById("adminPendingCount").textContent = list.length;
+  adminFacilFullList = result.list || [];
+  const pendingCount = adminFacilFullList.filter(f=>f.status==="Pending").length;
+  document.getElementById("adminPendingCount").textContent = pendingCount;
+  adminFacilPage = 0;
+  renderAdminPendingPage();
+}
+function renderAdminPendingPage(){
+  const box = document.getElementById("adminPendingList");
+  const navBox = document.getElementById("adminPendingPageNav");
+  const term = adminFacilSearchTerm;
+  const list = term
+    ? adminFacilFullList.filter(f=>(f.nama||"").toLowerCase().includes(term) || (f.username||"").toLowerCase().includes(term) || (f.instansi||"").toLowerCase().includes(term))
+    : adminFacilFullList;
+  if(adminFacilFullList.length === 0){
+    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">🧑‍🏫</span>Belum ada akun fasilitator sama sekali. Klik "Tambah Akun Fasilitator" di atas.</p>`;
+    navBox.innerHTML = "";
+    return;
+  }
   if(list.length === 0){
-    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">🎉</span>Tidak ada pendaftaran fasilitator yang menunggu persetujuan.</p>`;
+    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">🔍</span>Tidak ada fasilitator yang cocok dengan pencarian "${escapeHtml(adminFacilSearchTerm)}".</p>`;
+    navBox.innerHTML = "";
     return;
   }
-  box.innerHTML = list.map((f,i)=>`
+  const pageCount = Math.max(1, Math.ceil(list.length / ADMIN_PAGE_SIZE));
+  adminFacilPage = Math.max(0, Math.min(adminFacilPage, pageCount-1));
+  const pageList = list.slice(adminFacilPage*ADMIN_PAGE_SIZE, adminFacilPage*ADMIN_PAGE_SIZE + ADMIN_PAGE_SIZE);
+  const pillFor = f => f.status==="Pending" ? `<span class="status-pill pending">MENUNGGU</span>`
+    : f.status==="Disetujui" ? `<span class="status-pill approved">DISETUJUI</span>`
+    : `<span class="status-pill" style="background:#f4d6d6;color:#8a1f1f;">DITOLAK</span>`;
+  box.innerHTML = pageList.map((f,i)=>`
     <div class="admin-row admin-row--facil" style="--i:${i}">
       <div class="admin-row-top">
         <div class="admin-row-id">
@@ -4430,18 +4900,70 @@ async function renderAdminPending(){
             <div class="admin-row-sub">${f.instansi||"-"} · @${f.username}</div>
           </div>
         </div>
-        <span class="status-pill pending">MENUNGGU</span>
+        ${pillFor(f)}
       </div>
       <div class="admin-row-actions">
-        <button class="btn-approve" onclick="approveFasilitatorAction('${f.username.replace(/'/g,"\\'")}', true)">✔ Setujui</button>
-        <button class="btn-reject" onclick="approveFasilitatorAction('${f.username.replace(/'/g,"\\'")}', false)">✕ Tolak</button>
+        ${f.status==="Pending" ? `
+          <button class="btn-approve" onclick="approveFasilitatorAction('${f.username.replace(/'/g,"\\'")}', true)">✔ Setujui</button>
+          <button class="btn-reject" onclick="approveFasilitatorAction('${f.username.replace(/'/g,"\\'")}', false)">✕ Tolak</button>
+        ` : ""}
+        <button class="btn-delete-account" onclick="deleteFasilitatorAction('${f.username.replace(/'/g,"\\'")}','${f.nama.replace(/'/g,"\\'")}')">🗑 Hapus Akun</button>
       </div>
     </div>
   `).join("");
+  navBox.innerHTML = renderAdminPageNavHtml(adminFacilPage, pageCount, "adminFacilPage", "renderAdminPendingPage");
 }
 async function approveFasilitatorAction(username, approve){
   await apiGet("approve_fasilitator", Object.assign({}, adminParams(), {username, approve: approve?"1":"0"}));
   renderAdminPending();
+}
+async function deleteFasilitatorAction(username, nama){
+  if(!confirm(`Hapus akun fasilitator "${nama}" (@${username})? Siswa yang ditugaskan ke fasilitator ini akan otomatis dilepas (jadi "belum ada fasilitator"). Tindakan ini tidak bisa dibatalkan.`)) return;
+  const result = await apiGet("delete_fasilitator", Object.assign({}, adminParams(), {username}));
+  if(result.status !== "ok"){
+    alert("Gagal menghapus: " + (result.message || result.status));
+    return;
+  }
+  renderAdminPending();
+}
+function openAdminAddFasilitator(){
+  ["adminNewFacNama","adminNewFacInstansi","adminNewFacUsername","adminNewFacPassword"].forEach(id=>{
+    document.getElementById(id).value = "";
+  });
+  document.getElementById("adminNewFacError").style.display = "none";
+  openModal("modalAdminAddFasilitator");
+}
+async function submitAdminAddFasilitator(){
+  const nama = document.getElementById("adminNewFacNama").value.trim();
+  const instansi = document.getElementById("adminNewFacInstansi").value.trim();
+  const username = document.getElementById("adminNewFacUsername").value.trim();
+  const password = document.getElementById("adminNewFacPassword").value.trim();
+  const errorEl = document.getElementById("adminNewFacError");
+  const btn = document.getElementById("btnAdminAddFac");
+  if(!nama || !username || !password){
+    errorEl.textContent = "Nama, username, dan kata sandi wajib diisi.";
+    errorEl.style.display = "block";
+    return;
+  }
+  errorEl.style.display = "none";
+  btn.disabled = true; btn.textContent = "MENYIMPAN...";
+  const result = await apiGet("create_fasilitator", Object.assign({}, adminParams(), {nama, instansi, username, password}));
+  btn.disabled = false; btn.textContent = "SIMPAN";
+  if(result.status === "ok"){
+    closeModal("modalAdminAddFasilitator");
+    renderAdminPending();
+  }else{
+    errorEl.textContent = result.message || "Gagal menyimpan, coba lagi.";
+    errorEl.style.display = "block";
+  }
+}
+let adminSiswaFullList = [];
+let adminSiswaPage = 0;
+let adminSiswaSearchTerm = "";
+function onAdminSiswaSearchInput(value){
+  adminSiswaSearchTerm = value.trim().toLowerCase();
+  adminSiswaPage = 0;
+  renderAdminUsersPage();
 }
 async function renderAdminUsers(){
   const box = document.getElementById("adminUsersList");
@@ -4453,31 +4975,67 @@ async function renderAdminUsers(){
   if(usersResult.status !== "ok"){
     box.innerHTML = `<p class="admin-empty"><span class="ee-icon">⚠️</span>Gagal memuat data. Coba lagi.</p>`;
     document.getElementById("adminUsersCount").textContent = "0";
+    document.getElementById("adminUsersPageNav").innerHTML = "";
     return;
   }
-  const list = usersResult.list || [];
-  document.getElementById("adminUsersCount").textContent = list.length;
+  adminSiswaFullList = usersResult.list || [];
+  document.getElementById("adminUsersCount").textContent = adminSiswaFullList.length;
   const onlineCountEl = document.getElementById("adminUsersOnlineCount");
-  const onlineTotal = list.filter(u=>u.online).length;
+  const onlineTotal = adminSiswaFullList.filter(u=>u.online).length;
   onlineCountEl.textContent = "🟢 " + onlineTotal;
-  onlineCountEl.style.display = list.length ? "inline-flex" : "none";
-  if(list.length === 0){
+  onlineCountEl.style.display = adminSiswaFullList.length ? "inline-flex" : "none";
+  adminSiswaPage = 0;
+  renderAdminUsersPage();
+}
+function renderAdminUsersPage(){
+  const box = document.getElementById("adminUsersList");
+  const navBox = document.getElementById("adminUsersPageNav");
+  const term = adminSiswaSearchTerm;
+  const list = term
+    ? adminSiswaFullList.filter(u=>(u.nama||"").toLowerCase().includes(term))
+    : adminSiswaFullList;
+  if(adminSiswaFullList.length === 0){
     box.innerHTML = `<p class="admin-empty"><span class="ee-icon">🎓</span>Belum ada siswa yang tersimpan di server.</p>`;
+    navBox.innerHTML = "";
+    updateAdminBulkBar();
     return;
   }
-  const fasilitatorOptions = FASILITATOR_LIST.map(f=>`<option value="${f.username}">${f.nama}${f.instansi?" — "+f.instansi:""}</option>`).join("");
-  box.innerHTML = list.map((u,i)=>{
+  if(list.length === 0){
+    box.innerHTML = `<p class="admin-empty"><span class="ee-icon">🔍</span>Tidak ada siswa yang cocok dengan pencarian "${escapeHtml(adminSiswaSearchTerm)}".</p>`;
+    navBox.innerHTML = "";
+    updateAdminBulkBar();
+    return;
+  }
+  const pageCount = Math.max(1, Math.ceil(list.length / ADMIN_PAGE_SIZE));
+  adminSiswaPage = Math.max(0, Math.min(adminSiswaPage, pageCount-1));
+  const pageList = list.slice(adminSiswaPage*ADMIN_PAGE_SIZE, adminSiswaPage*ADMIN_PAGE_SIZE + ADMIN_PAGE_SIZE);
+  const fasilitatorOptions = fasilitatorOptionsHTML_();
+  box.innerHTML = pageList.map((u,i)=>{
     const activitySub = u.online
       ? `<span class="online-dot" aria-hidden="true"></span> Online sekarang`
       : `terakhir aktif ${formatTanggalSingkat(u.terakhir)}`;
+    const escLevel = getEscalationLevel(u);
+    const krisisFlag = escLevel === "krisis"
+      ? `<div class="facil-row-krisis-flag" style="margin:0 0 8px;">🚨 <b>Perlu eskalasi</b> — mood berat menetap ${u.moodStreak} hari berturut. Pastikan fasilitatornya (atau BK sekolah) sudah menindaklanjuti.</div>`
+      : "";
     return `
-    <div class="admin-row admin-row--siswa" style="--i:${i}">
+    <div class="admin-row admin-row--siswa ${escLevel==='krisis'?'facil-row--krisis':''}" style="--i:${i}">
+      <label style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--grey);margin-bottom:8px;cursor:pointer;">
+        <input type="checkbox" class="admin-select-cb" data-nama="${escapeHtml(u.nama)}" data-pin="${escapeHtml(String(u.pin))}" ${adminSiswaSelected.has(siswaKey_(u))?"checked":""} onchange="toggleAdminSiswaSelectEl(this)">
+        Pilih untuk aksi massal
+      </label>
+      ${krisisFlag}
       <div class="admin-row-top">
         <div class="admin-row-id">
           <div class="admin-avatar">${initials(u.nama)}</div>
           <div>
             <div class="admin-row-name">${u.nama}</div>
             <div class="admin-row-sub">${u.points||0} poin · ${u.roomsDone||0} ruangan selesai · ${activitySub}${u.mood ? " · mood terakhir: "+u.mood+(u.moodStreak>=3?" ("+u.moodStreak+" hari berturut)":"") : ""}</div>
+            ${u.asalSekolah ? `<div class="admin-row-sub" style="margin-top:2px;">🏫 ${escapeHtml(u.asalSekolah)}</div>` : ""}
+            <div class="admin-row-sub" style="margin-top:4px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              ${masteryPillHTML(u.avgMastery)}
+              <button class="btn-outline" style="flex:none;padding:4px 10px;font-size:11.5px;border-radius:8px;" onclick="openMasteryDetail('${u.nama.replace(/'/g,"\\'")}','${String(u.pin).replace(/'/g,"\\'")}','admin')">📊 Detail Ruangan</button>
+            </div>
           </div>
         </div>
         <span class="status-pill ${u.fasilitator?'approved':'pending'}">${u.fasilitator ? "ADA FASILITATOR" : "BELUM ADA"}</span>
@@ -4486,16 +5044,154 @@ async function renderAdminUsers(){
         <option value="">-- Tanpa Fasilitator --</option>
         ${fasilitatorOptions}
       </select>
+      <div class="admin-asal-sekolah-edit" data-nama="${escapeHtml(u.nama)}" data-pin="${escapeHtml(String(u.pin))}" style="display:flex;gap:8px;margin-top:8px;">
+        <input type="text" list="asalSekolahListAdmin" value="${escapeHtml(u.asalSekolah||"")}" placeholder="🏫 Asal sekolah (opsional)" style="flex:1;font-size:12.5px;padding:8px 10px;border-radius:8px;border:2px solid #ddd0ac;font-family:inherit;">
+        <button class="btn-outline" style="flex:none;padding:0 12px;font-size:12px;border-radius:8px;" onclick="saveAsalSekolahAdminEl(this)">💾</button>
+      </div>
       <div class="admin-row-actions">
-        <button class="btn-approve" onclick="assignFasilitatorAction('${u.nama.replace(/'/g,"\\'")}','${u.pin}',document.getElementById('assignSel${i}').value)">💾 Simpan</button>
+        <button class="btn-approve" onclick="assignFasilitatorAction('${u.nama.replace(/'/g,"\\'")}','${String(u.pin).replace(/'/g,"\\'")}',document.getElementById('assignSel${i}').value)">💾 Simpan</button>
+        <button class="btn-delete-account" onclick="deleteStudentAction('${u.nama.replace(/'/g,"\\'")}','${String(u.pin).replace(/'/g,"\\'")}')">🗑 Hapus Akun</button>
       </div>
     </div>
   `;}).join("");
-  list.forEach((u,i)=>{ document.getElementById("assignSel"+i).value = u.fasilitator || ""; });
+  pageList.forEach((u,i)=>{ document.getElementById("assignSel"+i).value = u.fasilitator || ""; });
+  navBox.innerHTML = renderAdminPageNavHtml(adminSiswaPage, pageCount, "adminSiswaPage", "renderAdminUsersPage");
+  updateAdminBulkBar();
+  refreshAsalSekolahDatalists_();
+}
+async function saveAsalSekolahAdminEl(btn){
+  const wrap = btn.closest(".admin-asal-sekolah-edit");
+  const nama = wrap.dataset.nama, pin = wrap.dataset.pin;
+  const val = wrap.querySelector("input").value.trim();
+  btn.disabled = true;
+  const result = await apiGet("set_asal_sekolah", Object.assign({}, adminParams(), {nama, pin, asalSekolah: val}));
+  btn.disabled = false;
+  if(result.status === "ok"){
+    btn.textContent = "✅";
+    setTimeout(()=>{ btn.textContent = "💾"; }, 1200);
+  } else {
+    alert("Gagal menyimpan asal sekolah. Coba lagi.");
+  }
+}
+// Kunci unik siswa buat Set seleksi massal (nama+PIN, bukan sekadar nama,
+// karena nama sendirian bisa kembar antar siswa).
+function siswaKey_(u){ return JSON.stringify([u.nama, String(u.pin)]); }
+function fasilitatorOptionsHTML_(){
+  return FASILITATOR_LIST.map(f=>`<option value="${f.username}">${f.nama}${f.instansi?" — "+f.instansi:""}</option>`).join("");
+}
+let adminSiswaSelected = new Set(); // Set<siswaKey_> — persist lintas halaman & pencarian
+function adminSiswaFilteredList_(){
+  const term = adminSiswaSearchTerm;
+  return term ? adminSiswaFullList.filter(u=>(u.nama||"").toLowerCase().includes(term)) : adminSiswaFullList;
+}
+function toggleAdminSiswaSelectEl(el){
+  const key = JSON.stringify([el.dataset.nama, el.dataset.pin]);
+  if(el.checked) adminSiswaSelected.add(key); else adminSiswaSelected.delete(key);
+  updateAdminBulkBar();
+}
+function toggleAdminSelectAllFiltered(checked){
+  adminSiswaFilteredList_().forEach(u=>{
+    if(checked) adminSiswaSelected.add(siswaKey_(u)); else adminSiswaSelected.delete(siswaKey_(u));
+  });
+  renderAdminUsersPage();
+}
+function clearAdminSelection(){
+  adminSiswaSelected.clear();
+  renderAdminUsersPage();
+}
+function updateAdminBulkBar(){
+  const filtered = adminSiswaFilteredList_();
+  document.getElementById("adminBulkFilteredCount").textContent = filtered.length;
+  const selectAllCb = document.getElementById("adminBulkSelectAllCb");
+  const selectedInFiltered = filtered.filter(u=>adminSiswaSelected.has(siswaKey_(u))).length;
+  selectAllCb.disabled = filtered.length === 0;
+  selectAllCb.checked = filtered.length > 0 && selectedInFiltered === filtered.length;
+  selectAllCb.indeterminate = selectedInFiltered > 0 && selectedInFiltered < filtered.length;
+
+  const n = adminSiswaSelected.size;
+  const label = document.getElementById("adminBulkSelectedLabel");
+  const select = document.getElementById("adminBulkAssignSelect");
+  const applyBtn = document.getElementById("adminBulkApplyBtn");
+  const clearBtn = document.getElementById("adminBulkClearBtn");
+  if(n > 0){
+    label.textContent = `${n} siswa terpilih`;
+    label.style.display = "inline";
+    select.innerHTML = `<option value="">-- Tanpa Fasilitator --</option>${fasilitatorOptionsHTML_()}`;
+    select.style.display = "inline-block";
+    applyBtn.style.display = "inline-block";
+    clearBtn.style.display = "inline-block";
+  } else {
+    label.style.display = "none";
+    select.style.display = "none";
+    applyBtn.style.display = "none";
+    clearBtn.style.display = "none";
+  }
+}
+async function applyBulkAssignFasilitator(){
+  if(!adminSiswaSelected.size) return;
+  const fasilitator = document.getElementById("adminBulkAssignSelect").value;
+  const fasInfo = FASILITATOR_LIST.find(f=>f.username===fasilitator);
+  const label = fasilitator ? (fasInfo ? fasInfo.nama : fasilitator) : "(tanpa fasilitator / dilepas)";
+  if(!confirm(`Tugaskan ${adminSiswaSelected.size} siswa terpilih ke fasilitator "${label}"? Fasilitator lama pada siswa tersebut (kalau ada) akan ditimpa.`)) return;
+  const students = Array.from(adminSiswaSelected).map(k=>{ const [nama,pin] = JSON.parse(k); return {nama, pin}; });
+  const btn = document.getElementById("adminBulkApplyBtn");
+  btn.disabled = true; btn.textContent = "Menyimpan...";
+  const result = await apiGet("bulk_assign_fasilitator", Object.assign({}, adminParams(), {students: JSON.stringify(students), fasilitator}));
+  btn.disabled = false; btn.textContent = "🔗 Tugaskan Fasilitator";
+  if(result.status === "ok"){
+    adminSiswaSelected.clear();
+    renderAdminUsers();
+    if(result.notFound && result.notFound.length){
+      alert(`Berhasil menugaskan ${result.updated} siswa. ${result.notFound.length} siswa tidak ditemukan (mungkin sudah dihapus): ${result.notFound.join(", ")}`);
+    }
+  } else {
+    alert("Gagal menerapkan penugasan massal. Cek koneksi internet, lalu coba lagi.");
+  }
 }
 async function assignFasilitatorAction(nama, pin, fasilitatorUsername){
   await apiGet("assign_fasilitator", Object.assign({}, adminParams(), {nama, pin, fasilitator: fasilitatorUsername}));
   renderAdminUsers();
+}
+async function deleteStudentAction(nama, pin){
+  if(!confirm(`Hapus akun siswa "${nama}"? Progres game (poin, ruangan selesai, dll) akan hilang. Riwayat lama di catatan aktivitas tetap tersimpan. Tindakan ini tidak bisa dibatalkan.`)) return;
+  const result = await apiGet("delete_student", Object.assign({}, adminParams(), {nama, pin}));
+  if(result.status !== "ok"){
+    alert("Gagal menghapus: " + (result.message || result.status));
+    return;
+  }
+  renderAdminUsers();
+}
+function openAdminAddStudent(){
+  document.getElementById("adminNewSiswaNama").value = "";
+  document.getElementById("adminNewSiswaPin").value = "";
+  document.getElementById("adminNewSiswaError").style.display = "none";
+  const sel = document.getElementById("adminNewSiswaFasil");
+  sel.innerHTML = `<option value="">— Tanpa fasilitator (opsional) —</option>` +
+    FASILITATOR_LIST.map(f=>`<option value="${f.username}">${f.nama}${f.instansi?" — "+f.instansi:""}</option>`).join("");
+  openModal("modalAdminAddStudent");
+}
+async function submitAdminAddStudent(){
+  const nama = document.getElementById("adminNewSiswaNama").value.trim();
+  const pin = document.getElementById("adminNewSiswaPin").value.trim();
+  const fasilitator = document.getElementById("adminNewSiswaFasil").value;
+  const errorEl = document.getElementById("adminNewSiswaError");
+  const btn = document.getElementById("btnAdminAddSiswa");
+  if(!nama || !pin){
+    errorEl.textContent = "Nama dan PIN wajib diisi.";
+    errorEl.style.display = "block";
+    return;
+  }
+  errorEl.style.display = "none";
+  btn.disabled = true; btn.textContent = "MENYIMPAN...";
+  const result = await apiGet("create_student", Object.assign({}, adminParams(), {nama, pin, fasilitator}));
+  btn.disabled = false; btn.textContent = "SIMPAN";
+  if(result.status === "ok"){
+    closeModal("modalAdminAddStudent");
+    renderAdminUsers();
+  }else{
+    errorEl.textContent = result.message || "Gagal menyimpan, coba lagi.";
+    errorEl.style.display = "block";
+  }
 }
 function startNewOrContinue(){
   if(STATE.name){ enterGameFromSavedState(); }
@@ -4522,13 +5218,17 @@ function togglePinVisibility(){
   pinField.type = showing ? "password" : "text";
   btn.textContent = showing ? "👁" : "🙈";
 }
-document.addEventListener("DOMContentLoaded", ()=>{
+document.addEventListener("DOMContentLoaded", async ()=>{
   logPageVisit();
   startHeartbeatLoop();
   applyA11yPrefs();
   syncMusicSwitch();
   document.getElementById("nameInput").addEventListener("input", checkCharForm);
   document.getElementById("pinInput").addEventListener("input", checkCharForm);
+  const restoredAdmin = await restoreAdminSession();
+  if(restoredAdmin) return; // langsung di Panel Admin, lewati alur pilih karakter & modal audio game
+  const restoredFacil = await restoreFacilSession();
+  if(restoredFacil) return; // langsung di Dashboard Fasilitator
   if(STATE.charChosen){
     pickCharacter(STATE.gender, STATE.jenjang || "sma");
   } else {
@@ -4586,6 +5286,43 @@ const MOOD_STREAK_LINE = {
   sedih:    "Aku notice kamu sedih beberapa hari ini. Mau cerita di Ruang Konseling?",
   berat:    "Beberapa hari ini terasa berat banget, ya. Kamu nggak sendirian — yuk mampir ke Ruang Konseling.",
 };
+
+/* ============================================================
+ * PROTOKOL ESKALASI MOOD — dipakai Dashboard Fasilitator & Panel
+ * Admin, supaya badge "⚠️ Perlu perhatian" yang cuma nunjuk SINYAL
+ * nggak berhenti di situ aja — ada 2 tingkat, dan tingkat yang lebih
+ * berat diarahkan ke langkah konkret (bukan cuma "coba dihubungi").
+ * Ini murni berdasar data terstruktur yang SUDAH ada (mood + streak +
+ * status tindak lanjut) — TIDAK membaca/memindai isi jurnal/refleksi
+ * bebas siswa, supaya nggak salah tafsir konten tulisan pribadi.
+ *
+ *  - "perhatian" (kuning) : mood sedih/berat, belum ditindaklanjuti.
+ *                           Sinyal biasa, cukup disapa/didekati.
+ *  - "krisis"    (merah)  : mood "berat" bertahan >=3 hari kalender
+ *                           berturut-turut DAN belum ditindaklanjuti.
+ *                           Pola menetap, bukan sesekali — di sinilah
+ *                           fasilitator diarahkan ke langkah konkret,
+ *                           bukan dibiarkan menebak sendiri harus
+ *                           ngapain. */
+function getEscalationLevel(u){
+  if(u.status === "selesai") return null;
+  if(u.mood === "berat" && (u.moodStreak||0) >= 3) return "krisis";
+  if(u.mood === "sedih" || u.mood === "berat") return "perhatian";
+  return null;
+}
+function krisisProtocolHTML(){
+  return `
+    <div class="krisis-protocol-box">
+      <div class="kp-title">🚨 Langkah yang disarankan — pola mood berat menetap</div>
+      <p style="margin:0 0 4px;">Ini bukan cuma "kurang mood" biasa — sistem menandainya karena mood <b>berat</b> bertahan 3 hari kalender berturut-turut. Sebaiknya ditindaklanjuti hari ini, bukan lewat pesan di game saja:</p>
+      <ol>
+        <li>Hubungi/temui siswa ini secara langsung hari ini, bukan cuma lewat kotak pesan di game.</li>
+        <li>Informasikan ke guru BK/psikolog sekolah agar bisa didampingi lebih lanjut, sesuai SOP sekolah.</li>
+        <li>Kalau ada tanda bahaya langsung (mis. menyebut ingin mengakhiri hidup/menyakiti diri), segera hubungi <b>Layanan Sejiwa Kemenkes: 119 ext. 8</b> (telepon, 24 jam, gratis) atau WhatsApp <b>+62 813-8007-3120</b> — layanan ini juga melayani anak &amp; remaja.</li>
+      </ol>
+    </div>
+  `;
+}
 /* Hitung berapa hari kalender berturut-turut (mundur dari hari ini) mood-nya
    sama persis dengan `mood`. history: [{date:"YYYY-MM-DD", mood}]. */
 function computeMoodStreak(history, mood){
@@ -5532,8 +6269,29 @@ function openProfileModal(){
   document.getElementById("profileNameInput").value = STATE.name || "";
   document.getElementById("profileNameNote").textContent =
     "Nama & PIN dipakai buat nyambungin progres kamu — kalau diganti, inget nama barunya ya biar tetap bisa lanjut dari perangkat lain.";
+  document.getElementById("profileAsalSekolahInput").value = STATE.asalSekolah || "";
+  document.getElementById("profileAsalSekolahNote").textContent =
+    "Biar fasilitator & admin gampang ngenalin kamu kalau sekolahmu ikut program ini bareng sekolah lain.";
+  refreshAsalSekolahDatalists_();
   renderProfileCharGrid();
   openModal("modalProfile");
+}
+// Isi semua <datalist class="asal-sekolah-datalist"> (profil siswa & Panel
+// Admin) dari daftar sekolah yang sudah pernah diketik siswa lain — biar
+// penulisan nama sekolah konsisten (nggak beda-beda ejaan tiap orang isi).
+async function refreshAsalSekolahDatalists_(){
+  const result = await apiGet("list_asal_sekolah", {});
+  const list = (result && result.status === "ok" && result.list) ? result.list : [];
+  const optionsHtml = list.map(s=>`<option value="${escapeHtml(s)}">`).join("");
+  document.querySelectorAll(".asal-sekolah-datalist").forEach(dl=>{ dl.innerHTML = optionsHtml; });
+}
+function saveProfileAsalSekolah(){
+  const input = document.getElementById("profileAsalSekolahInput");
+  const note = document.getElementById("profileAsalSekolahNote");
+  STATE.asalSekolah = input.value.trim();
+  saveState();
+  note.style.color = "";
+  note.textContent = "Tersimpan!";
 }
 function saveProfileName(){
   const input = document.getElementById("profileNameInput");
@@ -7958,6 +8716,16 @@ function completeRoom(roomId){
     [1,2,3].forEach(i=>{ gradable += getLevelGradableCount(LEVEL_CONTENT[levelKey][i]); });
     const ratio = gradable > 0 ? quizScore / gradable : 1;
     roomStars = ratio >= 0.99 ? 3 : ratio >= 0.5 ? 2 : 1;
+    // Simpan skor pemahaman (bukan cuma status selesai) supaya fasilitator/admin
+    // bisa lihat SEBERAPA PAHAM siswa di ruangan ini, bukan cuma "sudah lewat".
+    // Ikut ke-sync ke Sheet lewat saveState() → syncStateToSheet() yang sudah ada.
+    STATE.roomScores = STATE.roomScores || {};
+    STATE.roomScores[roomId] = {
+      correct: quizScore, total: gradable,
+      pct: gradable > 0 ? Math.round(ratio*100) : 0,
+      stars: roomStars,
+    };
+    saveState();
     roomRewardLine = roomStars === 3
       ? "Mantap, kamu paham betul seluruh ruangan ini!"
       : roomStars === 2
