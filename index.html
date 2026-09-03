@@ -5486,7 +5486,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   startHeartbeatLoop();
   applyA11yPrefs();
   syncMusicSwitch();
-  await loadVideoConfig(); // ambil link video Materi/Perpustakaan dari server duluan, biar konsisten di semua perangkat (lihat VIDEO_CONFIG_CACHE)
+  loadVideoConfig(); // ambil link video Materi/Perpustakaan dari server DI LATAR BELAKANG (sengaja nggak di-"await" — lihat VIDEO_CONFIG_CACHE) biar nggak nambah jeda loading awal; videonya baru dibutuhkan jauh belakangan (buka Ruang/Perpustakaan), jadi udah pasti kelar duluan
   document.getElementById("nameInput").addEventListener("input", checkCharForm);
   document.getElementById("pinInput").addEventListener("input", checkCharForm);
   const restoredAdmin = await restoreAdminSession();
