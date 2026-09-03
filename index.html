@@ -3336,6 +3336,46 @@ if("serviceWorker" in navigator){
       <button class="btn-modal-choice primary" onclick="closeModal('modalInfoMsg')">OKE</button>
     </div>
   </div>
+
+  <!-- Modal "Atur Video" — dipakai bareng Video Materi & Video Perpustakaan
+       (lihat openVideoSourceModal() di script). Tab "Link" nerima YouTube,
+       Google Drive, GitHub, atau link .mp4 langsung (auto-deteksi lewat
+       toEmbeddableVideo()). Tab "Upload File" kirim file ke Google Drive
+       lewat Code.gs, butuh login admin. -->
+  <div class="modal-backdrop" id="modalVideoSource">
+    <div class="modal-card modal-card-themed">
+      <span class="modal-plaque">ATUR VIDEO</span>
+      <div class="perpus-tabs" style="margin-bottom:14px;">
+        <button type="button" class="perpus-tab active" id="videoSourceTabLink" onclick="switchVideoSourceTab('link')">🔗 Link</button>
+        <button type="button" class="perpus-tab" id="videoSourceTabUpload" onclick="switchVideoSourceTab('upload')">⬆️ Upload File</button>
+      </div>
+
+      <div id="videoSourcePanelLink">
+        <label class="field-label" for="videoSourceLink">Link video</label>
+        <input type="text" id="videoSourceLink" placeholder="Tempel link YouTube, Google Drive, GitHub, atau .mp4 langsung">
+        <p style="font-size:11.5px;color:var(--grey);margin:4px 0 14px;">Link Google Drive & GitHub otomatis dideteksi & dikonversi biar bisa diputar. Kosongkan lalu simpan buat menghapus video.</p>
+        <button class="btn-modal-choice primary" onclick="saveVideoSourceLink()">SIMPAN LINK</button>
+        <button class="btn-ghost" style="margin-top:8px;color:var(--danger);" onclick="clearVideoSource()">Hapus Video</button>
+      </div>
+
+      <div id="videoSourcePanelUpload" style="display:none;">
+        <label class="field-label" for="videoSourceFile">Pilih file video</label>
+        <input type="file" id="videoSourceFile" accept="video/*">
+        <p style="font-size:11.5px;color:var(--grey);margin:6px 0 12px;">Maks 20MB — video diunggah ke Google Drive lewat server. Untuk file lebih besar, pakai link YouTube/Drive di tab Link.</p>
+        <div id="videoSourceAuthBox" style="display:none;margin-bottom:10px;">
+          <label class="field-label" for="videoSourceAdminUser">Username admin</label>
+          <input type="text" id="videoSourceAdminUser" placeholder="Username admin">
+          <label class="field-label" for="videoSourceAdminPass" style="margin-top:8px;">Password admin</label>
+          <input type="password" id="videoSourceAdminPass" placeholder="Kata sandi admin">
+          <p style="font-size:11.5px;color:var(--grey);margin:4px 0 0;">Upload butuh login admin biar nggak sembarang orang bisa mengisi Drive server.</p>
+        </div>
+        <button class="btn-modal-choice primary" id="btnVideoSourceUpload" onclick="uploadVideoSourceFile()">UPLOAD</button>
+        <p id="videoSourceUploadStatus" style="font-size:12px;color:var(--text-accent);margin:10px 0 0;min-height:16px;"></p>
+      </div>
+
+      <button class="btn-ghost" style="margin-top:14px;" onclick="closeModal('modalVideoSource')">Tutup</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -4200,6 +4240,20 @@ async function apiGet(action, params){
     return { status: "network_error" };
   }
 }
+// POST fire-and-forget (balasannya TIDAK dibaca — lihat "CATATAN SOAL CORS"
+// di Code.gs). Dipakai buat upload_video: kirim data lewat sini, lalu cek
+// hasilnya lewat polling apiGet("get_upload_status", ...).
+function apiPostFireAndForget(action, payload){
+  if(!GAME_API_URL) return;
+  try{
+    fetch(GAME_API_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: {"Content-Type":"text/plain;charset=utf-8"},
+      body: JSON.stringify(Object.assign({action}, payload||{})),
+    }).catch(()=>{});
+  }catch(e){ /* diam saja */ }
+}
 
 /* ---------- PILIH FASILITATOR (saat daftar akun baru) ---------- */
 let FASILITATOR_LIST = [];
@@ -4671,6 +4725,123 @@ const ADMIN_SESSION_KEY = "kenaliku_admin_session";
 // fasilitator target di approve_fasilitator). Helper ini yang menerjemahkannya.
 function adminParams(){
   return ADMIN_SESSION ? {adminUser: ADMIN_SESSION.username, adminPass: ADMIN_SESSION.password} : {};
+}
+
+/* ===== Modal "Atur Video" (Link / Upload File) — dipakai bareng oleh
+   Video Materi (renderMateriVideoBox) & Video Perpustakaan
+   (renderPerpusVideoBox). Tab Link cuma nyimpen ke localStorage kayak
+   sebelumnya (lewat getMateriVideoUrl/setMateriVideoUrl atau
+   getPerpusVideoUrl/setPerpusVideoUrl), auto-deteksi format link lewat
+   toEmbeddableVideo(). Tab Upload kirim file ke Code.gs (action
+   "upload_video", butuh admin) yang menyimpannya ke Google Drive, lalu
+   hasil link Drive-nya otomatis dipakai sebagai video (disimpan lewat
+   jalur yang sama seperti Tab Link). ===== */
+let videoSourceCtx = null; // {kind:"materi"|"perpus", id}
+function getVideoSourceUrl(){
+  return videoSourceCtx.kind === "materi" ? getMateriVideoUrl(videoSourceCtx.id, "") : getPerpusVideoUrl(videoSourceCtx.id);
+}
+function setVideoSourceUrl(url){
+  if(videoSourceCtx.kind === "materi") setMateriVideoUrl(videoSourceCtx.id, url);
+  else setPerpusVideoUrl(videoSourceCtx.id, url);
+}
+function refreshVideoSourceCaller(){
+  if(videoSourceCtx.kind === "materi") showMateri();
+  else renderPerpusSlide();
+}
+function openVideoSourceModal(kind, id){
+  videoSourceCtx = {kind, id};
+  document.getElementById("videoSourceLink").value = getVideoSourceUrl();
+  document.getElementById("videoSourceFile").value = "";
+  document.getElementById("videoSourceUploadStatus").textContent = "";
+  document.getElementById("videoSourceAdminUser").value = "";
+  document.getElementById("videoSourceAdminPass").value = "";
+  document.getElementById("videoSourceAuthBox").style.display = ADMIN_SESSION ? "none" : "block";
+  switchVideoSourceTab("link");
+  openModal("modalVideoSource");
+}
+function switchVideoSourceTab(tab){
+  document.getElementById("videoSourceTabLink").classList.toggle("active", tab==="link");
+  document.getElementById("videoSourceTabUpload").classList.toggle("active", tab==="upload");
+  document.getElementById("videoSourcePanelLink").style.display = tab==="link" ? "block" : "none";
+  document.getElementById("videoSourcePanelUpload").style.display = tab==="upload" ? "block" : "none";
+}
+function saveVideoSourceLink(){
+  setVideoSourceUrl(document.getElementById("videoSourceLink").value.trim());
+  closeModal("modalVideoSource");
+  refreshVideoSourceCaller();
+}
+function clearVideoSource(){
+  setVideoSourceUrl("");
+  closeModal("modalVideoSource");
+  refreshVideoSourceCaller();
+}
+const VIDEO_UPLOAD_MAX_BYTES = 20 * 1024 * 1024; // 20MB — batas aman payload doPost Apps Script (lihat catatan di Code.gs)
+function fileToBase64(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",").pop());
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+function genUploadId(){
+  return "u-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,10);
+}
+// Balasan POST "upload_video" nggak bisa dibaca lintas-origin (lihat
+// CATATAN SOAL CORS di Code.gs), jadi hasilnya diambil lewat polling GET
+// "get_upload_status" — dicoba tiap 1.5 detik sampai ~60 detik.
+async function pollUploadStatus(uploadId, tries){
+  tries = tries || 0;
+  const result = await apiGet("get_upload_status", {uploadId});
+  if(result.status === "ok" || result.status === "forbidden" || result.status === "error") return result;
+  if(tries >= 40) return {status:"timeout"};
+  await new Promise(r=>setTimeout(r, 1500));
+  return pollUploadStatus(uploadId, tries+1);
+}
+async function uploadVideoSourceFile(){
+  const fileInput = document.getElementById("videoSourceFile");
+  const statusEl = document.getElementById("videoSourceUploadStatus");
+  const btn = document.getElementById("btnVideoSourceUpload");
+  const file = fileInput.files && fileInput.files[0];
+  if(!file){ statusEl.textContent = "Pilih file video dulu."; return; }
+  if(!GAME_API_URL){ statusEl.textContent = "Upload butuh server (GAME_API_URL) yang belum diatur."; return; }
+  if(file.size > VIDEO_UPLOAD_MAX_BYTES){
+    statusEl.textContent = `File terlalu besar (maks ${(VIDEO_UPLOAD_MAX_BYTES/1024/1024)|0}MB). Pakai link YouTube/Drive di tab Link buat video yang lebih besar.`;
+    return;
+  }
+  let auth = adminParams();
+  if(!auth.adminUser){
+    const u = document.getElementById("videoSourceAdminUser").value.trim();
+    const p = document.getElementById("videoSourceAdminPass").value.trim();
+    if(!u || !p){ statusEl.textContent = "Isi username & password admin dulu buat upload."; return; }
+    auth = {adminUser:u, adminPass:p};
+  }
+  btn.disabled = true;
+  statusEl.textContent = "Membaca file...";
+  try{
+    const fileData = await fileToBase64(file);
+    const uploadId = genUploadId();
+    statusEl.textContent = "Mengunggah video, tunggu sebentar...";
+    apiPostFireAndForget("upload_video", Object.assign({
+      uploadId, fileName: file.name, mimeType: file.type || "video/mp4", fileData, roomId: videoSourceCtx.id,
+    }, auth));
+    const result = await pollUploadStatus(uploadId);
+    if(result.status === "ok" && result.url){
+      setVideoSourceUrl(result.url);
+      statusEl.textContent = "Berhasil diupload!";
+      closeModal("modalVideoSource");
+      refreshVideoSourceCaller();
+    } else if(result.status === "forbidden"){
+      statusEl.textContent = "Username/password admin salah.";
+    } else if(result.status === "timeout"){
+      statusEl.textContent = "Upload masih diproses server (file besar biasanya lebih lama) — coba buka lagi menu ini sebentar lagi.";
+    } else {
+      statusEl.textContent = "Gagal upload: " + (result.message || "coba lagi.");
+    }
+  }catch(e){
+    statusEl.textContent = "Gagal membaca file. Coba file lain.";
+  }
+  btn.disabled = false;
 }
 function initials(name){
   const parts = (name||"?").trim().split(/\s+/);
@@ -7249,19 +7420,31 @@ function setMateriVideoUrl(roomId, url){
     localStorage.setItem("materiVideoOverrides", JSON.stringify(overrides));
   }catch(e){}
 }
-// Deteksi link YouTube (watch?v=, youtu.be/, shorts/) dan ubah jadi bentuk
-// embed; kalau bukan YouTube, dianggap link video langsung (.mp4 dll).
+// Deteksi link YouTube (watch?v=, youtu.be/, shorts/), Google Drive (file/d/,
+// open?id=, uc?id=), atau GitHub (link "blob" ke file di repo) dan ubah jadi
+// bentuk embed yang beneran bisa diputar; kalau nggak cocok satupun,
+// dianggap link video langsung (.mp4 dll, termasuk hasil upload ke Drive
+// lewat modal "Atur Video" — sama-sama diarahkan ke sini).
 function toEmbeddableVideo(url){
+  url = String(url||"").trim();
   const yt = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
   if(yt) return {type:"iframe", src:`https://www.youtube.com/embed/${yt[1]}`};
+  // Google Drive: berbagai bentuk link (file/d/ID/view, open?id=ID, uc?id=ID)
+  // diarahkan semua ke bentuk /preview — pemutar bawaan Drive, lebih stabil
+  // buat file besar dibanding uc?export=download yang kadang nyangkut di
+  // halaman konfirmasi virus-scan.
+  const gdrive = url.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:export=download&)?id=)([\w-]{10,})/);
+  if(gdrive) return {type:"iframe", src:`https://drive.google.com/file/d/${gdrive[1]}/preview`};
+  // GitHub: link "blob" (halaman HTML tampilan file di web) diubah ke
+  // raw.githubusercontent.com biar bisa jadi <video src> langsung.
+  const gh = url.match(/^https:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/(.+)$/);
+  if(gh) return {type:"video", src:`https://raw.githubusercontent.com/${gh[1]}/${gh[2]}/${gh[3]}`};
   return {type:"video", src:url};
 }
+// Dipanggil dari tombol ✏️ Video Materi — buka modal "Atur Video" (lihat
+// openVideoSourceModal), bukan window.prompt lagi.
 function promptMateriVideo(roomId){
-  const current = getMateriVideoUrl(roomId, "");
-  const input = window.prompt("Tempel link video (YouTube atau link .mp4 langsung). Kosongkan lalu OK untuk hapus:", current);
-  if(input === null) return; // batal
-  setMateriVideoUrl(roomId, input.trim());
-  showMateri();
+  openVideoSourceModal("materi", roomId);
 }
 function renderMateriVideoBox(roomId, video, posterFallback){
   if(!video) return "";
@@ -9040,12 +9223,10 @@ function setPerpusVideoUrl(itemId, url){
     localStorage.setItem("perpusVideoOverrides", JSON.stringify(overrides));
   }catch(e){}
 }
+// Dipanggil dari tombol ✏️ Video Perpustakaan — buka modal "Atur Video"
+// yang sama dengan Video Materi (lihat openVideoSourceModal).
 function promptPerpusVideo(itemId){
-  const current = getPerpusVideoUrl(itemId);
-  const input = window.prompt("Tempel link video (YouTube atau link .mp4 langsung). Kosongkan lalu OK untuk hapus:", current);
-  if(input === null) return;
-  setPerpusVideoUrl(itemId, input.trim());
-  renderPerpusSlide();
+  openVideoSourceModal("perpus", itemId);
 }
 function renderPerpusVideoBox(item){
   const url = getPerpusVideoUrl(item.id);
