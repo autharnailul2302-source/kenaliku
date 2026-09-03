@@ -1688,7 +1688,7 @@
   .materi-intro{font-size:14px;line-height:1.6;margin:2px 0 12px;}
   .materi-video-box{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:linear-gradient(160deg,#25392f,#152018);box-shadow:0 8px 20px rgba(0,0,0,.28);}
   .materi-video-box video,.materi-video-box iframe{width:100%;height:100%;object-fit:cover;display:block;background:#000;border:0;}
-  .materi-video-box--empty{cursor:pointer;}
+  .materi-video-box--empty{cursor:default;}
   .materi-video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:14px;background-size:cover;background-position:center;}
   .materi-video-placeholder::before{content:'';position:absolute;inset:0;background:rgba(15,25,18,.55);}
   .materi-video-play{position:relative;width:46px;height:46px;border-radius:50%;background:rgba(251,248,239,.92);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--green-deep);box-shadow:0 4px 10px rgba(0,0,0,.3);transition:transform .15s ease;}
@@ -1735,7 +1735,7 @@
   .perpus-zoom-hint{position:absolute;top:8px;right:8px;z-index:2;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
   .perpus-video-box{position:relative;width:100%;height:min(56vh,480px);border-radius:14px;overflow:hidden;background:linear-gradient(160deg,#25392f,#152018);}
   .perpus-video-box video,.perpus-video-box iframe{width:100%;height:100%;object-fit:contain;display:block;background:#000;border:0;}
-  .perpus-video-box--empty{cursor:pointer;}
+  .perpus-video-box--empty{cursor:default;}
   .perpus-video-fs{position:absolute;bottom:8px;right:8px;z-index:2;width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,.5);color:#fff;border:none;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 
   /* ===== Lightbox komik — dibuka pas gambar/tombol kaca pembesar dipencet.
@@ -2177,6 +2177,7 @@
   .admin-row--facil .btn-approve{background:linear-gradient(180deg,var(--facil-mid),var(--facil-deep));color:#fff;}
   .admin-row--siswa .btn-approve{background:linear-gradient(180deg,var(--green-mid),var(--green-deep));color:#fff;}
   .btn-reject{background:transparent;color:var(--danger);border:2px solid var(--danger);}
+  .btn-video-edit{background:linear-gradient(180deg,var(--admin-mid),var(--admin-deep));color:#fff;flex:none !important;padding:9px 16px !important;}
   @media (hover:hover) and (pointer:fine){
     .admin-row-actions button:hover{filter:brightness(1.08);transform:translateY(-1px);}
   }
@@ -2869,6 +2870,9 @@ if("serviceWorker" in navigator){
         <button class="admin-tab tab-stats" id="adminTabLog" onclick="switchAdminTab('log')">
           <span>📝 Log Aktivitas</span>
         </button>
+        <button class="admin-tab tab-stats" id="adminTabVideo" onclick="switchAdminTab('video')">
+          <span>🎬 Video</span>
+        </button>
       </div>
       <div class="admin-toolbar" id="adminToolbarFacil">
         <input type="text" id="adminFacilSearch" class="admin-search" placeholder="🔍 Cari nama, username, atau instansi..." oninput="onAdminFacilSearchInput(this.value)">
@@ -2896,6 +2900,7 @@ if("serviceWorker" in navigator){
       <div class="admin-page-nav" id="adminUsersPageNav" style="display:none;"></div>
       <div class="admin-stats" id="adminStatsBody" style="display:none;"></div>
       <div class="admin-body" id="adminLogList" style="display:none;"></div>
+      <div class="admin-body" id="adminVideoList" style="display:none;grid-template-columns:1fr;"></div>
     </div>
   </section>
 
@@ -4736,7 +4741,7 @@ function adminParams(){
    "upload_video", butuh admin) yang menyimpannya ke Google Drive, lalu
    hasil link Drive-nya otomatis dipakai sebagai video (disimpan lewat
    jalur yang sama seperti Tab Link). ===== */
-let videoSourceCtx = null; // {kind:"materi"|"perpus", id}
+let videoSourceCtx = null; // {kind:"materi"|"perpus", id, fromAdmin}
 function getVideoSourceUrl(){
   return videoSourceCtx.kind === "materi" ? getMateriVideoUrl(videoSourceCtx.id, "") : getPerpusVideoUrl(videoSourceCtx.id);
 }
@@ -4744,12 +4749,17 @@ function setVideoSourceUrl(url){
   if(videoSourceCtx.kind === "materi") setMateriVideoUrl(videoSourceCtx.id, url);
   else setPerpusVideoUrl(videoSourceCtx.id, url);
 }
+// Dipanggil abis simpan/hapus/upload video. Kalau dibuka dari Panel Admin
+// (tab "🎬 Video"), refresh list admin-nya; kalau nggak (jalur lama, sudah
+// nggak dipanggil dari layar pemain lagi tapi tetap dijaga biar aman),
+// refresh tampilan pemutar video seperti sebelumnya.
 function refreshVideoSourceCaller(){
-  if(videoSourceCtx.kind === "materi") showMateri();
+  if(videoSourceCtx.fromAdmin) renderAdminVideo();
+  else if(videoSourceCtx.kind === "materi") showMateri();
   else renderPerpusSlide();
 }
-function openVideoSourceModal(kind, id){
-  videoSourceCtx = {kind, id};
+function openVideoSourceModal(kind, id, fromAdmin){
+  videoSourceCtx = {kind, id, fromAdmin: !!fromAdmin};
   document.getElementById("videoSourceLink").value = getVideoSourceUrl();
   document.getElementById("videoSourceFile").value = "";
   document.getElementById("videoSourceUploadStatus").textContent = "";
@@ -4912,19 +4922,63 @@ function switchAdminTab(tab){
   document.getElementById("adminTabUsers").classList.toggle("active", tab==="users");
   document.getElementById("adminTabStats").classList.toggle("active", tab==="stats");
   document.getElementById("adminTabLog").classList.toggle("active", tab==="log");
+  document.getElementById("adminTabVideo").classList.toggle("active", tab==="video");
   document.getElementById("adminPendingList").style.display = tab==="pending" ? "grid" : "none";
   document.getElementById("adminPendingPageNav").style.display = tab==="pending" ? "flex" : "none";
   document.getElementById("adminUsersList").style.display = tab==="users" ? "grid" : "none";
   document.getElementById("adminUsersPageNav").style.display = tab==="users" ? "flex" : "none";
   document.getElementById("adminStatsBody").style.display = tab==="stats" ? "flex" : "none";
   document.getElementById("adminLogList").style.display = tab==="log" ? "grid" : "none";
+  document.getElementById("adminVideoList").style.display = tab==="video" ? "grid" : "none";
   document.getElementById("adminToolbarFacil").style.display = tab==="pending" ? "flex" : "none";
   document.getElementById("adminToolbarSiswa").style.display = tab==="users" ? "flex" : "none";
   document.getElementById("adminBulkBar").style.display = tab==="users" ? "flex" : "none";
   if(tab === "pending") renderAdminPending();
   else if(tab === "users") renderAdminUsers();
   else if(tab === "log") renderAdminLog();
+  else if(tab === "video") renderAdminVideo();
   else renderAdminStats();
+}
+// Status singkat dipakai tab "🎬 Video" — nunjukin ada/nggaknya video tanpa
+// buka modal dulu.
+function videoStatusBadge(url){
+  return url
+    ? `<span style="color:var(--green-deep);font-weight:800;">✅ Ada video</span>`
+    : `<span style="color:var(--grey);font-weight:700;">⚪ Belum ada</span>`;
+}
+// Tab "🎬 Video" di Panel Admin — satu-satunya tempat video Materi &
+// Perpustakaan diatur (layar pemain cuma menampilkan, nggak bisa diedit
+// lagi, lihat renderMateriVideoBox/renderPerpusVideoBox).
+function renderAdminVideo(){
+  const box = document.getElementById("adminVideoList");
+  const materiRows = getRooms().map(r=>{
+    const fallback = (MATERI_DETAIL[r.id] && MATERI_DETAIL[r.id].video && MATERI_DETAIL[r.id].video.src) || "";
+    const url = getMateriVideoUrl(r.id, fallback);
+    return `
+      <div class="admin-row">
+        <div class="admin-row-top">
+          <div class="admin-row-id"><span class="admin-avatar">${r.icon}</span><div><div class="admin-row-name">${r.name}</div><div class="admin-row-sub">Video Materi — ${videoStatusBadge(url)}</div></div></div>
+        </div>
+        <div class="admin-row-actions"><button class="btn-video-edit" onclick="openVideoSourceModal('materi','${r.id}',true)">✏️ Atur Video</button></div>
+      </div>`;
+  }).join("");
+  const perpusRows = PERPUS_ITEMS.map(item=>{
+    const url = getPerpusVideoUrl(item.id);
+    return `
+      <div class="admin-row">
+        <div class="admin-row-top">
+          <div class="admin-row-id"><span class="admin-avatar">${item.icon}</span><div><div class="admin-row-name">${item.title}</div><div class="admin-row-sub">Video Perpustakaan — ${videoStatusBadge(url)}</div></div></div>
+        </div>
+        <div class="admin-row-actions"><button class="btn-video-edit" onclick="openVideoSourceModal('perpus','${item.id}',true)">✏️ Atur Video</button></div>
+      </div>`;
+  }).join("");
+  box.innerHTML = `
+    <p style="grid-column:1/-1;font-size:12.5px;color:var(--grey);margin:0 0 4px;">Atur video yang tampil di "Video Materi" tiap ruangan & tab Video Perpustakaan. Tempel link YouTube/Google Drive/GitHub (otomatis dideteksi), atau upload file langsung — pemain cuma bisa menonton, nggak bisa mengubah dari layar mereka.</p>
+    <div style="grid-column:1/-1;font-weight:800;font-size:13px;margin:10px 0 2px;">🎬 Video Materi (per Ruang)</div>
+    ${materiRows}
+    <div style="grid-column:1/-1;font-weight:800;font-size:13px;margin:14px 0 2px;">📚 Video Perpustakaan (per Koleksi)</div>
+    ${perpusRows}
+  `;
 }
 // Label & ikon aksi admin, dipakai tab "Log Aktivitas" supaya lebih terbaca
 // daripada nama action mentah dari backend.
@@ -4936,6 +4990,8 @@ const ADMIN_LOG_LABELS = {
   bulk_assign_fasilitator: "🔗📦 Tugaskan fasilitator (massal)",
   create_student: "➕ Tambah siswa",
   delete_student: "🗑️ Hapus siswa",
+  set_asal_sekolah: "🏫 Ubah asal sekolah siswa",
+  upload_video: "🎬 Upload video",
 };
 async function renderAdminLog(){
   const box = document.getElementById("adminLogList");
@@ -7443,9 +7499,6 @@ function toEmbeddableVideo(url){
 }
 // Dipanggil dari tombol ✏️ Video Materi — buka modal "Atur Video" (lihat
 // openVideoSourceModal), bukan window.prompt lagi.
-function promptMateriVideo(roomId){
-  openVideoSourceModal("materi", roomId);
-}
 function renderMateriVideoBox(roomId, video, posterFallback){
   if(!video) return "";
   const poster = video.poster || posterFallback || "";
@@ -7458,16 +7511,17 @@ function renderMateriVideoBox(roomId, video, posterFallback){
     return `
       <div class="materi-video-box">
         ${player}
-        <button type="button" class="materi-video-edit" onclick="promptMateriVideo('${roomId}')" title="Ganti video">✏️</button>
       </div>
     `;
   }
+  // Belum ada video diisi admin — tampilan placeholder-saja, TIDAK bisa
+  // diklik buat isi link lagi (itu sekarang cuma bisa lewat Panel Admin >
+  // tab "🎬 Video", lihat renderAdminVideo()).
   return `
-    <div class="materi-video-box materi-video-box--empty" onclick="promptMateriVideo('${roomId}')">
+    <div class="materi-video-box materi-video-box--empty">
       <div class="materi-video-placeholder" style="${poster?`background-image:url('${poster}');`:""}">
-        <div class="materi-video-play">▶</div>
         <div class="materi-video-caption">${video.caption||"Video Materi"}</div>
-        <div class="materi-video-note">Ketuk untuk isi link video</div>
+        <div class="materi-video-note">Video belum tersedia</div>
       </div>
     </div>
   `;
@@ -9225,9 +9279,6 @@ function setPerpusVideoUrl(itemId, url){
 }
 // Dipanggil dari tombol ✏️ Video Perpustakaan — buka modal "Atur Video"
 // yang sama dengan Video Materi (lihat openVideoSourceModal).
-function promptPerpusVideo(itemId){
-  openVideoSourceModal("perpus", itemId);
-}
 function renderPerpusVideoBox(item){
   const url = getPerpusVideoUrl(item.id);
   if(url){
@@ -9235,13 +9286,14 @@ function renderPerpusVideoBox(item){
     const player = embed.type === "iframe"
       ? `<iframe src="${embed.src}" title="Video ${item.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
       : `<video controls playsinline preload="metadata"><source src="${embed.src}"></video>`;
-    return `<div class="perpus-video-box">${player}<button type="button" class="materi-video-edit" onclick="promptPerpusVideo('${item.id}')" title="Ganti video">✏️</button><button type="button" class="perpus-video-fs" onclick="perpusVideoFullscreen(this)" title="Layar penuh">⛶</button></div>`;
+    return `<div class="perpus-video-box">${player}<button type="button" class="perpus-video-fs" onclick="perpusVideoFullscreen(this)" title="Layar penuh">⛶</button></div>`;
   }
-  return `<div class="perpus-video-box perpus-video-box--empty" onclick="promptPerpusVideo('${item.id}')">
+  // Belum ada video diisi admin — placeholder-saja, TIDAK bisa diklik
+  // (video sekarang cuma bisa diisi lewat Panel Admin > tab "🎬 Video").
+  return `<div class="perpus-video-box perpus-video-box--empty">
     <div class="materi-video-placeholder">
-      <div class="materi-video-play">▶</div>
       <div class="materi-video-caption">Video ${item.title}</div>
-      <div class="materi-video-note">Ketuk untuk isi link video</div>
+      <div class="materi-video-note">Video belum tersedia</div>
     </div>
   </div>`;
 }
