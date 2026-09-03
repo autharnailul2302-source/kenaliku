@@ -2076,6 +2076,7 @@
   .admin-topbar::after{
     content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;
     background:radial-gradient(circle,rgba(255,255,255,.10),transparent 70%);
+    pointer-events:none; /* dekorasi doang — jangan sampai nutupin klik ke tombol "🚪 Keluar" di topbar yang sama */
   }
   .admin-topbar .who{display:flex;align-items:center;gap:8px;font-size:14px;}
   .admin-topbar .who .crest{
@@ -2352,6 +2353,7 @@
   .facil-topbar::after{
     content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;
     background:radial-gradient(circle,rgba(255,255,255,.10),transparent 70%);
+    pointer-events:none; /* dekorasi doang — jangan sampai nutupin klik ke tombol "🚪 Keluar" di topbar yang sama */
   }
   .facil-topbar .who{display:flex;align-items:center;gap:8px;font-size:14px;}
   .facil-topbar .who .crest{
@@ -4734,20 +4736,16 @@ function adminParams(){
 
 /* ===== Modal "Atur Video" (Link / Upload File) — dipakai bareng oleh
    Video Materi (renderMateriVideoBox) & Video Perpustakaan
-   (renderPerpusVideoBox). Tab Link cuma nyimpen ke localStorage kayak
-   sebelumnya (lewat getMateriVideoUrl/setMateriVideoUrl atau
-   getPerpusVideoUrl/setPerpusVideoUrl), auto-deteksi format link lewat
-   toEmbeddableVideo(). Tab Upload kirim file ke Code.gs (action
-   "upload_video", butuh admin) yang menyimpannya ke Google Drive, lalu
-   hasil link Drive-nya otomatis dipakai sebagai video (disimpan lewat
-   jalur yang sama seperti Tab Link). ===== */
+   (renderPerpusVideoBox), tapi cuma bisa dibuka dari Panel Admin > tab
+   "🎬 Video" (openVideoSourceModal selalu dipanggil dengan fromAdmin=true
+   dari renderAdminVideo). Tab Link nyimpen ke server (set_video_url, lihat
+   setVideoUrlOnServer) — auto-deteksi format link lewat toEmbeddableVideo().
+   Tab Upload kirim file ke Code.gs (action "upload_video", butuh admin)
+   yang menyimpannya ke Google Drive DAN langsung upsert ke sheet
+   VideoConfig di server, lalu client tinggal update cache lokal. ===== */
 let videoSourceCtx = null; // {kind:"materi"|"perpus", id, fromAdmin}
 function getVideoSourceUrl(){
   return videoSourceCtx.kind === "materi" ? getMateriVideoUrl(videoSourceCtx.id, "") : getPerpusVideoUrl(videoSourceCtx.id);
-}
-function setVideoSourceUrl(url){
-  if(videoSourceCtx.kind === "materi") setMateriVideoUrl(videoSourceCtx.id, url);
-  else setPerpusVideoUrl(videoSourceCtx.id, url);
 }
 // Dipanggil abis simpan/hapus/upload video. Kalau dibuka dari Panel Admin
 // (tab "🎬 Video"), refresh list admin-nya; kalau nggak (jalur lama, sudah
@@ -4775,13 +4773,26 @@ function switchVideoSourceTab(tab){
   document.getElementById("videoSourcePanelLink").style.display = tab==="link" ? "block" : "none";
   document.getElementById("videoSourcePanelUpload").style.display = tab==="upload" ? "block" : "none";
 }
-function saveVideoSourceLink(){
-  setVideoSourceUrl(document.getElementById("videoSourceLink").value.trim());
+async function saveVideoSourceLink(){
+  const url = document.getElementById("videoSourceLink").value.trim();
+  const result = await setVideoUrlOnServer(videoSourceCtx.kind, videoSourceCtx.id, url);
+  if(result && result.status === "forbidden"){
+    showInfoModal("Gagal Simpan", "Sesi admin kamu berakhir — silakan keluar & login ulang, lalu coba lagi.");
+    return;
+  }
+  if(result && (result.status === "network_error" || result.status === "no_api")){
+    showInfoModal("Gagal Simpan", "Nggak bisa terhubung ke server, jadi link video ini BELUM tersimpan permanen. Cek koneksi lalu coba lagi.");
+    return;
+  }
   closeModal("modalVideoSource");
   refreshVideoSourceCaller();
 }
-function clearVideoSource(){
-  setVideoSourceUrl("");
+async function clearVideoSource(){
+  const result = await setVideoUrlOnServer(videoSourceCtx.kind, videoSourceCtx.id, "");
+  if(result && result.status === "forbidden"){
+    showInfoModal("Gagal Hapus", "Sesi admin kamu berakhir — silakan keluar & login ulang, lalu coba lagi.");
+    return;
+  }
   closeModal("modalVideoSource");
   refreshVideoSourceCaller();
 }
@@ -4833,11 +4844,14 @@ async function uploadVideoSourceFile(){
     const uploadId = genUploadId();
     statusEl.textContent = "Mengunggah video, tunggu sebentar...";
     apiPostFireAndForget("upload_video", Object.assign({
-      uploadId, fileName: file.name, mimeType: file.type || "video/mp4", fileData, roomId: videoSourceCtx.id,
+      uploadId, kind: videoSourceCtx.kind, fileName: file.name, mimeType: file.type || "video/mp4", fileData, roomId: videoSourceCtx.id,
     }, auth));
     const result = await pollUploadStatus(uploadId);
     if(result.status === "ok" && result.url){
-      setVideoSourceUrl(result.url);
+      // Server (handleVideoUpload_ di Code.gs) udah langsung nyimpen link
+      // ini ke sheet VideoConfig, jadi di sini cukup update cache lokal
+      // biar UI ke-refresh — nggak perlu panggil set_video_url lagi.
+      setVideoCacheOnly(videoSourceCtx.kind, videoSourceCtx.id, result.url);
       statusEl.textContent = "Berhasil diupload!";
       closeModal("modalVideoSource");
       refreshVideoSourceCaller();
@@ -5472,6 +5486,7 @@ document.addEventListener("DOMContentLoaded", async ()=>{
   startHeartbeatLoop();
   applyA11yPrefs();
   syncMusicSwitch();
+  await loadVideoConfig(); // ambil link video Materi/Perpustakaan dari server duluan, biar konsisten di semua perangkat (lihat VIDEO_CONFIG_CACHE)
   document.getElementById("nameInput").addEventListener("input", checkCharForm);
   document.getElementById("pinInput").addEventListener("input", checkCharForm);
   const restoredAdmin = await restoreAdminSession();
@@ -7454,27 +7469,32 @@ const TARGET_DETAIL = {
     hana:{expr:"bangga", text:"Kamu udah menjelajah cukup jauh sampai di sini. Yuk lihat lagi apa aja yang udah kamu pelajari."},
   },
 };
-// Kolom video di modal Materi.
-// - Kalau belum ada link video (video.src kosong & belum ada override),
-//   box-nya jadi placeholder yang BISA DIKLIK buat langsung isi link
-//   (YouTube atau file .mp4 langsung) — nggak perlu edit kode.
-// - Link yang diisi disimpan di localStorage per ruangan (materiVideoOverrides),
-//   jadi nempel terus di browser itu sampai diganti/dihapus lagi.
-// - Kalau videonya udah ada (baik dari kode lewat video.src, atau dari link
-//   yang diisi manual), tetap ada tombol ✏️ kecil di pojok buat ganti/hapus.
-function getMateriVideoUrl(roomId, fallbackSrc){
-  try{
-    const overrides = JSON.parse(localStorage.getItem("materiVideoOverrides")||"{}");
-    if(overrides[roomId]) return overrides[roomId];
-  }catch(e){}
-  return fallbackSrc || "";
+// Kolom video di modal Materi & tab Video Perpustakaan.
+// - Link video disimpan di SERVER (sheet VideoConfig lewat Code.gs), bukan
+//   localStorage lagi — supaya link yang diisi admin di satu perangkat ikut
+//   kelihatan di semua perangkat pemain lain, bukan cuma browser admin itu.
+// - VIDEO_CONFIG_CACHE dimuat sekali dari server saat game dibuka
+//   (loadVideoConfig(), dipanggil di DOMContentLoaded) biar
+//   getMateriVideoUrl/getPerpusVideoUrl bisa dibaca langsung (sinkron).
+// - Yang bisa UBAH videonya sekarang cuma admin lewat Panel Admin > tab
+//   "🎬 Video" (lihat renderAdminVideo & openVideoSourceModal).
+let VIDEO_CONFIG_CACHE = { materi:{}, perpus:{} };
+async function loadVideoConfig(){
+  const result = await apiGet("get_video_config", {});
+  if(result && result.status === "ok" && result.config) VIDEO_CONFIG_CACHE = result.config;
 }
-function setMateriVideoUrl(roomId, url){
-  try{
-    const overrides = JSON.parse(localStorage.getItem("materiVideoOverrides")||"{}");
-    if(url) overrides[roomId] = url; else delete overrides[roomId];
-    localStorage.setItem("materiVideoOverrides", JSON.stringify(overrides));
-  }catch(e){}
+function getMateriVideoUrl(roomId, fallbackSrc){
+  return VIDEO_CONFIG_CACHE.materi[roomId] || fallbackSrc || "";
+}
+function setVideoCacheOnly(kind, id, url){
+  const bucket = kind === "perpus" ? VIDEO_CONFIG_CACHE.perpus : VIDEO_CONFIG_CACHE.materi;
+  if(url) bucket[id] = url; else delete bucket[id];
+}
+// Simpan link ke server (admin only, lewat set_video_url) + update cache
+// lokal biar UI langsung ke-refresh tanpa nunggu reload.
+async function setVideoUrlOnServer(kind, id, url){
+  setVideoCacheOnly(kind, id, url);
+  return apiGet("set_video_url", Object.assign({kind, id, url}, adminParams()));
 }
 // Deteksi link YouTube (watch?v=, youtu.be/, shorts/), Google Drive (file/d/,
 // open?id=, uc?id=), atau GitHub (link "blob" ke file di repo) dan ubah jadi
@@ -9264,18 +9284,12 @@ function perpusVideoFullscreen(btn){
   const req = target.requestFullscreen || target.webkitRequestFullscreen || target.msRequestFullscreen;
   if(req) req.call(target);
 }
-// Link video disimpan guru sendiri lewat tombol ✏️ (localStorage), persis
-// pola Video Materi (getMateriVideoUrl/setMateriVideoUrl) — biar nggak perlu
-// nunggu file dimasukkan ke kode dulu.
+// Link video Perpustakaan sekarang juga disimpan di server (lihat
+// VIDEO_CONFIG_CACHE / setVideoUrlOnServer di dekat getMateriVideoUrl) —
+// getter di sini tinggal baca dari cache yang sama, sisi tulisnya udah
+// ditangani bareng lewat openVideoSourceModal/saveVideoSourceLink dkk.
 function getPerpusVideoUrl(itemId){
-  try{ return (JSON.parse(localStorage.getItem("perpusVideoOverrides")||"{}"))[itemId] || ""; }catch(e){ return ""; }
-}
-function setPerpusVideoUrl(itemId, url){
-  try{
-    const overrides = JSON.parse(localStorage.getItem("perpusVideoOverrides")||"{}");
-    if(url) overrides[itemId] = url; else delete overrides[itemId];
-    localStorage.setItem("perpusVideoOverrides", JSON.stringify(overrides));
-  }catch(e){}
+  return VIDEO_CONFIG_CACHE.perpus[itemId] || "";
 }
 // Dipanggil dari tombol ✏️ Video Perpustakaan — buka modal "Atur Video"
 // yang sama dengan Video Materi (lihat openVideoSourceModal).
