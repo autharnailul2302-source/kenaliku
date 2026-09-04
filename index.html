@@ -1687,6 +1687,7 @@
   }
   .materi-intro{font-size:14px;line-height:1.6;margin:2px 0 12px;}
   .materi-video-box{position:relative;width:100%;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:linear-gradient(160deg,#25392f,#152018);box-shadow:0 8px 20px rgba(0,0,0,.28);}
+  .video-source-note{font-size:11px;color:var(--grey);margin:6px 2px 0;font-style:italic;}
   .materi-video-box video,.materi-video-box iframe{width:100%;height:100%;object-fit:cover;display:block;background:#000;border:0;}
   .materi-video-box--empty{cursor:default;}
   .materi-video-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:14px;background-size:cover;background-position:center;}
@@ -3357,6 +3358,9 @@ if("serviceWorker" in navigator){
         <button type="button" class="perpus-tab" id="videoSourceTabUpload" onclick="switchVideoSourceTab('upload')">⬆️ Upload File</button>
       </div>
 
+      <label class="field-label" for="videoSourceSumber">Sumber video (opsional)</label>
+      <input type="text" id="videoSourceSumber" placeholder="misal: YouTube – Kemdikbud RI" style="margin-bottom:14px;">
+
       <div id="videoSourcePanelLink">
         <label class="field-label" for="videoSourceLink">Link video</label>
         <input type="text" id="videoSourceLink" placeholder="Tempel link YouTube, Google Drive, GitHub, atau .mp4 langsung">
@@ -4756,9 +4760,13 @@ function refreshVideoSourceCaller(){
   else if(videoSourceCtx.kind === "materi") showMateri();
   else renderPerpusSlide();
 }
+function getVideoSourceSumber(){
+  return videoSourceCtx.kind === "materi" ? getMateriVideoSumber(videoSourceCtx.id) : getPerpusVideoSumber(videoSourceCtx.id);
+}
 function openVideoSourceModal(kind, id, fromAdmin){
   videoSourceCtx = {kind, id, fromAdmin: !!fromAdmin};
   document.getElementById("videoSourceLink").value = getVideoSourceUrl();
+  document.getElementById("videoSourceSumber").value = getVideoSourceSumber();
   document.getElementById("videoSourceFile").value = "";
   document.getElementById("videoSourceUploadStatus").textContent = "";
   document.getElementById("videoSourceAdminUser").value = "";
@@ -4775,7 +4783,8 @@ function switchVideoSourceTab(tab){
 }
 async function saveVideoSourceLink(){
   const url = document.getElementById("videoSourceLink").value.trim();
-  const result = await setVideoUrlOnServer(videoSourceCtx.kind, videoSourceCtx.id, url);
+  const sumber = document.getElementById("videoSourceSumber").value.trim();
+  const result = await setVideoUrlOnServer(videoSourceCtx.kind, videoSourceCtx.id, url, sumber);
   if(result && result.status === "forbidden"){
     showInfoModal("Gagal Simpan", "Sesi admin kamu berakhir — silakan keluar & login ulang, lalu coba lagi.");
     return;
@@ -4788,7 +4797,7 @@ async function saveVideoSourceLink(){
   refreshVideoSourceCaller();
 }
 async function clearVideoSource(){
-  const result = await setVideoUrlOnServer(videoSourceCtx.kind, videoSourceCtx.id, "");
+  const result = await setVideoUrlOnServer(videoSourceCtx.kind, videoSourceCtx.id, "", "");
   if(result && result.status === "forbidden"){
     showInfoModal("Gagal Hapus", "Sesi admin kamu berakhir — silakan keluar & login ulang, lalu coba lagi.");
     return;
@@ -4839,19 +4848,20 @@ async function uploadVideoSourceFile(){
   }
   btn.disabled = true;
   statusEl.textContent = "Membaca file...";
+  const sumber = document.getElementById("videoSourceSumber").value.trim();
   try{
     const fileData = await fileToBase64(file);
     const uploadId = genUploadId();
     statusEl.textContent = "Mengunggah video, tunggu sebentar...";
     apiPostFireAndForget("upload_video", Object.assign({
-      uploadId, kind: videoSourceCtx.kind, fileName: file.name, mimeType: file.type || "video/mp4", fileData, roomId: videoSourceCtx.id,
+      uploadId, kind: videoSourceCtx.kind, fileName: file.name, mimeType: file.type || "video/mp4", fileData, roomId: videoSourceCtx.id, sumber,
     }, auth));
     const result = await pollUploadStatus(uploadId);
     if(result.status === "ok" && result.url){
-      // Server (handleVideoUpload_ di Code.gs) udah langsung nyimpen link
-      // ini ke sheet VideoConfig, jadi di sini cukup update cache lokal
-      // biar UI ke-refresh — nggak perlu panggil set_video_url lagi.
-      setVideoCacheOnly(videoSourceCtx.kind, videoSourceCtx.id, result.url);
+      // Server (handleVideoUpload_ di Code.gs) udah langsung nyimpen link+
+      // sumber ini ke sheet VideoConfig, jadi di sini cukup update cache
+      // lokal biar UI ke-refresh — nggak perlu panggil set_video_url lagi.
+      setVideoCacheOnly(videoSourceCtx.kind, videoSourceCtx.id, result.url, sumber);
       statusEl.textContent = "Berhasil diupload!";
       closeModal("modalVideoSource");
       refreshVideoSourceCaller();
@@ -4968,20 +4978,22 @@ function renderAdminVideo(){
   const materiRows = getRooms().map(r=>{
     const fallback = (MATERI_DETAIL[r.id] && MATERI_DETAIL[r.id].video && MATERI_DETAIL[r.id].video.src) || "";
     const url = getMateriVideoUrl(r.id, fallback);
+    const sumber = getMateriVideoSumber(r.id);
     return `
       <div class="admin-row">
         <div class="admin-row-top">
-          <div class="admin-row-id"><span class="admin-avatar">${r.icon}</span><div><div class="admin-row-name">${r.name}</div><div class="admin-row-sub">Video Materi — ${videoStatusBadge(url)}</div></div></div>
+          <div class="admin-row-id"><span class="admin-avatar">${r.icon}</span><div><div class="admin-row-name">${r.name}</div><div class="admin-row-sub">Video Materi — ${videoStatusBadge(url)}${sumber?` · Sumber: ${escapeHtml(sumber)}`:""}</div></div></div>
         </div>
         <div class="admin-row-actions"><button class="btn-video-edit" onclick="openVideoSourceModal('materi','${r.id}',true)">✏️ Atur Video</button></div>
       </div>`;
   }).join("");
   const perpusRows = PERPUS_ITEMS.map(item=>{
     const url = getPerpusVideoUrl(item.id);
+    const sumber = getPerpusVideoSumber(item.id);
     return `
       <div class="admin-row">
         <div class="admin-row-top">
-          <div class="admin-row-id"><span class="admin-avatar">${item.icon}</span><div><div class="admin-row-name">${item.title}</div><div class="admin-row-sub">Video Perpustakaan — ${videoStatusBadge(url)}</div></div></div>
+          <div class="admin-row-id"><span class="admin-avatar">${item.icon}</span><div><div class="admin-row-name">${item.title}</div><div class="admin-row-sub">Video Perpustakaan — ${videoStatusBadge(url)}${sumber?` · Sumber: ${escapeHtml(sumber)}`:""}</div></div></div>
         </div>
         <div class="admin-row-actions"><button class="btn-video-edit" onclick="openVideoSourceModal('perpus','${item.id}',true)">✏️ Atur Video</button></div>
       </div>`;
@@ -7483,18 +7495,31 @@ async function loadVideoConfig(){
   const result = await apiGet("get_video_config", {});
   if(result && result.status === "ok" && result.config) VIDEO_CONFIG_CACHE = result.config;
 }
+// Tiap entri cache sekarang {url, sumber} (sebelumnya cuma string url) —
+// "sumber" itu keterangan asal video (misal "YouTube - Kemdikbud RI"),
+// opsional, diisi admin lewat modal "Atur Video", ditampilkan ke siswa di
+// bawah video (lihat renderMateriVideoBox/renderPerpusVideoBox).
 function getMateriVideoUrl(roomId, fallbackSrc){
-  return VIDEO_CONFIG_CACHE.materi[roomId] || fallbackSrc || "";
+  const entry = VIDEO_CONFIG_CACHE.materi[roomId];
+  return (entry && entry.url) || fallbackSrc || "";
 }
-function setVideoCacheOnly(kind, id, url){
+function getMateriVideoSumber(roomId){
+  const entry = VIDEO_CONFIG_CACHE.materi[roomId];
+  return (entry && entry.sumber) || "";
+}
+function getPerpusVideoSumber(itemId){
+  const entry = VIDEO_CONFIG_CACHE.perpus[itemId];
+  return (entry && entry.sumber) || "";
+}
+function setVideoCacheOnly(kind, id, url, sumber){
   const bucket = kind === "perpus" ? VIDEO_CONFIG_CACHE.perpus : VIDEO_CONFIG_CACHE.materi;
-  if(url) bucket[id] = url; else delete bucket[id];
+  if(url) bucket[id] = {url, sumber: sumber||""}; else delete bucket[id];
 }
-// Simpan link ke server (admin only, lewat set_video_url) + update cache
-// lokal biar UI langsung ke-refresh tanpa nunggu reload.
-async function setVideoUrlOnServer(kind, id, url){
-  setVideoCacheOnly(kind, id, url);
-  return apiGet("set_video_url", Object.assign({kind, id, url}, adminParams()));
+// Simpan link+sumber ke server (admin only, lewat set_video_url) + update
+// cache lokal biar UI langsung ke-refresh tanpa nunggu reload.
+async function setVideoUrlOnServer(kind, id, url, sumber){
+  setVideoCacheOnly(kind, id, url, sumber);
+  return apiGet("set_video_url", Object.assign({kind, id, url, sumber: sumber||""}, adminParams()));
 }
 // Deteksi link YouTube (watch?v=, youtu.be/, shorts/), Google Drive (file/d/,
 // open?id=, uc?id=), atau GitHub (link "blob" ke file di repo) dan ubah jadi
@@ -7528,10 +7553,12 @@ function renderMateriVideoBox(roomId, video, posterFallback){
     const player = embed.type === "iframe"
       ? `<iframe src="${embed.src}" title="Video Materi" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
       : `<video controls playsinline preload="metadata" ${poster?`poster="${poster}"`:""}><source src="${embed.src}"></video>`;
+    const sumber = getMateriVideoSumber(roomId);
     return `
       <div class="materi-video-box">
         ${player}
       </div>
+      ${sumber ? `<div class="video-source-note">Sumber: ${escapeHtml(sumber)}</div>` : ""}
     `;
   }
   // Belum ada video diisi admin — tampilan placeholder-saja, TIDAK bisa
@@ -9289,7 +9316,8 @@ function perpusVideoFullscreen(btn){
 // getter di sini tinggal baca dari cache yang sama, sisi tulisnya udah
 // ditangani bareng lewat openVideoSourceModal/saveVideoSourceLink dkk.
 function getPerpusVideoUrl(itemId){
-  return VIDEO_CONFIG_CACHE.perpus[itemId] || "";
+  const entry = VIDEO_CONFIG_CACHE.perpus[itemId];
+  return (entry && entry.url) || "";
 }
 // Dipanggil dari tombol ✏️ Video Perpustakaan — buka modal "Atur Video"
 // yang sama dengan Video Materi (lihat openVideoSourceModal).
@@ -9300,7 +9328,8 @@ function renderPerpusVideoBox(item){
     const player = embed.type === "iframe"
       ? `<iframe src="${embed.src}" title="Video ${item.title}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`
       : `<video controls playsinline preload="metadata"><source src="${embed.src}"></video>`;
-    return `<div class="perpus-video-box">${player}<button type="button" class="perpus-video-fs" onclick="perpusVideoFullscreen(this)" title="Layar penuh">⛶</button></div>`;
+    const sumber = getPerpusVideoSumber(item.id);
+    return `<div class="perpus-video-box">${player}<button type="button" class="perpus-video-fs" onclick="perpusVideoFullscreen(this)" title="Layar penuh">⛶</button></div>${sumber ? `<div class="video-source-note">Sumber: ${escapeHtml(sumber)}</div>` : ""}`;
   }
   // Belum ada video diisi admin — placeholder-saja, TIDAK bisa diklik
   // (video sekarang cuma bisa diisi lewat Panel Admin > tab "🎬 Video").
