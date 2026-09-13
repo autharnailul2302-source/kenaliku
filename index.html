@@ -1214,6 +1214,17 @@
   @media (hover:hover) and (pointer:fine){
     .lobby-area-arrow:not(:disabled):hover{background:rgba(255,255,255,.14);}
   }
+  /* Nyala pelan-pelan di panah ▶ "PETA RUMAH" pas pemain lagi ninjau ulang
+     ruang yang udah kelar (isRevisit) dan ada ruang lanjutan buat balik ke
+     sana — nudge ambient, jalan terus tiap kali kondisinya kepenuhi (bukan
+     cuma sekali), beda sama coachmark #lobbyAreaHint yang cuma nongol sekali
+     seumur hidup save-data. Dipasang/dicabut lewat class "hint-pulse" di
+     renderLobby(). */
+  .lobby-area-arrow.hint-pulse{animation:lobbyArrowPulse 1.6s ease-in-out infinite;}
+  @keyframes lobbyArrowPulse{
+    0%,100%{box-shadow:0 0 0 0 rgba(255,214,120,.6);}
+    50%{box-shadow:0 0 0 7px rgba(255,214,120,0);}
+  }
   .lobby-hall-plaque{display:inline-block;color:#f2e9cf;font-weight:800;font-size:13px;
     letter-spacing:.05em;padding:0 6px;margin:0;white-space:nowrap;}
   .lobby-hall-desc{font-size:11.5px;color:#f2e9cf;margin:6px 0 0;text-shadow:0 1px 3px rgba(0,0,0,.6);}
@@ -6717,6 +6728,35 @@ function maybeShowLobbyGuide(){
   setTimeout(() => startLobbyCoach(), 700);
 }
 
+/* Coachmark KECIL sekali-tunjuk (beda dari tur lobbyGuide di atas yang 7+
+   langkah) — muncul SEKALI SEUMUR save-data, cuma pas pemain lagi ninjau
+   ulang area yang udah kelar semua pintunya (isRevisit) dan baru sadar dia
+   perlu balik lewat panah ▶. Ini nutupin celah: tur besar lobbyGuide ngejelasin
+   panah ◀▶ di awal BANGET (pas belum ada satu pintu pun yang kelar), jadi
+   gampang lupa begitu beneran kepake nanti. STATE.areaAdvanceHintSeen ditandai
+   selesai di dalam sini juga (bukan nunggu ditutup) karena cuma 1 langkah,
+   nggak ada progres "separuh jalan" yang perlu dijaga kayak lobbyGuide. */
+function maybeShowAreaAdvanceHint(){
+  if(STATE.areaAdvanceHintSeen) return;
+  if(!STATE.lobbyGuideSeen) return; // jangan numpuk 2 overlay coachmark bareng pas kunjungan pertama
+  const coachEl = document.getElementById("lobbyCoach");
+  if(coachEl && coachEl.style.display === "block") return; // ada coachmark lain lagi jalan
+  STATE.areaAdvanceHintSeen = true; saveState();
+  setTimeout(() => {
+    lobbyCoachActiveSteps = [{
+      selector: "#lobbyAreaNext",
+      title: "Lanjut ke Ruang Berikutnya",
+      text: "Ruang ini udah kamu selesaikan semua ✅. Ketuk panah ▶ ini buat balik ke ruang yang lagi kamu jelajahi sekarang."
+    }].filter(s => document.querySelector(s.selector));
+    if(!lobbyCoachActiveSteps.length) return;
+    lobbyCoachIndex = 0;
+    coachEl.style.display = "block";
+    renderLobbyCoachStep();
+    window.addEventListener("resize", queueLobbyCoachReposition);
+    window.addEventListener("orientationchange", queueLobbyCoachReposition);
+  }, 500);
+}
+
 const LOBBY_BUBBLE_TONE = {
   senang:"tone-senang", semangat:"tone-semangat", biasa:"tone-biasa",
   sedih:"tone-sedih", berat:"tone-berat",
@@ -6949,6 +6989,12 @@ function renderLobby(){
   const nextBtn = document.getElementById("lobbyAreaNext");
   if(prevBtn) prevBtn.disabled = viewIdx <= 0;
   if(nextBtn) nextBtn.disabled = viewIdx >= maxUnlockedIdx;
+  // Nyalain nudge pulse di panah kanan tiap kali pemain lagi ninjau ulang
+  // ruang lama (isRevisit) dan masih ada tempat buat balik lanjut lewat ▶ —
+  // ini yang bikin pemain nggak "kejebak" di ruang yang udah beres tanpa
+  // ngerti caranya balik. Jalan terus tiap render (bukan sekali doang).
+  if(nextBtn) nextBtn.classList.toggle("hint-pulse", isRevisit && !nextBtn.disabled);
+  if(isRevisit && !nextBtn.disabled) maybeShowAreaAdvanceHint();
 
   if(justAdvanced && LOBBY_AREAS[finishedAreaIdx+1]){
     enterCorridor(finishedAreaIdx+1, finishedAreaIdx);
